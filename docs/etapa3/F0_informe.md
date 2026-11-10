@@ -7,14 +7,14 @@ Rótulos: **(dato)** medido ese día en ese equipo · **(inferencia)** · **(sin
 
 | Tarea de F0 | Estado |
 |---|---|
-| Repositorio nuevo clonado y primera subida preparada en local | hecho; **falta subir** (necesita nombre y correo de git, permiso de escritura y visto bueno) |
+| Repositorio nuevo y primera subida | hecho (§7) |
 | Motores v3.1 y v4.0 copiados sin cambios y congelados | hecho |
 | Datos mínimos, viento partido | hecho |
-| Entorno único para los dos motores | verificado en Windows; **Linux sin verificar** |
-| Verificación de clon (`herramientas/probar.py`) e integración continua | escritos; la integración continua corre recién al subir |
+| Entorno único para los dos motores | verificado en Windows y en Linux (§7) |
+| Verificación de clon (`herramientas/probar.py`) e integración continua | funcionando: pasa en los dos sistemas (§7) |
 | Comprobaciones técnicas del plan | hechas (§5) |
 | Decisiones registradas | `decisiones.md` |
-| Prerregistros E-E3-1 a 4 | escritos en `prerregistros/`; **falta etiquetarlos** en git |
+| Prerregistros E-E3-1 a 4 | escritos en `prerregistros/` y etiquetados en git (`prerregistro-E-E3-1` a `-4`); falta completar quién escribe y quién evalúa cada uno |
 | Contrato entre los dos frentes | `contrato_servidor_motor.md`, versión 1 |
 | Publicación con datos históricos y `bajar_historicos.py` | **no hecho** |
 | Licencia, protección de `main`, reparto entre las dos personas | **pendiente de las personas del proyecto** |
@@ -83,7 +83,10 @@ Ningún archivo supera los 50 MB.
   había probado en un entorno creado solo con ella. Fue un error de método de esta F0.
 - (dato) Con las dos bibliotecas agregadas, el clon limpio con entorno nuevo pasa todo en Windows: v3.1 69 pruebas, v4.0 130
   más 5 excluidas, y las dos corridas cortas.
-- (sin verificar) Linux: recién se sabrá cuando la integración continua corra con la corrección.
+- (dato) Con la corrección subida (cambio `0bf1429`), la integración continua **pasó en Windows y en Linux** (corrida
+  42837108288, unos 3 minutos por sistema): versiones congeladas, datos, pruebas de los dos motores y las dos corridas
+  cortas. Es la primera comprobación de que los motores funcionan en Linux (Ubuntu) con este entorno. De esa corrida se
+  conoce que cada paso terminó bien; el detalle de cuántas pruebas pasaron en Linux está en su registro en GitHub.
 - Regla que queda: `requirements.txt` se valida siempre con `instalar.bat` o `./instalar.sh` sobre un clon limpio.
 
 ## 8. Cosas que conviene saber

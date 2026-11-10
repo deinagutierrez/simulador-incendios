@@ -36,7 +36,8 @@ Tarda unos minutos. Al final tiene que decir **"Todo funciona."**
 
 Para volver a comprobar más tarde: `probar.bat` o `./probar.sh` (con `--rapido` omite las corridas).
 
-En Linux la verificación la hace la integración continua de GitHub; hasta que corra por primera vez no está comprobado.
+La integración continua de GitHub repite esta comprobación en Windows y en Linux en cada cambio. Pasa en los dos desde el
+2026-11-10.
 
 ## Qué hay
 
