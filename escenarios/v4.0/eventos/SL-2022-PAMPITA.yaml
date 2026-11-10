@@ -1,0 +1,46 @@
+# Incendio Estancia La Pampita (Coronel Pringles), septiembre de 2022. Evento de VALIDACIÓN (incorporado 2026-10-20).
+id: SL-2022-PAMPITA
+nombre: Estancia La Pampita (Coronel Pringles)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2022_43669 restringido a septiembre de 2022 (raster mensual; 1,3 ha de mayo-agosto y octubre)
+  oid: "2022_43669"
+  calendar_year: 2022
+  mes: 9
+  superficie_ha: 118
+  superficie_informada_snmf_ha: 350
+inicio:
+  fecha_local: "2022-09-02"       # SNMF fecha_inicio (3 reportes, 05 al 07/09; primer reporte 3 días después)
+  hora_utc_hipotesis: ["2022-09-02T16:00:00Z", "2022-09-02T13:00:00Z", "2022-09-02T19:00:00Z"]   # HIPÓTESIS 13, 10 y 16 h local
+  confianza: media                # 02/09 HR mín 17 %, viento S 5,4 m/s; 03/09 viento NO 6,6 m/s
+fin:
+  fecha_extincion_snmf: "2022-09-06"
+  fecha_contenido_snmf: "2022-09-05"
+  propagacion_principal: "2022-09-02 a 2022-09-05"
+  fin_simulacion_utc: "2022-09-07T03:00:00Z"
+  evaluacion_utc: ["2022-09-03T03:00:00Z", "2022-09-06T03:00:00Z", "2022-09-07T03:00:00Z"]   # fin del 02/09, controlado, extinción
+ignicion:
+  fuente: SNMF (punto informado a 10 m del polígono)
+  puntos:
+    - {nombre: Estancia La Pampita, lon: -65.626944, lat: -32.820278}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: extremo S de la cicatriz (barlovento del viento S del 02/09). No es una observación."
+    puntos:
+      - {nombre: extremo S cicatriz (hipótesis), lon: -65.62759, lat: -32.82336}
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2022-09-01T00:00:00Z", fin_utc: "2022-09-07T03:00:00Z"}
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2022-07-18", "2022-09-01"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+  respaldo_evento: SL-2022-RENCA
+cobertura_anio: 2021
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [33, 11, 41, 34]        # La Toma, Naschel, Renca, Tilisarao
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2022-09-02", contencion_dia: 3, extincion_dia: 4}
+notas:
+  - Superficie informada por el SNMF (350 ha) tres veces mayor que MapBiomas (118 ha): discrepancia registrada.
+  - Simultáneo con Renca - San Felipe (06-11/09, 15 km al NE) y La Pampita comparte semana con Las Chacras (03-05/09). Sin VIIRS en GEE para 2022; focos MODIS.
+  - Combate: BBVV Tilisarao, Renca, La Toma, Naschel y BB PL San Luis (SNMF).

@@ -1,0 +1,8 @@
+# Evento NO VISTO del lote X-49 (docs/v4.0/31): Las Chacras octubre 2023 (1.308 ha, reactivacion tras lluvia, combate documentado). Primera hipotesis horaria, ignicion = primer pase VIIRS (regla 4.1 del banco), sin barreras ni combate.
+descripcion: "Propagacion libre con modelo_v3 sobre SL-2023-CHACRASOCT. Insumos: scripts/preparar_evento_desde_banco.py de v3.4 (sin GEE ni Open-Meteo); la primera corrida genera datos/procesados/v4.0/SL-2023-CHACRASOCT."
+evento: SL-2023-CHACRASOCT
+hipotesis: 0
+ignicion: snmf
+variante: libre
+validar: true
+figuras: true

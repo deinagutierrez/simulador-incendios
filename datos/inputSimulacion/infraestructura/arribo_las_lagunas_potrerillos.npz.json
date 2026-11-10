@@ -1,0 +1,53 @@
+{
+  "producto": "arribo_las_lagunas_potrerillos.npz",
+  "fuente": "cuarteles de bomberos (Ministerio de Seguridad SL + BOMBEROS.shp) y red vial integrada; MCP 8 vecinos",
+  "generado_utc": "2026-10-20T17:58:29Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 100.0,
+      "xmin": 3513060.0,
+      "ymin": 6367700.0,
+      "xmax": 3563260.0,
+      "ymax": 6417900.0,
+      "ncol": 502,
+      "nfil": 502
+    },
+    "margen_m": 120000.0,
+    "velocidades_kmh": {
+      "autopista": 80,
+      "calle": 30,
+      "camino": 35,
+      "huella": 15,
+      "otro": 15,
+      "ruta": 45,
+      "ruta_pavimentado": 70,
+      "senda": 4,
+      "servicio": 20,
+      "vado": 15
+    },
+    "campo_traviesa_kmh": 3.0,
+    "max_h": 8.0,
+    "version": "1.0"
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\simulador\\bomberos_san_luis.geojson",
+      "bytes": 33732,
+      "sha256": "a45db0b73d4998b8b874ae259dd3f88dd4c77220c6b837a3bf3f5c00bad5f8f0"
+    },
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\simulador\\caminos_sanluis_integrado.geojson",
+      "bytes": 47484516,
+      "sha256": "0a1aeebd6b0277280f6f4239e2cf7c7d13b017fedc99a86f6de20a11650fac54"
+    }
+  ],
+  "sha256_producto": "a197e3746a7a6383bfae402dca19fa01ddda84128bd004d9c32b68369c6d3c10",
+  "bytes_producto": 32187261,
+  "cuarteles": 39,
+  "fuera_de_la_grilla_ampliada": 3,
+  "tiempo_mediano_dominio_h": 0.7541080117225647,
+  "nota": "velocidades por clase de vía = HIPÓTESIS (docs/13 §6)"
+}

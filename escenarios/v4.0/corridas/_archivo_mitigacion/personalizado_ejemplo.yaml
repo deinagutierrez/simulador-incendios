@@ -1,0 +1,26 @@
+# Ejemplo de corrida armada campo por campo (sin `variante`): plantilla para ensayar medidas de mitigación y parámetros de SIM
+descripcion: Renca 2022 con barreras, contención con tasa fija de 500 m/h y combate a las 3 h de la ignición (campos sueltos, sin variante).
+evento: SL-2022-RENCA            # id de escenarios/v4.0/eventos (o `caso: <carpeta del conjunto de prueba>` o `sim: <YAML nativo de SIM>`)
+hipotesis: 0                     # índice de inicio.hora_utc_hipotesis de la ficha
+ignicion: alt0                   # snmf | alt0 | alt1… (alt0 = extremo norte de la cicatriz, a barlovento; ver la ficha)
+# horas: 24                      # recorta la duración (por defecto hasta fin.fin_simulacion_utc)
+modelo: modelo_v3                # modelo_v3 (SIM corregido) | sim_v4_original (V.4 tal como se entregó) | otro de modelos/
+barreras: on                     # auto (lo que diga el modelo) | on | off
+contencion: on                   # auto | on | off
+despacho: global                 # auto | global (tasa fija, docs/10) | local | pronostico (SNMF, docs/13) | l03 (supresión de V.4)
+ajustes:                         # se fusiona en `parametros` de SIM (simulador/config.py DEFAULTS)
+  contencion: {tasa_linea_m_h: 500, retardo_h: 3}
+  # barreras: {modo: umbral, lambda: 1.5}
+  # parada: {horas_sin_avance: 24}
+# k_grupo: {GR: 1.0, GS: 1.0, SH: 1.0, TU: 1.0, TL: 1.0}   # multiplicadores de R0 por familia Scott & Burgan
+# k_global: 1.0
+# factor_waf: 1.0
+# humedad: {metodo_muerto: fija, fija_m1: 0.06, fija_m10: 0.07, fija_m100: 0.08}   # atajo a parametros.humedad
+# semilla: 20261015              # una sola semilla: modo estocástico, cruces de barrera y escapes
+# ensemble: 0                    # n > 0: modo estocástico con mapa de probabilidad de quemado
+# mitigacion:                    # rutas relativas a esta carpeta, a escenarios/v4.0 o al repositorio
+#   barreras_extra: ../mitigacion/cortafuego_ejemplo.geojson     # líneas con ancho_m (cortafuegos, líneas de control)
+#   modificador_combustible: ../mitigacion/<factor_de_carga>.tif  # GeoTIFF en la grilla del dominio, factor [0, 2]
+# parche: {dt_min: 1.0, salidas: {png_cada_h: 6}}   # cualquier cambio al cfg completo de SIM (va al final)
+validar: true
+figuras: true

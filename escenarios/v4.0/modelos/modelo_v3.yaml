@@ -1,0 +1,53 @@
+# Modelo físico de v4.0 (el tercer juego de parámetros del repositorio: modelo_v1 = v2.0, modelo_v2 = v3.0, modelo_v3 = v4.0).
+# Motor: SIM de V.4 (autómata celular, Rothermel + Scott & Burgan 40, Huygens por origen heredado) con las correcciones de la
+# verificación (docs/v4.0/15) y las variaciones de flexibilidad de v3.0 (barreras probabilísticas, contención por combate,
+# despacho SNMF, humedad seleccionable, factores k). Son los valores por defecto de simulador/config.py, escritos explícitos.
+descripcion: SIM corregido + barreras y contención de v3.0 (barreras activas; la contención la activa la variante o el campo `contencion`)
+# combustible pre-evento (D46, E043, provisorio hasta probarlo con eventos no vistos): regla 3.3b = la 3.3 de V.4 con el NDVI
+# estructural de las clases leñosas sin la anomalía del verano seco (docs/v4.0/17 y 20). En E038 bajó el |Δt| mediano de
+# 25,2 a 18,9 h y subió el IoU de 0,131 a 0,142 frente a 3.3. `regla_combustible: "3.3"` en la corrida vuelve a la de V.4;
+# sim_v4_original no declara la clave y sigue con 3.3
+regla_combustible: "3.3b"
+vecindad: 8
+dt_min: 2.0
+parametros:
+  # fuente: serie = viento uniforme + factor topográfico simple de V.4 (k_pendiente, k_relieve solo actúan con serie). Por defecto
+  # desde E036 (D41): en la ablación E035, WindNinja (campo sobre el relieve, biblioteca de v3.0; `viento: windninja` en la corrida)
+  # costó +66 % de cómputo sin cambiar IoU ni tiempos en los 9 eventos menores (docs/v4.0/18)
+  viento: {fuente: serie, biblioteca: null, factor_10m_20ft: 0.87, k_pendiente: 0.5, k_relieve: 0.3}   # U_20ft = U_10m/1,15
+  humedad:
+    metodo_muerto: retardo          # retardo (Simard + τ 1/10/100 h) | ffmc_vanwagner | fija
+    emc: nfdrs                      # Simard 1968 con T en °F (coeficientes NFDRS)
+    emc_min_pct: 1.0
+    lluvia_24h_mm_extincion: null   # v3.0 usa 15 mm
+    mx_grupo: {}                    # humedad de extinción por familia (fracción), p. ej. {GR: 0.15}
+    viva_metodo: lineal             # lineal (a + b·NDMI) | minmax (v3.0, herbáceo y leñoso por separado) | fija
+    curado_solo_dinamicos: true
+  limitar_viento: true
+  # Límite de viento efectivo de Andrews, Cruz y Rothermel (2013): U_eff ≤ 96,8·I_R^(1/3) (ft/min, I_R en BTU/ft²/min),
+  # aplicado después de combinar viento y pendiente. Los autores desaconsejan el límite de 1972 (U ≤ 0,9·I_R), que
+  # subestima R con vientos fuertes en pastizales; rothermel_1972 queda solo en sim_v4_original.
+  limite_viento: andrews_2013
+  huygens: {tol_rumbo_deg: 15.0, tol_e: 0.05}
+  extincion: reversible
+  credito_desde_activacion: true    # P7: el crédito de una celda nueva se cuenta desde llegada + retardo de ignición
+  spotting: {por_unidad_tiempo: true}   # P8: p_max por paso nominal Δt, ajustada al sub-paso
+  propagacion: {k_global: 1.0, k_grupo: {}, k_codigo: {}, factor_waf: 1.0}
+  # normalizar (H6): P = (σ(x) − σ(0))/(1 − σ(0)) con σ la logística en L/W, así P(L=0) = 0 (la de v3.0 tiene un piso
+  # σ(0) = 1,8 % por enlace y hora con λ=1, β=4); false = fórmula de v3.0.
+  barreras: {activo: true, modo: probabilistico, llama: direccional, lambda: 1.0, beta: 4.0, semilla: 20261015, normalizar: true}
+  contencion:
+    activo: false
+    despacho: fijo
+    tasa_linea_m_h: 1000.0
+    seleccion: contigua
+    prioridad: flancos
+    acumular_max_h: 8.0
+    intensidad_sostener_kw_m: 1700.0
+    intensidad_sostener_aereo_kw_m: 3500.0
+    intensidad_escape_kw_m: 3500.0
+    p_escape_hora: 0.5
+    snmf: {a: 17.3, b: 0.36, kappa: 10.0, tasa_max_m_h: 20000.0, kappa_quiebre_ha: 3000.0, kappa_gamma: 0.62, kappa_min: 1.0}
+  # escapes: potencial (D41): no espera escapes que la meteorología restante no permite; en E035 dio resultados idénticos (51/51)
+  # con −52 % de cómputo en las corridas con combate. El banco y el protocolo siguen con el valor de SIM (v3)
+  parada: {horas_sin_avance: 12, contenido: true, escapes: potencial}

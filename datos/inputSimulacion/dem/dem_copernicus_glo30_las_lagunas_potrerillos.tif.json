@@ -1,0 +1,39 @@
+{
+  "producto": "dem_copernicus_glo30_las_lagunas_potrerillos.tif",
+  "fuente": "derivado de dem_copernicus_glo30_viento_las_lagunas_potrerillos.tif",
+  "generado_utc": "2026-10-14T19:46:22Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "fuente": "copernicus_glo30",
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3513060.0,
+      "ymin": 6367770.0,
+      "xmax": 3563220.0,
+      "ymax": 6417900.0,
+      "ncol": 1672,
+      "nfil": 1671
+    },
+    "grilla_viento": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3503040.0,
+      "ymin": 6357750.0,
+      "xmax": 3573240.0,
+      "ymax": 6427920.0,
+      "ncol": 2340,
+      "nfil": 2339
+    }
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\dem\\dem_copernicus_glo30_viento_las_lagunas_potrerillos.tif",
+      "bytes": 22079811,
+      "sha256": "ccfee86d89ef5b7465f14f8320a71a9103507211825f1f1f250ba172d0f8d1a5"
+    }
+  ],
+  "sha256_producto": "0aeb29d4ae17622d573e8edd6a085eb2821239f855f20db48cef00e23ce9ebae",
+  "bytes_producto": 11315667
+}

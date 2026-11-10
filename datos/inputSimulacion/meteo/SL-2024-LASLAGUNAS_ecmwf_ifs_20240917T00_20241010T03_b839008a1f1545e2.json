@@ -1,0 +1,391 @@
+{
+  "fuente": "Open-Meteo Historical Weather API (reanálisis/análisis de modelo, NO observaciones)",
+  "url": "https://archive-api.open-meteo.com/v1/archive",
+  "modelo": "ecmwf_ifs",
+  "licencia": "CC-BY 4.0",
+  "descargado_utc": "2026-10-14T19:46:58Z",
+  "periodo_utc": [
+    "2024-09-17 00:00:00+00:00",
+    "2024-10-10 03:00:00+00:00"
+  ],
+  "variables": [
+    "temperature_2m",
+    "relative_humidity_2m",
+    "wind_speed_10m",
+    "wind_direction_10m",
+    "precipitation",
+    "shortwave_radiation",
+    "wind_gusts_10m",
+    "vapour_pressure_deficit"
+  ],
+  "convencion_direccion_viento": "meteorológica: grados desde los que sopla (0 = N, 90 = E)",
+  "unidades": {
+    "temperature_2m": "°C",
+    "relative_humidity_2m": "%",
+    "wind_speed_10m": "m/s",
+    "precipitation": "mm/h",
+    "shortwave_radiation": "W/m²"
+  },
+  "puntos": [
+    {
+      "punto_id": "p00",
+      "lon_pedido": -65.8738,
+      "lat_pedido": -32.84392,
+      "lon_modelo": -65.87515,
+      "lat_modelo": -32.864674,
+      "elevacion_modelo_m": 1386.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p01",
+      "lon_pedido": -65.68633,
+      "lat_pedido": -32.84359,
+      "lon_modelo": -65.654816,
+      "lat_modelo": -32.864674,
+      "elevacion_modelo_m": 1108.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p02",
+      "lon_pedido": -65.49887,
+      "lat_pedido": -32.84298,
+      "lon_modelo": -65.54468,
+      "lat_modelo": -32.864674,
+      "elevacion_modelo_m": 856.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p03",
+      "lon_pedido": -65.31142,
+      "lat_pedido": -32.84209,
+      "lon_modelo": -65.32434,
+      "lat_modelo": -32.864674,
+      "elevacion_modelo_m": 850.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p04",
+      "lon_pedido": -65.87402,
+      "lat_pedido": -32.68574,
+      "lon_modelo": -65.85367,
+      "lat_modelo": -32.653778,
+      "elevacion_modelo_m": 1433.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p05",
+      "lon_pedido": -65.68689,
+      "lat_pedido": -32.68541,
+      "lon_modelo": -65.714294,
+      "lat_modelo": -32.72408,
+      "elevacion_modelo_m": 1160.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p06",
+      "lon_pedido": -65.49976,
+      "lat_pedido": -32.6848,
+      "lon_modelo": -65.52438,
+      "lat_modelo": -32.653778,
+      "elevacion_modelo_m": 954.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p07",
+      "lon_pedido": -65.31264,
+      "lat_pedido": -32.68392,
+      "lon_modelo": -65.30487,
+      "lat_modelo": -32.653778,
+      "elevacion_modelo_m": 724.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p08",
+      "lon_pedido": -65.87424,
+      "lat_pedido": -32.52755,
+      "lon_modelo": -65.912415,
+      "lat_modelo": -32.51318,
+      "elevacion_modelo_m": 1214.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p09",
+      "lon_pedido": -65.68744,
+      "lat_pedido": -32.52722,
+      "lon_modelo": -65.69342,
+      "lat_modelo": -32.51318,
+      "elevacion_modelo_m": 1074.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p10",
+      "lon_pedido": -65.50064,
+      "lat_pedido": -32.52662,
+      "lon_modelo": -65.47446,
+      "lat_modelo": -32.51318,
+      "elevacion_modelo_m": 941.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p11",
+      "lon_pedido": -65.31385,
+      "lat_pedido": -32.52574,
+      "lon_modelo": -65.36496,
+      "lat_modelo": -32.51318,
+      "elevacion_modelo_m": 709.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p12",
+      "lon_pedido": -65.87446,
+      "lat_pedido": -32.36936,
+      "lon_modelo": -65.861664,
+      "lat_modelo": -32.372585,
+      "elevacion_modelo_m": 730.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p13",
+      "lon_pedido": -65.68798,
+      "lat_pedido": -32.36904,
+      "lon_modelo": -65.64322,
+      "lat_modelo": -32.372585,
+      "elevacion_modelo_m": 965.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p14",
+      "lon_pedido": -65.50151,
+      "lat_pedido": -32.36844,
+      "lon_modelo": -65.534,
+      "lat_modelo": -32.372585,
+      "elevacion_modelo_m": 913.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    },
+    {
+      "punto_id": "p15",
+      "lon_pedido": -65.31504,
+      "lat_pedido": -32.36756,
+      "lon_modelo": -65.31555,
+      "lat_modelo": -32.372585,
+      "elevacion_modelo_m": 696.0,
+      "unidades": {
+        "time": "iso8601",
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "wind_speed_10m": "m/s",
+        "wind_direction_10m": "°",
+        "precipitation": "mm",
+        "shortwave_radiation": "W/m²",
+        "wind_gusts_10m": "m/s",
+        "vapour_pressure_deficit": "kPa"
+      }
+    }
+  ],
+  "control_calidad": {
+    "duplicados": 0,
+    "variables": {
+      "temperature_2m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 1.5,
+        "max": 35.1
+      },
+      "relative_humidity_2m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 1.0,
+        "max": 100.0
+      },
+      "wind_speed_10m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 15.01
+      },
+      "wind_direction_10m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 360.0
+      },
+      "precipitation": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 7.6
+      },
+      "shortwave_radiation": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 955.0
+      },
+      "wind_gusts_10m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.6,
+        "max": 23.2
+      },
+      "vapour_pressure_deficit": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 5.28
+      }
+    },
+    "max_horas_consecutivas_faltantes_obligatorias": 0
+  },
+  "limitaciones": "resolución espacial del modelo (IFS 9 km / ERA5 25 km / ERA5-Land 11 km) y horaria; la variación sub-malla (valles, laderas) no está representada",
+  "hash_parametros": "b839008a1f1545e2"
+}

@@ -1,0 +1,60 @@
+# Incendio sin parte SNMF cerca de Laguna Larga, entre Las Lagunas y Potrerillos (Libertador General San Martín), septiembre-octubre de 2023. Evento NO VISTO (lote X-49, incorporado 2026-11-04).
+# Nombre provisorio por el topónimo más cercano (Laguna Larga, 3,7 km; Potrerillo, 6,3 km). Componente del banco V4: MB_2023_26597_2023-09-10.
+id: SL-2023-LAGUNALARGA
+nombre: Laguna Larga (Libertador General San Martín), septiembre-octubre 2023 (sin parte SNMF; MapBiomas 2023_26597)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2023_26597 restringido a los píxeles quemados en SEPTIEMBRE y OCTUBRE de 2023 (raster mensual; 6 ha de julio y noviembre excluidas). Componente MB_2023_26597_2023-09-10 de eventos_fase1.csv (banco V4).
+  oid: "2023_26597"
+  calendar_year: 2023
+  mes: [9, 10]
+  superficie_ha: 431
+inicio:
+  fecha_local: "2023-09-29"       # VIIRS S-NPP: 10 detecciones el 29/09 a las 18:00 UTC (FRP máx 43 MW) en el extremo N de la cicatriz; nada el 30/09; 15 + 10 detecciones el 01/10 (17:22 y 19:03 UTC) en el extremo S
+  hora_utc_hipotesis: ["2023-09-29T16:00:00Z", "2023-09-29T14:00:00Z", "2023-09-29T17:00:00Z", "2023-09-29T12:00:00Z"]   # HIPÓTESIS 13, 11, 14 y 9 h local del 29/09 (17 °C, HR 28 %, viento SE 4,5 m/s)
+  cota_superior_utc: "2023-09-29T18:00:00Z"
+  confianza: media                # día acotado por VIIRS; sin parte SNMF; hora desconocida
+fin:
+  propagacion_principal: "2023-09-29 a 2023-10-01"   # dos episodios: N el 29/09 (viento SE) y S el 01/10 (viento N 5-7 m/s). T80 del banco: 01/10 19:03 UTC
+  fin_simulacion_utc: "2023-10-04T03:00:00Z"   # fin del 03/10 local (lluvia 2,8 mm y viento S 8 m/s el 03/10); coincide con el fin de la serie IFS
+  evaluacion_utc: ["2023-09-30T03:00:00Z", "2023-10-02T03:00:00Z", "2023-10-04T03:00:00Z"]   # fin del 29/09, fin del 01/10 (T80, último pase), fin de la simulación
+ignicion:
+  fuente: "Primer pase VIIRS S-NPP, 29/09/2023 18:00 UTC: las 10 detecciones (regla §4.1 del banco, docs/v4.0/16); la misma ignición de la Fase 1 (_banco/MB_2023_26597_2023-09-10/ignicion.geojson). No hay punto SNMF."
+  puntos:
+    - {nombre: VIIRS 29/09 18:00 n01, lon: -65.71112, lat: -32.63844}
+    - {nombre: VIIRS 29/09 18:00 n02, lon: -65.71899, lat: -32.62156}
+    - {nombre: VIIRS 29/09 18:00 n03, lon: -65.70853, lat: -32.62736}
+    - {nombre: VIIRS 29/09 18:00 n04, lon: -65.71311, lat: -32.62796}
+    - {nombre: VIIRS 29/09 18:00 n05, lon: -65.70788, lat: -32.63085}
+    - {nombre: VIIRS 29/09 18:00 n06, lon: -65.71376, lat: -32.62446}
+    - {nombre: VIIRS 29/09 18:00 n07, lon: -65.71703, lat: -32.63205}
+    - {nombre: VIIRS 29/09 18:00 n08, lon: -65.70721, lat: -32.63435}
+    - {nombre: VIIRS 29/09 18:00 n09, lon: -65.70655, lat: -32.63784}
+    - {nombre: VIIRS 29/09 18:00 n10, lon: -65.71246, lat: -32.63145}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: la detección de mayor FRP del primer pase (43 MW, sector N), como punto único. No es una observación del origen."
+    puntos:
+      - {nombre: foco FRP máx 29/09 (hipótesis), lon: -65.71899, lat: -32.62156}
+  - fuente: "HIPÓTESIS derivada: extremo N de la cicatriz (alargada N-S, 6,4 km), a barlovento del viento N del 30/09 al 02/10 que llevó el fuego hacia el S. No es una observación."
+    puntos:
+      - {nombre: extremo N cicatriz (hipótesis), lon: -65.71449, lat: -32.60733}
+  - fuente: "HIPÓTESIS derivada: extremo S de la cicatriz, a barlovento del viento SE del día de ignición (29/09). Poco probable: los focos del 29/09 están en el extremo N. Sólo para sensibilidad."
+    puntos:
+      - {nombre: extremo S cicatriz (hipótesis), lon: -65.70567, lat: -32.66466}
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2023-09-28T00:00:00Z", fin_utc: "2023-10-04T03:00:00Z"}   # serie del banco V4 (banco_v4/entradas/meteo_ifs), copiada por preparar_evento_desde_banco.py
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2023-08-15", "2023-09-28"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+  # sin GEE: ndvi_30m/ndmi_30m derivados del compuesto mensual previo del banco (indices_mes.tif de MB_2023_26597_2023-09-10)
+cobertura_anio: 2022
+combate:
+  fuente: "sin parte SNMF a <= 2 km ni en la ventana del evento (INTIHUASI 04/10/2023 está a 15 km; LAS CHACRAS 19/10/2023 a 2,9 km pero 20 días después): cuarteles, medios y fechas desconocidos"
+  cuarteles_id: []
+  aereo: []
+  snmf: null
+notas:
+  - "Evento no visto por v3.x ni por los lotes de v4 (E033 a E059). M1 y M2 lo corrieron una sola vez en la Fase 1 del banco (E023, X-11)."
+  - "Tres pases con focos (35 detecciones S-NPP; sin NOAA-20 local): sirve para forma y tiempo. Fuego lento de varios días con cambio de viento (SE el 29/09, N del 30/09 al 02/10); prueba de la propagación con viento moderado y HR 26-30 %."
+  - "Topónimos: Laguna Larga / Almacén 3,7 km, Potrerillo 6,3 km. Celda F08-C09 de la grilla de 10 km; 12,6 km del borde del dominio."

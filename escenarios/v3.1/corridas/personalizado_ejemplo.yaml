@@ -1,0 +1,14 @@
+# Ejemplo de escenario armado campo por campo (sin `variante`): sirve de plantilla para ensayar medidas de mitigación
+descripcion: Renca 2022 con barreras, contención con tasa fija de 500 m/h y combate a las 3 h de la ignición.
+evento: SL-2022-RENCA
+hipotesis: 0
+ignicion: alt0               # extremo norte de la cicatriz (a barlovento), ver la ficha del evento
+modelo: modelo_v2
+barreras: on                 # auto (lo que diga el modelo) | on | off
+contencion: on
+despacho: global             # auto | global (tasa fija, docs/10) | local | pronostico (docs/13)
+ajustes: {tasa_linea_m_h: 500, contencion_retardo_h: 3}
+# parche: {barreras: {cruce: {lambda: 1.5}}}   # cualquier cambio al YAML del modelo
+# k_clase: {1: 0.75, 2: 0.75, 3: 0.75, 4: 2.0, 5: 2.0, 6: 5.0, 7: 5.0}   # por defecto, los del modelo
+validar: true
+figuras: true

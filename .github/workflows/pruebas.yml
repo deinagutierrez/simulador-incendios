@@ -1,0 +1,27 @@
+# En cada cambio: un clon limpio tiene que instalar y funcionar, en Windows y en Linux.
+name: pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  clon-funciona:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - name: Ningún archivo supera el límite de GitHub
+        run: python herramientas/tamanos.py 95
+      - name: Instalar bibliotecas
+        run: python -m pip install -r requirements.txt
+      - name: Versiones congeladas, datos, pruebas de los dos motores y corridas cortas
+        run: python herramientas/probar.py

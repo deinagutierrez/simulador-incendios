@@ -1,0 +1,20 @@
+{
+  "mascara": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\grilla\\mascara_dominio_las_lagunas_potrerillos.tif",
+  "dem_viento": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\dem\\dem_copernicus_glo30_viento_las_lagunas_potrerillos.tif",
+  "dem": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\dem\\dem_copernicus_glo30_las_lagunas_potrerillos.tif",
+  "pendiente": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\dem\\pendiente_copernicus_glo30_las_lagunas_potrerillos.tif",
+  "orientacion": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\dem\\orientacion_copernicus_glo30_las_lagunas_potrerillos.tif",
+  "cobertura": {
+    "2021": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\cobertura\\cobertura_mapbiomas_col3_2021_las_lagunas_potrerillos.tif",
+    "2022": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\cobertura\\cobertura_mapbiomas_col3_2022_las_lagunas_potrerillos.tif",
+    "2023": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\cobertura\\cobertura_mapbiomas_col3_2023_las_lagunas_potrerillos.tif",
+    "2024": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\cobertura\\cobertura_mapbiomas_col3_2024_las_lagunas_potrerillos.tif",
+    "2025": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\cobertura\\cobertura_mapbiomas_col3_2025_las_lagunas_potrerillos.tif"
+  },
+  "infraestructura": {
+    "caminos": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\infraestructura\\caminos_las_lagunas_potrerillos.gpkg",
+    "viviendas": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\infraestructura\\viviendas_las_lagunas_potrerillos.gpkg",
+    "electricidad_mt": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\infraestructura\\electricidad_mt_las_lagunas_potrerillos.gpkg"
+  },
+  "cicatriz_mensual": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\cicatrices\\fuego_mensual_las_lagunas_potrerillos.tif"
+}

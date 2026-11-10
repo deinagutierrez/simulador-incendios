@@ -1,0 +1,16 @@
+# Plantilla para comparar valores de calibración desde Colab (docs/v4.0/17): copiar, cambiar los valores y correr
+descripcion: Las Lagunas 2024 con contención SNMF en modo pronóstico y valores de calibración explícitos (los de v3.0 por defecto).
+evento: SL-2024-LASLAGUNAS
+hipotesis: 1
+horas: 72
+variante: local_pronostico        # barreras + contención SNMF sin la ficha (como ante un incendio nuevo)
+viento: windninja                 # windninja | serie
+regla_combustible: "3.3"          # 3.3 (V.4) | 3.3b (estructura leñosa sin la anomalía del verano, docs/v4.0/17)
+ajustes:
+  contencion:
+    intensidad_sostener_kw_m: 1700        # umbral de sostén I_s (v3.0: 1700; grilla de la Fase 2: 800 / 1700 / 3500)
+    intensidad_sostener_aereo_kw_m: 3500  # con medio aéreo (se usó max(3500, I_s))
+    snmf: {kappa: 10.0}                   # multiplicador del despacho SNMF (v3.0: 10; grilla: 1 / 3 / 10)
+parar_en_cicatriz: on              # termina al igualar la superficie de la cicatriz (D38; el usuario lo pidió también aquí, E030)
+validar: true
+figuras: true

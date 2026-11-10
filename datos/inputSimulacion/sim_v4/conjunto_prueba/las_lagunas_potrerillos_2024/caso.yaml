@@ -1,0 +1,82 @@
+nombre: las_lagunas_potrerillos_2024
+descripcion: 'Complejo Las Lagunas–Potrerillos (partes SNMF ''LAS LAGUNAS'' y ''POTRERILLOS'' del 18-09-2024, unidos por el evento satelital 2024-003),
+  18-09-2024 → 09-10-2024 (extinguido). Cicatriz COE de 38.631 ha (un polígono de 38.541 ha + parches), 100 % dentro del dominio: es el incendio
+  que motivó el dominio Las Lagunas–Potrerillos. Caso SM05 de conjunto_pruebas (tipo estrés) adaptado al estándar 7.1. Hay 2.006 focos VIIRS S-NPP:
+  el primer pase (18-09 15:43 local) ya muestra 50 focos a lo largo de 9 km, por lo que la ignición base es múltiple (los focos del primer pase)
+  y t0 es la hora de ese pase.'
+fechas:
+  inicio: '2024-09-18'
+  fin: '2024-10-09'
+  origen: parte SNMF (fecha_inicio, fecha_extincion)
+fuentes:
+  perimetro: COE San Luis (AQ2024_0001, AQ2024_0076)
+  ignicion: focos VIIRS S-NPP del primer pase dentro de la cicatriz
+  meteo: ERA5 (ECMWF/C3S) vía Open-Meteo Historical Weather API, models=era5, celda (-32.5, -65.5), descargado 2026-10-07; punto = centroide de
+    la cicatriz (-32.6175, -65.5753)
+  combustible: MapBiomas Col.3 2023 + NDVI/NDMI verano 2024 (regla 3.3)
+  indices_mes: NDVI/NDMI 2024-09 (compuesto mensual S2)
+  focos: FIRMS VIIRS S-NPP (archivo local del proyecto)
+escenario:
+  nombre: las_lagunas_potrerillos_2024
+  grilla:
+    xmin: 3514620.0
+    ymin: 6370890.0
+    xmax: 3560550.0
+    ymax: 6411570.0
+  t_inicio: '2024-09-18T15:43:00-03:00'
+  duracion_h: 72
+  dt_min: 2.0
+  vecindad: 8
+  modo: determinista
+  semilla: 42
+  ignicion: ignicion.geojson
+  meteo: meteo_horaria.csv
+  combustible: combustible_pre_evento.tif
+  indices_mes_evento: indices_mes_evento.tif
+  ndvi_verano: ndvi_verano_previo.tif
+  perimetro_observado: perimetro_observado.geojson
+  focos: focos_viirs.geojson
+  salidas:
+    png: true
+    gif: true
+    dpi: 100
+    png_cada_h: 2
+variantes:
+  parte_potrerillos_12h:
+    t_inicio: '2024-09-18T12:00:00-03:00'
+    ignicion: ignicion_parte_potrerillos_12h.geojson
+  parte_las_lagunas_12h:
+    t_inicio: '2024-09-18T12:00:00-03:00'
+    ignicion: ignicion_parte_las_lagunas_12h.geojson
+  dos_partes_12h:
+    t_inicio: '2024-09-18T12:00:00-03:00'
+    ignicion: ignicion_dos_partes_12h.geojson
+  duracion_144h:
+    duracion_h: 144
+    salidas:
+      png_cada_h: 6
+  dt_5min:
+    dt_min: 5.0
+  bosque_gs2:
+    combustible: combustible_bosque_gs2.tif
+  agricola_gr1:
+    combustible: combustible_agricola_gr1.tif
+  bosque_gs2_agricola_gr1:
+    combustible: combustible_bosque_gs2_agricola_gr1.tif
+evaluacion:
+  perimetros_alternativos:
+    mapbiomas_fuego_2024: perimetro_mapbiomas_fuego_2024.geojson
+    sentinel2_2024-003: perimetro_s2_evento_2024-003.geojson
+  nombre_toa: sim_SM05_2024_LAS_LAGUNAS_POTRERILLOS_simulador_toa.tif
+  tolerancias:
+    sorensen_min: 0.5
+    error_superficie_pct_max: 50
+incertidumbres:
+- 'Ignición: dos partes SNMF a 7 km (Las Lagunas y Potrerillos) y 50 focos VIIRS a lo largo de 9 km en el primer pase (15:43 local): varias igniciones
+  o un fuego de la mañana. Base = focos del primer pase; variantes desde cada parte a las 12:00.'
+- El perímetro COE es el acumulado de 21 días con supresión (6 brigadas, aviones); la corrida base es de 72 h de propagación libre. La variante
+  de 144 h cubre el período de actividad VIIRS (18 → 24-09).
+- 'Superficies discrepantes entre fuentes: COE 38.631 ha, SMF 48.226 ha, Sentinel-2 dNBR 25.437 ha.'
+- 'Un solo punto ERA5 (celda de 0,25°) para una caja de 46 × 41 km con relieve serrano: el viento real varió dentro del área.'
+- El combustible pre-evento usa cobertura 2023 + NDVI verano 2024; no se corrigen áreas quemadas en 2022–2023 dentro de la caja.
+- 'Las variantes bosque_gs2 / agricola_gr1 reasignan TU5 y TU1 → GS2 y NB3 → GR1: son hipótesis de calibración, no datos.'

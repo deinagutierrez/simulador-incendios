@@ -1,0 +1,7 @@
+# Escenario corto para comprobar que la instalación de v3 funciona (6 horas simuladas con barreras y contención local)
+descripcion: Prueba de humo de v3. Si corre, el código, las barreras y el producto de arribo están bien instalados.
+evento: SL-2024-LASLAGUNAS
+hipotesis: 1
+horas: 6
+variante: local              # modelo_v2 + barreras + contención con despacho SNMF y cuarteles de la ficha
+validar: false

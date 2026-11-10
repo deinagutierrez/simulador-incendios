@@ -1,0 +1,7 @@
+# Línea base de v3: Las Lagunas–Potrerillos 2024 sin barreras ni combate, con la humedad por retardo y los k recalibrados (docs/11-12)
+descripcion: Propagación libre con modelo_v2 (barreras y contención apagadas). Comparable con calibracion_2024 de v2.0.
+evento: SL-2024-LASLAGUNAS
+hipotesis: 1
+variante: libre_v2
+validar: true
+figuras: true

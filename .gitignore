@@ -1,0 +1,28 @@
+# entornos y cachés
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# resultados y cachés: se regeneran en cada computadora
+resultados/
+datos/procesados/
+
+# la biblioteca de viento se versiona partida (*.nc.part00, .part01, ...); los motores arman el .nc la primera vez que se usa
+datos/inputSimulacion/viento/*.nc
+
+# corridas en tiempo real generadas por el simulador
+datos/inputSimulacion/**/RT-*
+escenarios/**/RT-*
+
+# datos históricos que se bajan aparte (ver DATOS.md)
+datos/historicos_descargados/
+
+# claves y configuración local
+*.env
+config/herramientas.yaml
+
+# sistema
+Thumbs.db
+.DS_Store

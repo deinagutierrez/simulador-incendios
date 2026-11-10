@@ -1,0 +1,1140 @@
+{
+  "type": "FeatureCollection",
+  "name": "bomberos_san_luis_unificado",
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "id": 1,
+        "nombre": "DG 11 Bomberos - Cuartel 5 San Luis",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": 24,
+        "cuartel": "Cuartel N°24",
+        "regional": "Regional 3",
+        "localidad": "San Luis",
+        "departamento": "Juan Martín Pueyrredón",
+        "contacto": "Teléfono: 2657 210201 JCA",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 2218,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.294954,
+        "lat": -33.298748
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.294954,
+          -33.298748
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "properties": {
+        "id": 2,
+        "nombre": "DG 11 Bomberos - Cuartel 2 La Punta",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": null,
+        "cuartel": null,
+        "regional": null,
+        "localidad": null,
+        "departamento": null,
+        "contacto": null,
+        "origen": "solo_shp",
+        "dist_entre_fuentes_m": null,
+        "fuente": "BOMBEROS.shp",
+        "lon": -66.313552,
+        "lat": -33.193298
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.313552,
+          -33.193298
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "properties": {
+        "id": 3,
+        "nombre": "DG 11 Bomberos - Cuartel 3 // Aeropuerto De Conlara",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": null,
+        "cuartel": null,
+        "regional": null,
+        "localidad": null,
+        "departamento": null,
+        "contacto": null,
+        "origen": "solo_shp",
+        "dist_entre_fuentes_m": null,
+        "fuente": "BOMBEROS.shp",
+        "lon": -65.179709,
+        "lat": -32.379529
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.179709,
+          -32.379529
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "properties": {
+        "id": 4,
+        "nombre": "DG 11 Bomberos - Cuartel San Pablo",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": 32,
+        "cuartel": "Cuartel N°32",
+        "regional": "Regional 3",
+        "localidad": "San Pablo",
+        "departamento": "Chacabuco",
+        "contacto": "Teléfono: 02656 422877",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 245,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.304146,
+        "lat": -32.659393
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.304146,
+          -32.659393
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 5,
+      "properties": {
+        "id": 5,
+        "nombre": "DG 11 Bomberos - Cuartel Aeropuerto",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": null,
+        "cuartel": null,
+        "regional": null,
+        "localidad": null,
+        "departamento": null,
+        "contacto": null,
+        "origen": "solo_shp",
+        "dist_entre_fuentes_m": null,
+        "fuente": "BOMBEROS.shp",
+        "lon": -66.350756,
+        "lat": -33.274916
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.350756,
+          -33.274916
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 6,
+      "properties": {
+        "id": 6,
+        "nombre": "DG 11 Bomberos - Cuartel Voluntarios Merlo",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": 3,
+        "cuartel": "Cuartel N°3",
+        "regional": "Regional 3",
+        "localidad": "Merlo",
+        "departamento": "Junín",
+        "contacto": "Teléfonos: 02656-475066 /478021",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 10,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.015905,
+        "lat": -32.337325
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.015905,
+          -32.337325
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 7,
+      "properties": {
+        "id": 7,
+        "nombre": "Bomberos // Cuartel Central de Bomberos de la Policia San Luis",
+        "tipo": "Policia",
+        "cuartel_n": 25,
+        "cuartel": "Cuartel N°25",
+        "regional": "Regional 1",
+        "localidad": "San Luis",
+        "departamento": "Juan Martín Pueyrredón",
+        "contacto": "Teléfono: 266-4885434 NEC 6875",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 2188,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.340091,
+        "lat": -33.280881
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.340091,
+          -33.280881
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 8,
+      "properties": {
+        "id": 8,
+        "nombre": "Bomberos Voluntarios Fraga",
+        "tipo": "Voluntarios",
+        "cuartel_n": 38,
+        "cuartel": "Cuartel N°38",
+        "regional": "Regional 2",
+        "localidad": "Fraga",
+        "departamento": "Coronel Pringles",
+        "contacto": "Teléfono: 2657 21-0698 JCA",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 6,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.791984,
+        "lat": -33.498813
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.791984,
+          -33.498813
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 9,
+      "properties": {
+        "id": 9,
+        "nombre": "DG 11 Bomberos - Cuartel Los Manantiales",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": 27,
+        "cuartel": "Cuartel N°27",
+        "regional": "Regional 1",
+        "localidad": "Villa General Roca",
+        "departamento": "Belgrano",
+        "contacto": "Teléfono: 266 470-558 JCA",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 97,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.45036,
+        "lat": -32.665291
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.45036,
+          -32.665291
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 10,
+      "properties": {
+        "id": 10,
+        "nombre": "DG 11 Bomberos - Cuartel Union",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": 15,
+        "cuartel": "Cuartel N°15",
+        "regional": "Regional 2",
+        "localidad": "Unión",
+        "departamento": "Gobernador Dupuy",
+        "contacto": "Teléfono: 02658-15411114",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 194,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.94954,
+        "lat": -35.15149
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.94954,
+          -35.15149
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 11,
+      "properties": {
+        "id": 11,
+        "nombre": "Bomberos Voluntarios Naschel",
+        "tipo": "Voluntarios",
+        "cuartel_n": 10,
+        "cuartel": "Cuartel N°10",
+        "regional": "Regional 3",
+        "localidad": "Naschel",
+        "departamento": "Chacabuco",
+        "contacto": "Teléfono: 02656-445200",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 58,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.376256,
+        "lat": -32.914291
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.376256,
+          -32.914291
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 12,
+      "properties": {
+        "id": 12,
+        "nombre": "Bomberos Voluntarios El Volcán",
+        "tipo": "Voluntarios",
+        "cuartel_n": 13,
+        "cuartel": "Cuartel N°13",
+        "regional": "Regional 1",
+        "localidad": "El Volcán",
+        "departamento": "Juan Martín Pueyrredón",
+        "contacto": "Teléfono Fijo: El Volcan",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 1450,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.177176,
+        "lat": -33.251633
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.177176,
+          -33.251633
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 13,
+      "properties": {
+        "id": 13,
+        "nombre": "DG 11 Bomberos - Cuartel Quines",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": 12,
+        "cuartel": "Cuartel N°12",
+        "regional": "Regional 1",
+        "localidad": "Quines",
+        "departamento": "Ayacucho",
+        "contacto": "Teléfono: 02651-470110",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 35,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.8071,
+        "lat": -32.23401
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.8071,
+          -32.23401
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 14,
+      "properties": {
+        "id": 14,
+        "nombre": "DG 11 Bomberos - Cuartel 4 Juana Koslay",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": null,
+        "cuartel": null,
+        "regional": null,
+        "localidad": null,
+        "departamento": null,
+        "contacto": null,
+        "origen": "solo_shp",
+        "dist_entre_fuentes_m": null,
+        "fuente": "BOMBEROS.shp",
+        "lon": -66.270941,
+        "lat": -33.297239
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.270941,
+          -33.297239
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 15,
+      "properties": {
+        "id": 15,
+        "nombre": "DG 11 Bomberos - Cuartel Voluntarios Carpintería",
+        "tipo": "DG 11 (provincial)",
+        "cuartel_n": 23,
+        "cuartel": "Cuartel N°23",
+        "regional": "Regional 3",
+        "localidad": "Carpintería",
+        "departamento": "Junín",
+        "contacto": "Teléfono: 02656 - 479001",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 1352,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.019148,
+        "lat": -32.40716
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.019148,
+          -32.40716
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 16,
+      "properties": {
+        "id": 16,
+        "nombre": "Bomberos Voluntarios \"Luis Navarro\" Justo Daract",
+        "tipo": "Voluntarios",
+        "cuartel_n": 2,
+        "cuartel": "Cuartel N°2",
+        "regional": "Regional 2",
+        "localidad": "Justo Daract",
+        "departamento": "General Pedernera",
+        "contacto": "Teléfono: (02657) 480636",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 7,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.184116,
+        "lat": -33.863533
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.184116,
+          -33.863533
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 17,
+      "properties": {
+        "id": 17,
+        "nombre": "Bomberos Voluntarios Concarán",
+        "tipo": "Voluntarios",
+        "cuartel_n": 16,
+        "cuartel": "Cuartel N°16",
+        "regional": "Regional 3",
+        "localidad": "Concarán",
+        "departamento": "Chacabuco",
+        "contacto": "Teléfono: (02656) 480222",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 68,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.240456,
+        "lat": -32.563903
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.240456,
+          -32.563903
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 18,
+      "properties": {
+        "id": 18,
+        "nombre": "Bomberos Voluntarios Los Molles",
+        "tipo": "Voluntarios",
+        "cuartel_n": 21,
+        "cuartel": "Cuartel N°21",
+        "regional": "Regional 3",
+        "localidad": "Los Molles",
+        "departamento": "Junín",
+        "contacto": "Teléfono: 02656-477833",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 1166,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.009806,
+        "lat": -32.442503
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.009806,
+          -32.442503
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 19,
+      "properties": {
+        "id": 19,
+        "nombre": "Bomberos Buena Esperanza",
+        "tipo": "Sin clasificar",
+        "cuartel_n": 14,
+        "cuartel": "Cuartel N°14",
+        "regional": "Regional 2",
+        "localidad": "Buena Esperanza",
+        "departamento": "Gobernador Dupuy",
+        "contacto": "Teléfono: 02664452000 Int. 5945",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 578,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.263502,
+        "lat": -34.755393
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.263502,
+          -34.755393
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 20,
+      "properties": {
+        "id": 20,
+        "nombre": "Bomberos Voluntarios Luján",
+        "tipo": "Voluntarios",
+        "cuartel_n": 36,
+        "cuartel": "Cuartel N°36",
+        "regional": "Regional 1",
+        "localidad": "Luján",
+        "departamento": "Ayacucho",
+        "contacto": "Teléfono:266 4366308 JCA",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 18,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.933091,
+        "lat": -32.365004
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.933091,
+          -32.365004
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 21,
+      "properties": {
+        "id": 21,
+        "nombre": "Bomberos Voluntarios San Francisco del Monte de Oro",
+        "tipo": "Voluntarios",
+        "cuartel_n": 6,
+        "cuartel": "Cuartel N°6",
+        "regional": "Regional 1",
+        "localidad": "San Francisco del Monte de Oro",
+        "departamento": "Ayacucho",
+        "contacto": "Teléfono: 02651-426022",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 70,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.126473,
+        "lat": -32.599595
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.126473,
+          -32.599595
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 22,
+      "properties": {
+        "id": 22,
+        "nombre": "Bomberos Voluntarios La Carolina",
+        "tipo": "Voluntarios",
+        "cuartel_n": 35,
+        "cuartel": "Cuartel N°35",
+        "regional": "Regional 1",
+        "localidad": "Carolina",
+        "departamento": "Coronel Pringles",
+        "contacto": "Teléfono: 2664452000 int. 5552 o int. 5553",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 194,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.09099,
+        "lat": -32.810095
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.09099,
+          -32.810095
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 23,
+      "properties": {
+        "id": 23,
+        "nombre": "Bomberos Voluntarios \"La Unión\" Villa de la Quebrada",
+        "tipo": "Voluntarios",
+        "cuartel_n": 31,
+        "cuartel": "Cuartel N°31",
+        "regional": "Regional 1",
+        "localidad": "Villa de la Quebrada",
+        "departamento": "Belgrano",
+        "contacto": "Teléfono: 266 529-6329 JCA",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 341,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.28934,
+        "lat": -33.015492
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.28934,
+          -33.015492
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 24,
+      "properties": {
+        "id": 24,
+        "nombre": "Bomberos Voluntarios La Punta",
+        "tipo": "Voluntarios",
+        "cuartel_n": 17,
+        "cuartel": "Cuartel N°17",
+        "regional": "Regional 1",
+        "localidad": "La Punta",
+        "departamento": "Juan Martín Pueyrredón",
+        "contacto": "Teléfono:0266 445-2000",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 605,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.311176,
+        "lat": -33.187758
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.311176,
+          -33.187758
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 25,
+      "properties": {
+        "id": 25,
+        "nombre": "Bomberos Voluntarios Potrero de los Funes",
+        "tipo": "Voluntarios",
+        "cuartel_n": 19,
+        "cuartel": "Cuartel N°19",
+        "regional": "Regional 1",
+        "localidad": "Potrero de los Funes",
+        "departamento": "Juan Martín Pueyrredón",
+        "contacto": "Teléfono Fijo: 495239",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 90,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.229793,
+        "lat": -33.211045
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.229793,
+          -33.211045
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 27,
+      "properties": {
+        "id": 27,
+        "nombre": "Bomberos Voluntarios San Luis",
+        "tipo": "Voluntarios",
+        "cuartel_n": 8,
+        "cuartel": "Cuartel N°8",
+        "regional": "Regional 1",
+        "localidad": "San Luis",
+        "departamento": "Juan Martín Pueyrredón",
+        "contacto": "Teléfonos: 429444 / 422224",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 38,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.345229,
+        "lat": -33.302749
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.345229,
+          -33.302749
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 28,
+      "properties": {
+        "id": 28,
+        "nombre": "Bomberos Voluntarios Estancia Grande",
+        "tipo": "Voluntarios",
+        "cuartel_n": null,
+        "cuartel": null,
+        "regional": null,
+        "localidad": null,
+        "departamento": null,
+        "contacto": null,
+        "origen": "solo_shp",
+        "dist_entre_fuentes_m": null,
+        "fuente": "BOMBEROS.shp",
+        "lon": -66.178198,
+        "lat": -33.210988
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.178198,
+          -33.210988
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 29,
+      "properties": {
+        "id": 29,
+        "nombre": "Bomberos Voluntarios El Trapiche",
+        "tipo": "Voluntarios",
+        "cuartel_n": 11,
+        "cuartel": "Cuartel N°11",
+        "regional": "Regional 1",
+        "localidad": "El Trapiche",
+        "departamento": "Coronel Pringles",
+        "contacto": "Teléfono Fijo: 493183",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 32,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -66.063253,
+        "lat": -33.108277
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -66.063253,
+          -33.108277
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 30,
+      "properties": {
+        "id": 30,
+        "nombre": "Bomberos Voluntarios San Martín",
+        "tipo": "Voluntarios",
+        "cuartel_n": 28,
+        "cuartel": "Cuartel N°28",
+        "regional": "Regional 3",
+        "localidad": "San Martín",
+        "departamento": "Libertador General San Martín",
+        "contacto": "Teléfono: 0266 448-2007",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 6,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.675901,
+        "lat": -32.410145
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.675901,
+          -32.410145
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 31,
+      "properties": {
+        "id": 31,
+        "nombre": "Cuartel De Bomberos Lafinur Los Cajones",
+        "tipo": "Sin clasificar",
+        "cuartel_n": 33,
+        "cuartel": "Cuartel N°33",
+        "regional": "Regional 3",
+        "localidad": "Los Cajones",
+        "departamento": "Junín",
+        "contacto": "Teléfono: 3544 30-6569 JCA",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 159,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.37046,
+        "lat": -32.0274
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.37046,
+          -32.0274
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 32,
+      "properties": {
+        "id": 32,
+        "nombre": "Bomberos Voluntarios de Santa Rosa del Conlara \"Cmdte. Gral. Guido Cesar Pollini\"",
+        "tipo": "Voluntarios",
+        "cuartel_n": 4,
+        "cuartel": "Cuartel N°4",
+        "regional": "Regional 3",
+        "localidad": "Santa Rosa del Conlara",
+        "departamento": "Junín",
+        "contacto": "Teléfono: (02656) 492222",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 15,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.210364,
+        "lat": -32.342478
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.210364,
+          -32.342478
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 33,
+      "properties": {
+        "id": 33,
+        "nombre": "Bomberos Voluntarios La Toma",
+        "tipo": "Voluntarios",
+        "cuartel_n": 5,
+        "cuartel": "Cuartel N°5",
+        "regional": "Regional 2",
+        "localidad": "La Toma",
+        "departamento": "Coronel Pringles",
+        "contacto": "Teléfono:(02655) 421021",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 5,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.62343,
+        "lat": -33.051497
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.62343,
+          -33.051497
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 34,
+      "properties": {
+        "id": 34,
+        "nombre": "Bomberos Voluntarios Tilisarao",
+        "tipo": "Voluntarios",
+        "cuartel_n": 7,
+        "cuartel": "Cuartel N°7",
+        "regional": "Regional 3",
+        "localidad": "Tilisarao",
+        "departamento": "Chacabuco",
+        "contacto": "Teléfono: (02656) 420031",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 41,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.293319,
+        "lat": -32.734224
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.293319,
+          -32.734224
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 35,
+      "properties": {
+        "id": 35,
+        "nombre": "Bomberos Voluntarios Cortaderas",
+        "tipo": "Voluntarios",
+        "cuartel_n": 20,
+        "cuartel": "Cuartel N°20",
+        "regional": "Regional 3",
+        "localidad": "Cortaderas",
+        "departamento": "Chacabuco",
+        "contacto": "Teléfono: 02656-471201",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 6,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -64.994429,
+        "lat": -32.503294
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -64.994429,
+          -32.503294
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 36,
+      "properties": {
+        "id": 36,
+        "nombre": "Bomberos Voluntarios Villa Larca",
+        "tipo": "Voluntarios",
+        "cuartel_n": null,
+        "cuartel": null,
+        "regional": null,
+        "localidad": null,
+        "departamento": null,
+        "contacto": null,
+        "origen": "solo_shp",
+        "dist_entre_fuentes_m": null,
+        "fuente": "BOMBEROS.shp",
+        "lon": -64.988217,
+        "lat": -32.618073
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -64.988217,
+          -32.618073
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 37,
+      "properties": {
+        "id": 37,
+        "nombre": "Asociación de Bomberos Voluntarios de Villa del Carmen",
+        "tipo": "Voluntarios",
+        "cuartel_n": 34,
+        "cuartel": "Cuartel N°34",
+        "regional": "Regional 3",
+        "localidad": "Villa del Carmen",
+        "departamento": "Chacabuco",
+        "contacto": "Teléfonos: 0266 15-416-3659",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 194,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.037542,
+        "lat": -32.941755
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.037542,
+          -32.941755
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 38,
+      "properties": {
+        "id": 38,
+        "nombre": "Bomberos Voluntarios \"El Fortin\" Villa Mercedes",
+        "tipo": "Voluntarios",
+        "cuartel_n": 1,
+        "cuartel": "Cuartel N°1",
+        "regional": "Regional 2",
+        "localidad": "Villa Mercedes",
+        "departamento": "General Pedernera",
+        "contacto": "Teléfono: (02657) 422224 / 422444",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 17,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.46296,
+        "lat": -33.675853
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.46296,
+          -33.675853
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 39,
+      "properties": {
+        "id": 39,
+        "nombre": "Destacamento N° 1 Bomberos Voluntarios \"El Fortín\" Villa Mercedes",
+        "tipo": "Voluntarios",
+        "cuartel_n": null,
+        "cuartel": null,
+        "regional": null,
+        "localidad": null,
+        "departamento": null,
+        "contacto": null,
+        "origen": "solo_shp",
+        "dist_entre_fuentes_m": null,
+        "fuente": "BOMBEROS.shp",
+        "lon": -65.497132,
+        "lat": -33.683092
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.497132,
+          -33.683092
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 40,
+      "properties": {
+        "id": 40,
+        "nombre": "Bomberos Cuartel N° 29 Batavia",
+        "tipo": "Sin clasificar",
+        "cuartel_n": 29,
+        "cuartel": "Cuartel N°29",
+        "regional": "Regional 2",
+        "localidad": "Batavia",
+        "departamento": "Gobernador Dupuy",
+        "contacto": "NEC 8711",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 25,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.688757,
+        "lat": -34.778441
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.688757,
+          -34.778441
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 41,
+      "properties": {
+        "id": 41,
+        "nombre": "Bomberos Voluntarios de Renca",
+        "tipo": "Voluntarios",
+        "cuartel_n": 26,
+        "cuartel": "Cuartel N°26",
+        "regional": "Regional 3",
+        "localidad": "Renca",
+        "departamento": "Chacabuco",
+        "contacto": "Teléfono: (02656) 422656",
+        "origen": "ambos",
+        "dist_entre_fuentes_m": 19,
+        "fuente": "BOMBEROS.shp; Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.366276,
+        "lat": -32.769174
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.366276,
+          -32.769174
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 44,
+      "properties": {
+        "id": 44,
+        "nombre": "Bomberos Cuartel N°30 Papagayos",
+        "tipo": "Sin clasificar",
+        "cuartel_n": 30,
+        "cuartel": "Cuartel N°30",
+        "regional": "Regional 3",
+        "localidad": "Papagayos",
+        "departamento": "Chacabuco",
+        "contacto": "Teléfono: 0266 448-9540",
+        "origen": "solo_ministerio",
+        "dist_entre_fuentes_m": null,
+        "fuente": "Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -64.992005,
+        "lat": -32.676001
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -64.992005,
+          -32.676001
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 45,
+      "properties": {
+        "id": 45,
+        "nombre": "Bomberos Cuartel N°37 San José del Morro",
+        "tipo": "Sin clasificar",
+        "cuartel_n": 37,
+        "cuartel": "Cuartel N°37",
+        "regional": "Regional 2",
+        "localidad": "San José del Morro",
+        "departamento": "General Pedernera",
+        "contacto": "Teléfono: 266 417-2262 JCA NEC 5371",
+        "origen": "solo_ministerio",
+        "dist_entre_fuentes_m": null,
+        "fuente": "Ministerio de Seguridad de San Luis - Direccion de Prevencion y Gestion de Emergencias (2026-09-10)",
+        "lon": -65.491662,
+        "lat": -33.211729
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -65.491662,
+          -33.211729
+        ]
+      }
+    }
+  ]
+}

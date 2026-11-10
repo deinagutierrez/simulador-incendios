@@ -1,0 +1,4 @@
+# Rutas locales de herramientas externas (no sensibles)
+windninja_cli: C:/Users/lisan/tools/WindNinja-4.0.0/install/bin/WindNinja_cli.exe   # no instalado en DESKTOP-CEOMRUQ (2026-10-15)
+gdal_bin: C:/Program Files/QGIS 3.44.14/bin
+gee_project: miprojecto-508714      # proyecto de Google Cloud habilitado para Earth Engine (también: `earthengine set_project` o EARTHENGINE_PROJECT)

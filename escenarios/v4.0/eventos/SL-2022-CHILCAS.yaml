@@ -1,0 +1,47 @@
+# Incendio Paraje Las Chilcas, Ruta 42 (Junín), diciembre de 2022 (verano, ola de calor). Evento de VALIDACIÓN (incorporado 2026-10-20).
+id: SL-2022-CHILCAS
+nombre: Paraje Las Chilcas, Ruta 42 (Junín)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2022_43589 restringido a los píxeles quemados en diciembre de 2022 (raster mensual; el polígono suma 5 ha de agosto-noviembre)
+  oid: "2022_43589"
+  calendar_year: 2022
+  mes: 12
+  superficie_ha: 299
+inicio:
+  fecha_local: "2022-12-05"       # SNMF fecha_inicio (3 reportes, 06 al 12/12); primer día de la ola de calor: T máx 36 °C, HR mín 13 %, viento O 7 m/s
+  hora_utc_hipotesis: ["2022-12-05T16:00:00Z", "2022-12-05T13:00:00Z", "2022-12-05T19:00:00Z", "2022-12-05T04:00:00Z", "2022-12-05T02:00:00Z"]   # HIPÓTESIS h0–h2: 13, 10 y 16 h local (SNMF, originales); h3, h4 (E036, D43): 01 h local del 05/12 y 23 h del 04/12 = primera detección VIIRS − 1 h y − 3 h, redondeadas a la hora
+  cota_superior_utc: "2022-12-05T05:24:00Z"  # E036: primera detección VIIRS S-NPP (FIRMS, REPO/datos/crudos/FIRMS/viirs_snpp_san_luis.csv): 3 focos nocturnos (FRP ≤ 1,2 MW, confianza n) a 99–264 m del extremo N de la cicatriz; a las 17:47 UTC, 5 focos dentro (FRP hasta 82 MW). h0–h2 son posteriores a esta cota
+  confianza: media
+fin:
+  fecha_extincion_snmf: "2022-12-07"
+  propagacion_principal: "2022-12-05 a 2022-12-07"
+  fin_simulacion_utc: "2022-12-08T03:00:00Z"
+  evaluacion_utc: ["2022-12-06T03:00:00Z", "2022-12-07T03:00:00Z", "2022-12-08T03:00:00Z"]   # fin del 05/12, del 06/12 y extinción
+ignicion:
+  fuente: SNMF (punto informado a 245 m del polígono; se desplaza a la celda combustible quemada más cercana si no es combustible -> HIPÓTESIS)
+  puntos:
+    - {nombre: Paraje Las Chilcas, lon: -65.374806, lat: -32.459}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: extremo O (a barlovento del viento O del 05/12) de la parte principal de la cicatriz. No es una observación."
+    puntos:
+      - {nombre: extremo O cicatriz (hipótesis), lon: -65.37885, lat: -32.44823}
+  - fuente: "HIPÓTESIS derivada (E036, D43): extremo N de la cicatriz, dentro de ella (celda combustible GS2 a una celda del borde), a 203 m de los 3 focos VIIRS nocturnos del 05/12 02:24 local. Coherente con el avance hacia el S: viento del N–NNO desde las 03 h local (25–28 km/h desde las 09 h) y cicatriz alargada N–S (5,5 × 1,8 km); los focos de las 14:47 local están en el centro. alt0 supone viento O, que la meteorología IFS no muestra. El punto SNMF (239 m fuera) y alt0 (72 m fuera) se conservan. No es una observación."
+    puntos:
+      - {nombre: extremo N cicatriz (hipótesis E036), lon: -65.36399, lat: -32.43359}
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2022-12-04T00:00:00Z", fin_utc: "2022-12-08T03:00:00Z"}
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2022-10-20", "2022-12-04"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+  respaldo_evento: SL-2022-RENCA
+cobertura_anio: 2021
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [17, 18, 6, 32, 34]     # Concarán, Los Molles, Merlo, Santa Rosa del Conlara, Tilisarao
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2022-12-05", contencion_dia: 2, extincion_dia: 2}
+notas:
+  - Verano con ola de calor (36 °C, HR 13 %): junto con Puertas 2022, prueba del estado de humedad viva fuera de la estación seca invernal.
+  - Sin detecciones VIIRS en GEE para 2022; focos MODIS de 1 km.

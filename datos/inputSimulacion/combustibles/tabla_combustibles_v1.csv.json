@@ -1,0 +1,20 @@
+{
+  "producto": "tabla_combustibles_v1.csv",
+  "fuente": "clases locales v1 + parámetros S&B 2005 por analogía",
+  "generado_utc": "2026-11-04T13:35:16Z",
+  "version_codigo": "3.2.0",
+  "host": "DESKTOP-CEOMRUQ",
+  "parametros": {
+    "version": "v1"
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\Usuario\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\firebench\\resources\\data\\fuel_models\\data_ScottandBurgan40.csv",
+      "bytes": 2313,
+      "sha256": "1091d0b3e277609266ab9f8e92f1bd4cc39f9848d222d11bc8df1ec5b3f69b60"
+    }
+  ],
+  "sha256_producto": "a430b07a62fa56b10cf576634afbc07b96c2b22eba4e8c48fb6ba5b041e7228b",
+  "bytes_producto": 4052,
+  "nota": "WAF sin abrigo: Baughman & Albini 1980 generalizado (Andrews 2012); factor_dosel = HIPOTESIS"
+}

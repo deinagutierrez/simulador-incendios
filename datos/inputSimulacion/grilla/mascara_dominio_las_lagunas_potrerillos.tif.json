@@ -1,0 +1,33 @@
+{
+  "producto": "mascara_dominio_las_lagunas_potrerillos.tif",
+  "fuente": "primero_cuadrado.geojson (dominio exacto) rasterizado",
+  "generado_utc": "2026-10-14T19:43:38Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3513060.0,
+      "ymin": 6367770.0,
+      "xmax": 3563220.0,
+      "ymax": 6417900.0,
+      "ncol": 1672,
+      "nfil": 1671
+    },
+    "filtro": {
+      "tipo": "dominio_exacto_25_celdas"
+    }
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\primero_cuadrado.geojson",
+      "bytes": 43849,
+      "sha256": "b454ea78d409fc5aa86a70739d4d7e692a1a1ae2224371b5f38eafd8e4d1e5e4"
+    }
+  ],
+  "sha256_producto": "3469575ec3ba246cad5583519fe5a51c86328a6af0ae94977fc80b6d3fa238f2",
+  "bytes_producto": 23478,
+  "celdas_dentro": 2777934,
+  "area_km2": 2500.1406
+}

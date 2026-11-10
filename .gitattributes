@@ -1,0 +1,3 @@
+# Ningún archivo se convierte al subir ni al bajar: los bytes son los mismos en Windows y en Linux.
+# Es necesario para que el control de versiones congeladas (congelado.json, sha256 por archivo) dé igual en todas las máquinas.
+* -text

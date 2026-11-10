@@ -1,0 +1,44 @@
+# Incendio Paraje Puertas Coloradas (Chacabuco), enero de 2022 (verano). Evento de VALIDACIÓN.
+id: SL-2022-PUERTAS
+nombre: Paraje Puertas Coloradas (Chacabuco)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2021_46201 restringido a píxeles quemados en enero de 2022
+  oid: "2021_46201"
+  calendar_year: 2022
+  mes: 1
+  superficie_ha: 2080
+inicio:
+  fecha_local: "2022-01-12"       # SNMF inicio 12/01 (primer reporte 13/01); MODIS detecta 12 px el 12/01
+  hora_utc_hipotesis: ["2022-01-12T16:00:00Z", "2022-01-12T13:00:00Z", "2022-01-12T19:00:00Z", "2022-01-12T17:00:00Z"]   # HIPÓTESIS 13, 10 y 16 h local
+  # hipótesis 3 (v3.1, 2026-10-27, docs/v3.1/02): acotada por la primera detección: primer foco VIIRS SNPP 12/01 18:19 UTC
+  confianza: media
+fin:
+  fecha_extincion_snmf: "2022-01-16"
+  propagacion_principal: "2022-01-12 a 2022-01-14"
+  fin_simulacion_utc: "2022-01-17T03:00:00Z"
+  evaluacion_utc: ["2022-01-13T03:00:00Z", "2022-01-15T03:00:00Z", "2022-01-17T03:00:00Z"]   # fin del día de ignición (añadido 2026-10-20, docs/12), fin de la propagación principal, extinción
+ignicion:
+  fuente: SNMF (punto informado a 922 m del polígono; se desplaza a la celda combustible quemada más cercana -> HIPÓTESIS)
+  puntos:
+    - {nombre: Pje. Puertas Coloradas, lon: -65.399472, lat: -32.534444}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada por búsqueda inversa (2026-10-27): punto que maximiza el IoU con la cicatriz en el instante en que la simulación alcanza su superficie (variante libre_v2, ~40 candidatos sobre la cicatriz principal + 300 m y refinamiento; estable en las 3 hipótesis horarias). IoU 0,31 vs 0,11 del punto SNMF. Se ajusta a la misma cicatriz con la que se evalúa: no es una observación ni una validación independiente."
+    puntos:
+      - {nombre: búsqueda inversa (hipótesis), lon: -65.37085, lat: -32.59404}
+  - fuente: "HIPÓTESIS derivada por búsqueda conjunta hora + punto (v3.1, 2026-10-27, docs/v3.1/02): junto a los 9 focos de la primera pasada (12/01 18:19 UTC); con la ignición de las 17 UTC: IoU 0,21, 65 % a tiempo (puntaje 0,43 vs 0,28 de alt0). No es una observación."
+    puntos:
+      - {nombre: búsqueda conjunta v3.1 (hipótesis), lon: -65.38125, lat: -32.56812}
+recomendada:   # ignición espacial y horaria que usan los barridos de v3.1 (2026-10-27, docs/v3.1/02)
+  ignicion: alt1
+  hipotesis: 3
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2022-01-11T00:00:00Z", fin_utc: "2022-01-17T03:00:00Z"}
+indices: {coleccion: COPERNICUS/S2_SR_HARMONIZED, ventana: ["2021-11-25", "2022-01-11"], umbral_cs_cdf: 0.6, compuesto: mediana}
+cobertura_anio: 2021
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [15, 17, 41, 34]        # Carpintería, Concarán, Renca, Tilisarao
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2022-01-12", contencion_dia: 4, extincion_dia: 4}
+notas:
+  - Estación estival (vegetación verde): prueba del estado dinámico de humedad en condiciones distintas al evento de calibración.

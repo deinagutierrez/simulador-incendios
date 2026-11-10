@@ -1,0 +1,20 @@
+clave_mapbiomas,clase,carga_baja,carga_media,carga_alta,si_NDMI>0.15,ndvi_p33,ndvi_p67
+3,Bosques cerrados,TU1,TU5,TU5,,0.533,0.597
+4,Bosques abiertos,TU1,GS2,TU5,,0.491,0.541
+6,Bosques inundables,TU1,TU1,TU1,,,
+9,Silvicultura,TL8,TL8,TL8,,0.683,0.739
+11,Herbáceas inundables,GR3,GR3,GR6,,0.19,0.19
+12,Herbáceas (< cota),GR1,GR2,GR4,GR6,0.393,0.468
+12_alt,Pastizal de altura (>= cota),GR2,GR4,GR7,GR6,0.377,0.439
+15,Pasturas,GR2,GR4,GR7,GR6,0.366,0.47
+18,Agricultura,NB3,NB3,NB3,,,
+19,Cultivos temporarios,NB3,NB3,NB3,,0.492,0.681
+21,Mosaico de usos,GR1,GR2,GS1,,,
+24,Áreas urbanas,NB1,NB1,NB1,,0.364,0.506
+25,Otras áreas no vegetadas,NB9,NB9,NB9,,0.141,0.245
+33,"Ríos, lagunas, lagos",NB8,NB8,NB8,,-0.214,0.048
+36,Cultivos perennes,NB3,NB3,NB3,,,
+63,Mosaico arbustos-herbáceas,GS1,GS2,GS2,GR6,0.24,0.308
+66,Arbustales cerrados,SH2,SH5,SH7,,0.441,0.485
+73,Turberas,GR6,GR6,GR6,,,
+77,Arbustales abiertos,GS2,SH2,SH5,,0.408,0.455

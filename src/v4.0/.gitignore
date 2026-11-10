@@ -1,0 +1,12 @@
+__pycache__/
+*.egg-info/
+.pytest_cache/
+config/herramientas.yaml
+.env
+# resultados de pytest (tmp_path dentro del repo, informes y cobertura)
+.pytest_tmp/
+pytest-of-*/
+junit*.xml
+.coverage
+.coverage.*
+htmlcov/

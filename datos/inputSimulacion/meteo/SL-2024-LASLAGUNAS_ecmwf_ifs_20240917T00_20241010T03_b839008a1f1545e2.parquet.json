@@ -1,0 +1,146 @@
+{
+  "producto": "SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2.parquet",
+  "fuente": "Open-Meteo Historical Weather API (reanálisis/análisis de modelo, NO observaciones)",
+  "generado_utc": "2026-10-14T19:46:58Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "modelo": "ecmwf_ifs",
+    "tipo": "historico",
+    "variables": [
+      "precipitation",
+      "relative_humidity_2m",
+      "shortwave_radiation",
+      "temperature_2m",
+      "vapour_pressure_deficit",
+      "wind_direction_10m",
+      "wind_gusts_10m",
+      "wind_speed_10m"
+    ],
+    "inicio": "2024-09-17 00:00:00+00:00",
+    "fin": "2024-10-10 03:00:00+00:00",
+    "puntos": [
+      [
+        -65.8738,
+        -32.8439
+      ],
+      [
+        -65.6863,
+        -32.8436
+      ],
+      [
+        -65.4989,
+        -32.843
+      ],
+      [
+        -65.3114,
+        -32.8421
+      ],
+      [
+        -65.874,
+        -32.6857
+      ],
+      [
+        -65.6869,
+        -32.6854
+      ],
+      [
+        -65.4998,
+        -32.6848
+      ],
+      [
+        -65.3126,
+        -32.6839
+      ],
+      [
+        -65.8742,
+        -32.5276
+      ],
+      [
+        -65.6874,
+        -32.5272
+      ],
+      [
+        -65.5006,
+        -32.5266
+      ],
+      [
+        -65.3138,
+        -32.5257
+      ],
+      [
+        -65.8745,
+        -32.3694
+      ],
+      [
+        -65.688,
+        -32.369
+      ],
+      [
+        -65.5015,
+        -32.3684
+      ],
+      [
+        -65.315,
+        -32.3676
+      ]
+    ]
+  },
+  "entradas": [],
+  "sha256_producto": "aa8848cd44f4b49d74beb20b045f87c0f4a28d6feb5a4e75aaec242b286445fc",
+  "bytes_producto": 92539,
+  "control_calidad": {
+    "duplicados": 0,
+    "variables": {
+      "temperature_2m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 1.5,
+        "max": 35.1
+      },
+      "relative_humidity_2m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 1.0,
+        "max": 100.0
+      },
+      "wind_speed_10m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 15.01
+      },
+      "wind_direction_10m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 360.0
+      },
+      "precipitation": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 7.6
+      },
+      "shortwave_radiation": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 955.0
+      },
+      "wind_gusts_10m": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.6,
+        "max": 23.2
+      },
+      "vapour_pressure_deficit": {
+        "nulos": 0,
+        "fuera_de_rango": 0,
+        "min": 0.0,
+        "max": 5.28
+      }
+    },
+    "max_horas_consecutivas_faltantes_obligatorias": 0
+  }
+}

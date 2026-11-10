@@ -1,0 +1,8 @@
+# Mesilla del Cura 2024: evento de calibración de la contención (κ, v3.0 docs/13 §7), ignición alternativa alt1 (extremo S de la parte principal de la cicatriz)
+descripcion: Barreras + contención local sobre SIM; retardo vial desde los cuarteles declarados en la ficha; sin medios aéreos (la ficha registra aereo vacío).
+evento: SL-2024-MESILLA
+hipotesis: 0
+ignicion: alt1
+variante: local
+validar: true
+figuras: true

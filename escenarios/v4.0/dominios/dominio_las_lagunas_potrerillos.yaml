@@ -1,0 +1,35 @@
+# Dominio de simulación "Las Lagunas-Potrerillos" (San Luis). Fuente: primero_cuadrado.geojson (Etapa 1).
+id: las_lagunas_potrerillos
+nombre: Las Lagunas-Potrerillos
+crs: EPSG:5345                      # POSGAR 2007 / Argentina faja 3
+resolucion_m: 30
+grilla:                             # entidad 1 del GeoJSON (bbox alineado a 30 m)
+  xmin: 3513060
+  ymin: 6367770
+  xmax: 3563220
+  ymax: 6417900
+  ncol: 1672
+  nfil: 1671
+mascara_dominio:                    # entidad 0 (polígono exacto, 2.500,16 km²)
+  archivo: primero_cuadrado.geojson
+  filtro: {tipo: dominio_exacto_25_celdas}
+margen_viento_m: 10020              # dominio de WindNinja = grilla + margen (múltiplo de 30 m)
+margen_indices_m: 1020
+dem:
+  fuente: copernicus_glo30          # alternativa: aster
+  archivo_aster: Topografia/MDT_ASTER GDEM.tif
+cobertura:
+  fuente: mapbiomas_col3
+  patron: Uso_Cobertura_Suelo/Coleccion_3/mapbiomas_col3_sanluis_{anio}.tif
+  leyenda: Uso_Cobertura_Suelo/Coleccion_3/leyenda_col3.csv
+cicatrices:
+  poligonos: Fuego_MapBiomas/Coleccion_1/incendios_mapbiomas_fuego_sanluis.gpkg
+  mensual: Fuego_MapBiomas/Coleccion_1/fuego_mensual_sanluis_2022_2025.tif
+infraestructura:
+  caminos: caminos_sanluis_integrado.geojson
+  viviendas: viviendas_sanluis_integrado.geojson
+  electricidad_mt: Electricidad/red_distribucion_MT_EDESAL_SL.geojson
+registros_snmf: registros_incendios_san_luis_2020-2026(SNMF).csv
+combate:                            # docs/13: despacho local (cuarteles y régimen territorial de la respuesta)
+  cuarteles: bomberos_san_luis.geojson            # 42 cuarteles (Ministerio de Seguridad SL 2026-09-10 + BOMBEROS.shp)
+  departamentos: departamentos_san_luis_ign_conae.geojson

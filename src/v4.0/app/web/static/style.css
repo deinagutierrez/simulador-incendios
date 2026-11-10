@@ -1,0 +1,44 @@
+:root {
+  --fondo: #f6f5f2; --panel: #ffffff; --texto: #1f2328; --suave: #6a6f76; --borde: #d9d7d2;
+  --sim: #1f6fd1; --l03: #2a9d4b; --mod: #d9590b; --b1: #6b6b6b; --ref: #111111; --ok: #1a7f37; --mal: #b42318;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --fondo: #15171a; --panel: #1d2024; --texto: #e6e6e6; --suave: #9aa0a6; --borde: #33373d;
+          --sim: #5aa2ff; --l03: #5fd07e; --mod: #ff8c42; --b1: #a0a0a0; --ref: #f2f2f2; --ok: #4ac26b; --mal: #ff6b5b; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--fondo); color: var(--texto); }
+header { display: flex; align-items: baseline; gap: 16px; padding: 10px 16px; border-bottom: 1px solid var(--borde); background: var(--panel); flex-wrap: wrap; }
+header h1 { font-size: 17px; margin: 0; }
+#meta { color: var(--suave); font-size: 12px; }
+main { display: grid; grid-template-columns: 340px 1fr; height: calc(100vh - 46px); }
+aside { overflow: auto; padding: 10px 14px; border-right: 1px solid var(--borde); background: var(--panel); }
+aside h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); margin: 12px 0 6px; }
+#centro { display: grid; grid-template-rows: 1fr auto; min-width: 0; }
+#mapa { min-height: 320px; }
+#detalle { max-height: 55vh; overflow: auto; padding: 10px 16px; background: var(--panel); border-top: 1px solid var(--borde); }
+.evento { padding: 6px 8px; border: 1px solid var(--borde); border-radius: 6px; margin-bottom: 6px; cursor: pointer; }
+.evento:hover, .evento.activo { border-color: var(--texto); }
+.evento .t { font-weight: 600; }
+.evento .s { color: var(--suave); font-size: 12px; }
+.chip { display: inline-block; font-size: 11px; padding: 0 6px; border-radius: 10px; border: 1px solid var(--borde); margin-left: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { text-align: right; padding: 3px 6px; border-bottom: 1px solid var(--borde); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--suave); font-weight: 600; }
+.sim { color: var(--sim); font-weight: 600; } .mod { color: var(--mod); font-weight: 600; } .b1 { color: var(--b1); font-weight: 600; }
+.ok { color: var(--ok); } .mal { color: var(--mal); }
+.nota { color: var(--suave); font-size: 12px; margin: 6px 0; }
+.controles label { margin-right: 12px; font-size: 12.5px; white-space: nowrap; }
+@media (max-width: 800px) {
+  main { grid-template-columns: 1fr; height: auto; }
+  aside { border-right: 0; border-bottom: 1px solid var(--borde); }
+  #mapa { height: 60vh; }
+}
+.tiempo { display: flex; align-items: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+.tiempo input[type=range] { flex: 1 1 260px; }
+.tiempo button { font-size: 14px; padding: 2px 10px; border: 1px solid var(--borde); background: var(--panel); color: var(--texto); border-radius: 4px; cursor: pointer; }
+#detalle h3 { font-size: 13px; margin: 10px 0 4px; color: var(--suave); }
+#tabla-hora, #detalle table { overflow-x: auto; display: block; }
+#grafico svg { max-width: 680px; color: var(--texto); }
+.sim-l03 { color: var(--l03); font-weight: 600; }

@@ -1,0 +1,16 @@
+# Prueba de rendimiento: 24 h sobre el dominio completo (1672 × 1671), sin figuras.
+# Ignición sintética en el centro del dominio con la meteorología del caso 2023 (viento N 14–20 km/h por la tarde).
+nombre: rendimiento_dominio_completo
+descripcion: Meta de la sección 6 — 24 h simuladas en menos de 2 minutos sobre el dominio completo.
+grilla: null                         # dominio completo
+t_inicio: "2023-08-31T12:00:00-03:00"
+duracion_h: 24
+dt_min: 2.0
+vecindad: 8
+ignicion:
+  - {lon: -65.70, lat: -32.60, hora_ignicion: "2023-08-31T12:00:00-03:00", id: centro}
+meteo: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/meteo_horaria.csv
+combustible: ../../../datos/inputSimulacion/sim_v4/estaticos/combustible/sb40_2023.tif
+indices_mes_evento: ../../../datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2023_08.tif
+ndvi_verano: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/ndvi_verano_previo.tif
+salidas: {png: false, gif: false, geotiff: true, geojson: true}

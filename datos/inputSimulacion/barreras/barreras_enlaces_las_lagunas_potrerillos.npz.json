@@ -1,0 +1,98 @@
+{
+  "producto": "barreras_enlaces_las_lagunas_potrerillos.npz",
+  "fuente": "caminos (OSM/SIG SL/IGN) + barreras_extra sobre enlaces del estencil",
+  "generado_utc": "2026-10-15T14:53:18Z",
+  "version_codigo": "0.1.0",
+  "host": "DESKTOP-CEOMRUQ",
+  "parametros": {
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3513060.0,
+      "ymin": 6367770.0,
+      "xmax": 3563220.0,
+      "ymax": 6417900.0,
+      "ncol": 1672,
+      "nfil": 1671
+    },
+    "anchos": {
+      "autopista": 25,
+      "calle": 8,
+      "camino": 6,
+      "contencion": 3,
+      "ferrocarril": 6,
+      "huella": 3,
+      "otro": 3,
+      "ruta": 10,
+      "ruta_pavimentado": 14,
+      "senda": 1.5,
+      "servicio": 4,
+      "vado": 6
+    },
+    "vecindad": 16,
+    "factor_fino": 4,
+    "excluir_duplicados": true,
+    "barreras_extra": null,
+    "version": "v2.0"
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\Usuario\\Desktop\\simulador\\data\\derivados\\infraestructura\\caminos_las_lagunas_potrerillos.gpkg",
+      "bytes": 884736,
+      "sha256": "ff460489aa6e3e8dbf0143249f06a7def8dde7e66369055596ed10da6e55c8f7"
+    }
+  ],
+  "sha256_producto": "b4602bf795ac2f55c176861cf379975b66b24a1de286f66a0951e3ead4fa6b02",
+  "bytes_producto": 376037,
+  "enlaces_con_barrera": 750692,
+  "celdas_con_barrera": 155481,
+  "codigos": {
+    "1": {
+      "ancho_m": 1.5,
+      "clases": [
+        "senda"
+      ]
+    },
+    "2": {
+      "ancho_m": 3.0,
+      "clases": [
+        "huella",
+        "otro"
+      ]
+    },
+    "3": {
+      "ancho_m": 4.0,
+      "clases": [
+        "servicio"
+      ]
+    },
+    "4": {
+      "ancho_m": 6.0,
+      "clases": [
+        "camino",
+        "ferrocarril",
+        "vado"
+      ]
+    },
+    "5": {
+      "ancho_m": 8.0,
+      "clases": [
+        "calle"
+      ]
+    },
+    "6": {
+      "ancho_m": 10.0,
+      "clases": [
+        "ruta"
+      ]
+    },
+    "7": {
+      "ancho_m": 14.0,
+      "clases": [
+        "ruta_pavimentado"
+      ]
+    }
+  },
+  "tramos_usados": 561,
+  "nota": "anchos por clase = HIPÓTESIS (docs/10 §3.1)"
+}

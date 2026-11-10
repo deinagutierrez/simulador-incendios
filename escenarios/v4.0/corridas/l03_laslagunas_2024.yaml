@@ -1,0 +1,7 @@
+# Las Lagunas–Potrerillos 2024 con la supresión L03 de V.4 (protocolo v1.3 §2.4): tres dotaciones desde los cuarteles más rápidos por la red vial
+descripcion: Supresión L03 sobre SIM corregido. Llegadas = 30 min de despacho + viaje vial (producto de arribo de v3.0) de los 3 cuarteles más rápidos; 500 m/h por dotación; ataque directo con llama < 2,4 m.
+evento: SL-2024-LASLAGUNAS
+hipotesis: 1
+variante: l03
+validar: true
+figuras: true

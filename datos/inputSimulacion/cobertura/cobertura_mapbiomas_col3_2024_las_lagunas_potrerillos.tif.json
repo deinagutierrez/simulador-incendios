@@ -1,0 +1,44 @@
+{
+  "producto": "cobertura_mapbiomas_col3_2024_las_lagunas_potrerillos.tif",
+  "fuente": "MapBiomas Argentina Col. 3 (recorte provincial provisto)",
+  "generado_utc": "2026-10-14T19:43:52Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "anio": 2024,
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3513060.0,
+      "ymin": 6367770.0,
+      "xmax": 3563220.0,
+      "ymax": 6417900.0,
+      "ncol": 1672,
+      "nfil": 1671
+    },
+    "remuestreo": "nearest"
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\Uso_Cobertura_Suelo\\Coleccion_3\\mapbiomas_col3_sanluis_2024.tif",
+      "bytes": 12826137,
+      "sha256": "814e4d92edcdc6c8128653e0214f76f9ffd2a476171878efaf7fe05ae32f411d"
+    }
+  ],
+  "sha256_producto": "67fa8aa857d7de5f37ff827bb3752b7c924337e6713d04e42366ce0eeebf5cb1",
+  "bytes_producto": 466114,
+  "conteo_clases": {
+    "3": 496522,
+    "4": 892770,
+    "9": 856,
+    "12": 470693,
+    "15": 223474,
+    "19": 158947,
+    "24": 2542,
+    "25": 2202,
+    "33": 13486,
+    "63": 43079,
+    "66": 12348,
+    "77": 476993
+  }
+}

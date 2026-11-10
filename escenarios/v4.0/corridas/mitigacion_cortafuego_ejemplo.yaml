@@ -1,0 +1,14 @@
+# Ejemplo de mitigación: un cortafuego de 20 m dibujado 1,5 km al norte de la ignición alt1 de Mesilla del Cura 2024 (barreras_extra)
+# Con el combustible pre-evento de la regla 3.3 (verano) el frente llega a la línea a las ~11 h. A 36 h, sin la línea:
+# 4956 ha y 123 de 134 celdas de la línea quemadas; con la línea: 3604 ha, 25 celdas, y el fuego pasa al norte ~6,5 h
+# más tarde (17,3 h contra 10,8 h). La línea demora y achica el incendio pero no lo bloquea (lo rodea por los extremos).
+descripcion: Mesilla del Cura 2024 desde alt1, 36 h, con un cortafuego de ejemplo (escenarios/v4.0/mitigacion/cortafuego_ejemplo.geojson) que SIM rasteriza como camino tipo cortafuego. Comparar con la misma corrida sin el bloque mitigacion.
+evento: SL-2024-MESILLA
+hipotesis: 0
+ignicion: alt1
+horas: 36                        # a 24 h con el combustible viejo el frente no llegaba a la línea
+variante: barreras               # barreras activas (cruce probabilístico según la llama), sin combate
+mitigacion:
+  barreras_extra: ../mitigacion/cortafuego_ejemplo.geojson
+validar: true
+figuras: true

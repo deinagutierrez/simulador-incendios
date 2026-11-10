@@ -1,0 +1,63 @@
+# Ficha de evento para simulación. Valores con fuente explícita; las hipótesis están marcadas.
+id: SL-2024-LASLAGUNAS
+nombre: Las Lagunas - Potrerillos (Libertador General San Martín)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 (burned_area_polygons_v2)
+  oid: "2024_41914"
+  calendar_year: 2024
+  superficie_ha: 40048            # medida en EPSG:5345 dentro del dominio (100 % contenido)
+  superficie_informada_snmf_ha: 48226
+inicio:
+  fecha_local: "2024-09-18"       # SNMF fecha_inicio (24 reportes)
+  hora_utc_hipotesis: ["2024-09-18T13:00:00Z", "2024-09-18T15:00:00Z", "2024-09-18T17:00:00Z"]  # HIPÓTESIS: 10, 12, 14 h local
+  cota_superior_utc: "2024-09-18T17:26:00Z"  # primera detección VIIRS NOAA-20 (interpretación de acq_time)
+  confianza: media                # día alto, hora desconocida
+fin:
+  fecha_extincion_snmf: "2024-10-09"
+  fecha_contenido_snmf: "2024-09-28"
+  propagacion_principal: "2024-09-18 a 2024-09-24"   # hotspots MODIS/VIIRS
+  fin_simulacion_utc: "2024-10-10T03:00:00Z"        # 00:00 local del 10/10
+  evaluacion_utc: ["2024-09-21T03:00:00Z", "2024-09-22T03:00:00Z", "2024-09-25T03:00:00Z", "2024-09-28T03:00:00Z", "2024-10-10T03:00:00Z"]   # fin del 20/09 local (fase explosiva, 87 % de los focos), fin del 21/09, fin de propagación principal (VIIRS), contenido, extinción
+  confianza: alta (día), sin hora
+ignicion:
+  fuente: SNMF (puntos informados; no son el origen exacto verificado)
+  puntos:
+    - {nombre: Las Lagunas, lon: -65.5477, lat: -32.6367}
+    - {nombre: Potrerillos, lon: -65.6232, lat: -32.6422}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada por búsqueda inversa (2026-10-27): punto que maximiza el IoU con la cicatriz en el instante en que la simulación alcanza su superficie (variante libre_v2, ~40 candidatos sobre la cicatriz principal + 300 m y refinamiento; estable en las 3 hipótesis horarias). IoU 0,36 vs 0,34 del punto SNMF. Se conserva Potrerillos y se reemplaza Las Lagunas (sin focos el 18/09) por el extremo N de los 85 focos VIIRS NOAA-20 del 18/09 17:26 UTC (franja N-S en lon -65,607, viento N); un único punto en (-65,621, -32,616) da lo mismo. Mejora marginal: a esta escala el origen pesa poco. Se ajusta a la misma cicatriz con la que se evalúa: no es una observación ni una validación independiente."
+    puntos:
+      - {nombre: Potrerillos (hipótesis), lon: -65.6232, lat: -32.6422}
+      - {nombre: extremo N focos VIIRS 18/09 (búsqueda inversa, hipótesis), lon: -65.607, lat: -32.616}
+recomendada:   # ignición espacial y horaria que usan los barridos de v3.1 (2026-10-27, docs/v3.1/02)
+  ignicion: alt0
+  hipotesis: 0
+meteorologia:
+  fuente: open-meteo archive
+  modelo: ecmwf_ifs               # respaldo: era5
+  inicio_utc: "2024-09-17T00:00:00Z"   # 1 día antes para inicializar FFMC
+  fin_utc: "2024-10-10T03:00:00Z"
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2024-07-30", "2024-09-17"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+cobertura_anio: 2023
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: []                      # el SNMF no nombra cuarteles: 16-19 brigadistas nacionales (BNC) y 7 bomberos el 30/09
+  # 1 AT-802 del SNMF todos los días del 18 al 25/09 y un helicóptero Bell 407 el 20/09; sólo de día (08-19 h local)
+  aereo:
+    - ["2024-09-18T11:00:00Z", "2024-09-18T22:00:00Z"]
+    - ["2024-09-19T11:00:00Z", "2024-09-19T22:00:00Z"]
+    - ["2024-09-20T11:00:00Z", "2024-09-20T22:00:00Z"]
+    - ["2024-09-21T11:00:00Z", "2024-09-21T22:00:00Z"]
+    - ["2024-09-22T11:00:00Z", "2024-09-22T22:00:00Z"]
+    - ["2024-09-23T11:00:00Z", "2024-09-23T22:00:00Z"]
+    - ["2024-09-24T11:00:00Z", "2024-09-24T22:00:00Z"]
+    - ["2024-09-25T11:00:00Z", "2024-09-25T22:00:00Z"]
+  snmf: {inicio: "2024-09-18", contencion_dia: 10, extincion_dia: 21}   # "fuera de control" el 26/09; "perímetro estabilizado" desde el 28/09
+notas:
+  - Dos focos informados por SNMF; MapBiomas devuelve un único polígono multiparte.
+  - Hubo combate (bomberos); la simulación v1 no incluye mitigación.

@@ -1,0 +1,25 @@
+{
+  "producto": "dem_copernicus_glo30_viento_las_lagunas_potrerillos.tif",
+  "fuente": "COPERNICUS/DEM/GLO30_2024_1 vía GEE getDownloadURL",
+  "generado_utc": "2026-10-14T19:46:21Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "coleccion": "COPERNICUS/DEM/GLO30_2024_1",
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3503040.0,
+      "ymin": 6357750.0,
+      "xmax": 3573240.0,
+      "ymax": 6427920.0,
+      "ncol": 2340,
+      "nfil": 2339
+    },
+    "remuestreo": "bilinear (GEE) a 30 m"
+  },
+  "entradas": [],
+  "sha256_producto": "ccfee86d89ef5b7465f14f8320a71a9103507211825f1f1f250ba172d0f8d1a5",
+  "bytes_producto": 22079811,
+  "nota": "mosaico de teselas GLO-30 2024_1; alturas sobre el elipsoide EGM2008 (ortométricas)"
+}

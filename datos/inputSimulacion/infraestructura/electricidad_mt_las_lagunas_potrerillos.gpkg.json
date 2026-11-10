@@ -1,0 +1,29 @@
+{
+  "producto": "electricidad_mt_las_lagunas_potrerillos.gpkg",
+  "fuente": "red_distribucion_MT_EDESAL_SL.geojson recortado al dominio + 1 km",
+  "generado_utc": "2026-10-14T19:43:54Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "bbox": [
+      3512040.0,
+      6366750.0,
+      3564240.0,
+      6418920.0
+    ],
+    "crs": "EPSG:5345"
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\Electricidad\\red_distribucion_MT_EDESAL_SL.geojson",
+      "bytes": 17100891,
+      "sha256": "5a44bec03c7653d251c775ce57664547ae41eafcd90544ec4884e76fbfa2325a"
+    }
+  ],
+  "sha256_producto": "cbc6f89ee36c9c3377641be0270ee1d521a58142572fb3c272807c3d97423188",
+  "bytes_producto": 970752,
+  "entidades": 5543,
+  "capas": [
+    "linestring"
+  ]
+}

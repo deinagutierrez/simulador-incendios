@@ -1,0 +1,662 @@
+version: '1.0'
+fecha: '2026-10-07'
+grilla:
+  crs: EPSG:5345
+  xmin: 3513060.0
+  ymax: 6417900.0
+  res: 30.0
+  ancho: 1672
+  alto: 1671
+  xmin_xmax_ymin_ymax:
+  - 3513060.0
+  - 6367770.0
+  - 3563220.0
+  - 6417900.0
+codigos_combustible:
+- 91
+- 92
+- 93
+- 98
+- 99
+- 101
+- 102
+- 103
+- 104
+- 105
+- 106
+- 107
+- 108
+- 109
+- 121
+- 122
+- 123
+- 124
+- 141
+- 142
+- 143
+- 144
+- 145
+- 146
+- 147
+- 148
+- 149
+- 161
+- 162
+- 163
+- 164
+- 165
+- 181
+- 182
+- 183
+- 184
+- 185
+- 186
+- 187
+- 188
+- 189
+- 201
+- 202
+- 203
+- 204
+notas:
+- Generado por scripts/preparar_datos.py; es el único script con rutas de origen.
+- El simulador lee solo las entradas listadas acá y verifica sha256, grilla, dtype, nodata y rangos al iniciar.
+- Las entradas 'caso_*' pertenecen a conjunto_prueba/<caso>/ y se referencian desde su caso.yaml.
+entradas:
+- nombre: dominio
+  ruta: dominio/dominio.geojson
+  tipo: geojson
+  sha256: b454ea78d409fc5aa86a70739d4d7e692a1a1ae2224371b5f38eafd8e4d1e5e4
+  crs: EPSG:4326
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\dominio_lagunas_potrerillos.geojson
+    fuente: Dominio_LasLagunas_30m (recorte 30-09-2026)
+  fecha_preparacion: '2026-10-07'
+  descripcion: Dominio Las Lagunas–Potrerillos y 25 celdas de 10 km (WGS84, RFC 7946)
+- nombre: grilla
+  ruta: dominio/grilla.json
+  tipo: json
+  sha256: 8050b9124fc3a4580949b6d3fd3b7a1f3ee93f8401effc9b3b263fd33e45076c
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Topografia\mdt_30m.tif
+    fuente: derivado del MDT del dominio
+  fecha_preparacion: '2026-10-07'
+  descripcion: CRS, transform, ancho, alto y resolución de la grilla de trabajo
+- nombre: mdt
+  ruta: estaticos/topografia/mdt.tif
+  tipo: raster
+  sha256: 9cfc62dbee7a3c657b4fed7bff3e64b21c469ca2b9ba7452fc95baf3b7b8f5b6
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: m s.n.m.
+  rango:
+  - 0
+  - 7000
+  bandas: 1
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Topografia\mdt_30m.tif
+    fuente: Dominio_LasLagunas_30m/Topografia
+  fecha_preparacion: '2026-10-07'
+  descripcion: MDT ASTER GDEM remuestreado bilineal a 30 m
+- nombre: pendiente
+  ruta: estaticos/topografia/pendiente.tif
+  tipo: raster
+  sha256: cd9fea4c0579ffa2367eff9fe75ea15fa76c9f41b12b0791c8f9550356ee26e3
+  crs: EPSG:5345
+  dtype: uint8
+  nodata: 255.0
+  unidades: grados
+  rango:
+  - 0
+  - 90
+  bandas: 1
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Topografia\pendiente_grados.tif
+    fuente: Dominio_LasLagunas_30m/Topografia
+  fecha_preparacion: '2026-10-07'
+  descripcion: Horn 3×3 sobre mdt.tif
+- nombre: orientacion
+  ruta: estaticos/topografia/orientacion.tif
+  tipo: raster
+  sha256: 6b30a5143b46e81876760142c9b10c3cee55047c92e1cecca26e29840959c090
+  crs: EPSG:5345
+  dtype: uint16
+  nodata: 65535.0
+  unidades: grados (0 = N, horario); 361 = plano
+  rango:
+  - 0
+  - 361
+  bandas: 1
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Topografia\orientacion_grados.tif
+    fuente: Dominio_LasLagunas_30m/Topografia
+  fecha_preparacion: '2026-10-07'
+  descripcion: Horn 3×3 sobre mdt.tif; < 0,5° = plano (361)
+- nombre: combustible_2023
+  ruta: estaticos/combustible/sb40_2023.tif
+  tipo: raster
+  sha256: 9d54c8660877234dc5e5c7c1c093b86eb28855345e1e4496d7a61333858f2a9d
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -9999.0
+  unidades: código FBFM40
+  bandas: 1
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Combustibles\modelos_SB40_2023.tif
+    fuente: MapBiomas Col.3 + ASTER + S2 NDVI/NDMI verano (generar_modelos_combustible.py)
+  fecha_preparacion: '2026-10-07'
+  descripcion: Modelos Scott & Burgan 2023 (cobertura 2023 + NDVI verano 2023)
+  codigos: combustible
+- nombre: combustible_2024
+  ruta: estaticos/combustible/sb40_2024.tif
+  tipo: raster
+  sha256: d04bf410d61c522ecc92f6acc56ded38501219837af85f9eae5b07208c5cdab4
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -9999.0
+  unidades: código FBFM40
+  bandas: 1
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Combustibles\modelos_SB40_2024.tif
+    fuente: MapBiomas Col.3 + ASTER + S2 NDVI/NDMI verano (generar_modelos_combustible.py)
+  fecha_preparacion: '2026-10-07'
+  descripcion: Modelos Scott & Burgan 2024 (cobertura 2024 + NDVI verano 2024)
+  codigos: combustible
+- nombre: combustible
+  ruta: estaticos/combustible/sb40_2025.tif
+  tipo: raster
+  sha256: dd50e56503f36890eb02a9ca737e88327a519f7fe971e19eeb630c40854855bd
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -9999.0
+  unidades: código FBFM40
+  bandas: 1
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Combustibles\modelos_SB40_2025.tif
+    fuente: MapBiomas Col.3 + ASTER + S2 NDVI/NDMI verano (generar_modelos_combustible.py)
+  fecha_preparacion: '2026-10-07'
+  descripcion: Modelos Scott & Burgan 2025 (cobertura 2025 + NDVI verano 2025)
+  codigos: combustible
+- nombre: parametros_sb40
+  ruta: estaticos/combustible/parametros_sb40.csv
+  tipo: tabla
+  sha256: eabb668f64c30dd36f78427c85a5968a27785f971c4048b6f61ee0446fb8c85a
+  unidades: t/ac, 1/ft, ft, %, BTU/lb
+  origen:
+    fuente: Scott & Burgan (2005) RMRS-GTR-153, transcripción en simulador/fuel/sb40.py
+  fecha_preparacion: '2026-10-07'
+  descripcion: Parámetros de los 40 modelos estándar
+- nombre: tabla_equivalencias
+  ruta: estaticos/combustible/tabla_equivalencias.csv
+  tipo: tabla
+  sha256: 6bb439baf07666dee14df741fde08a7b3a47c67a4bea7f331e4b7d93f01181f8
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Combustibles\tabla_equivalencias.csv
+  fecha_preparacion: '2026-10-07'
+  descripcion: Tablas del generador de modelos de combustible (MapBiomas → FBFM40)
+- nombre: umbrales_ndvi
+  ruta: estaticos/combustible/umbrales_ndvi.csv
+  tipo: tabla
+  sha256: 8770609ed51b61affccdd745e22b9c74de2a182b0db26b6da0e3af06be721d71
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Combustibles\umbrales_ndvi.csv
+  fecha_preparacion: '2026-10-07'
+  descripcion: Tablas del generador de modelos de combustible (MapBiomas → FBFM40)
+- nombre: infraestructura
+  ruta: estaticos/infraestructura.gpkg
+  tipo: vector
+  sha256: 79404bedd0fc13f83a833851179ea3158a8da1d4624e639deb22c0ebde21c422
+  crs: EPSG:5345
+  capas:
+  - caminos
+  - viviendas
+  - red_electrica
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Vectores\vectores_dominio.gpkg
+    fuente: vectores_dominio.gpkg (SIG San Luis + IGN + OSM; EDESAL vía Secretaría de Energía)
+    capa_red_original: elec_red_mt_edesal
+  fecha_preparacion: '2026-10-07'
+  descripcion: Caminos (id, tipo, ancho_m), viviendas (id), red eléctrica (id, tension)
+  valores_por_defecto:
+    caminos.ancho_m: 'inferido del tipo: {''pavimentado'': 8.0, ''ripio'': 7.0, ''tierra'': 5.0, ''huella'': 3.0} (autopista
+      20.0 m); la fuente no trae ancho'
+    caminos.tipo: 'derivado de clase+superficie: pavimentado/autopista→pavimentado; huella,senda→huella; ruta consolidado|desconocido→ripio;
+      ferrocarril→ripio; consolidado→ripio; resto→tierra'
+    red_electrica.id: secuencial MT-000000; la fuente (EDESAL) no trae identificador
+    red_electrica.tension: MT para toda la capa (13,2 y 33 kV); no hay AT ni BT en el dominio
+- nombre: indices_2023_01
+  ruta: dinamicos/indices/NDVI_NDMI_2023_01.tif
+  tipo: raster
+  sha256: 07833a3fb2b40373f9cffce65f1163f79ade38cafde62cecf39c188778bc4204
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: índice ×10000 (banda 1 NDVI, banda 2 NDMI)
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Indices_Espectrales\mensual\NDVI_NDMI_2023_01.tif
+    fuente: Sentinel-2 L2A (GEE), compuesto mediano mensual, Cloud Score+ ≥ 0,60
+  fecha_preparacion: '2026-10-07'
+  descripcion: NDVI/NDMI 2023-01
+- nombre: indices_2023_02
+  ruta: dinamicos/indices/NDVI_NDMI_2023_02.tif
+  tipo: raster
+  sha256: 25685252707587bb5bac0c5c9864928ccc1cdf345439704bd022d1c31ada2f5e
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: índice ×10000 (banda 1 NDVI, banda 2 NDMI)
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Indices_Espectrales\mensual\NDVI_NDMI_2023_02.tif
+    fuente: Sentinel-2 L2A (GEE), compuesto mediano mensual, Cloud Score+ ≥ 0,60
+  fecha_preparacion: '2026-10-07'
+  descripcion: NDVI/NDMI 2023-02
+- nombre: indices_2023_03
+  ruta: dinamicos/indices/NDVI_NDMI_2023_03.tif
+  tipo: raster
+  sha256: f829b4a2369c96accd5b43fd85033ba2c878c49194d46dbfcb7c8a43b3d33909
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: índice ×10000 (banda 1 NDVI, banda 2 NDMI)
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Indices_Espectrales\mensual\NDVI_NDMI_2023_03.tif
+    fuente: Sentinel-2 L2A (GEE), compuesto mediano mensual, Cloud Score+ ≥ 0,60
+  fecha_preparacion: '2026-10-07'
+  descripcion: NDVI/NDMI 2023-03
+- nombre: indices_2023_08
+  ruta: dinamicos/indices/NDVI_NDMI_2023_08.tif
+  tipo: raster
+  sha256: 5047f254178ff7adb85b41610af2b2f0be8408897bcbac3a9e08bd19e5638310
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: índice ×10000 (banda 1 NDVI, banda 2 NDMI)
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Indices_Espectrales\mensual\NDVI_NDMI_2023_08.tif
+    fuente: Sentinel-2 L2A (GEE), compuesto mediano mensual, Cloud Score+ ≥ 0,60
+  fecha_preparacion: '2026-10-07'
+  descripcion: NDVI/NDMI 2023-08
+- nombre: indices_2024_01
+  ruta: dinamicos/indices/NDVI_NDMI_2024_01.tif
+  tipo: raster
+  sha256: f28c9ca1adbef0445a695146f8ef30a05b62667cf5e59f09c3050c2384fb0f76
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: índice ×10000 (banda 1 NDVI, banda 2 NDMI)
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Indices_Espectrales\mensual\NDVI_NDMI_2024_01.tif
+    fuente: Sentinel-2 L2A (GEE), compuesto mediano mensual, Cloud Score+ ≥ 0,60
+  fecha_preparacion: '2026-10-07'
+  descripcion: NDVI/NDMI 2024-01
+- nombre: indices_2024_02
+  ruta: dinamicos/indices/NDVI_NDMI_2024_02.tif
+  tipo: raster
+  sha256: 3c6a511dd5ef97556b456d4a312b32187dd0d7a61840725e93171fe703d2c403
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: índice ×10000 (banda 1 NDVI, banda 2 NDMI)
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Indices_Espectrales\mensual\NDVI_NDMI_2024_02.tif
+    fuente: Sentinel-2 L2A (GEE), compuesto mediano mensual, Cloud Score+ ≥ 0,60
+  fecha_preparacion: '2026-10-07'
+  descripcion: NDVI/NDMI 2024-02
+- nombre: indices_2024_03
+  ruta: dinamicos/indices/NDVI_NDMI_2024_03.tif
+  tipo: raster
+  sha256: b88b647dac7e57e602f69badd9a286fb3c0f70cee706df037a406bc924544f03
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: índice ×10000 (banda 1 NDVI, banda 2 NDMI)
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Indices_Espectrales\mensual\NDVI_NDMI_2024_03.tif
+    fuente: Sentinel-2 L2A (GEE), compuesto mediano mensual, Cloud Score+ ≥ 0,60
+  fecha_preparacion: '2026-10-07'
+  descripcion: NDVI/NDMI 2024-03
+- nombre: indices_2024_09
+  ruta: dinamicos/indices/NDVI_NDMI_2024_09.tif
+  tipo: raster
+  sha256: f3aca19f4a22452086eb3e1825d34ab412f603780bf32dae70c295db08fae41e
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768.0
+  unidades: índice ×10000 (banda 1 NDVI, banda 2 NDMI)
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen:
+    ruta: C:\Users\Usuario\Documents\Dominio_LasLagunas_30m\Indices_Espectrales\mensual\NDVI_NDMI_2024_09.tif
+    fuente: Sentinel-2 L2A (GEE), compuesto mediano mensual, Cloud Score+ ≥ 0,60
+  fecha_preparacion: '2026-10-07'
+  descripcion: NDVI/NDMI 2024-09
+- nombre: caso_las_lagunas_la_aguada_2023_combustible_pre_evento
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/combustible_pre_evento.tif
+  tipo: raster
+  sha256: 3352cf275061cbc2159df014a8a0e4a40150e3243e16ba8715b465e8311c0ad6
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -9999
+  unidades: código FBFM40
+  bandas: 1
+  origen: &id001
+    ruta: C:\Users\Usuario\Documents\conjunto_pruebas\casos\SM01_2023_LAS_LAGUNAS_Y_LA_AGUADA
+    fuente: conjunto_pruebas (formato anterior, SM01_2023_LAS_LAGUNAS_Y_LA_AGUADA)
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+  codigos: combustible
+- nombre: caso_las_lagunas_la_aguada_2023_ndvi_verano
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/ndvi_verano_previo.tif
+  tipo: raster
+  sha256: 8eeea97d7f6ac31efe1180092a038a3a7b2f5c0f904b6fc64fe37ef2fc73e0fc
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768
+  rango:
+  - -10000
+  - 10000
+  bandas: 1
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_indices_mes_evento
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/indices_mes_evento.tif
+  tipo: raster
+  sha256: 5047f254178ff7adb85b41610af2b2f0be8408897bcbac3a9e08bd19e5638310
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_meteo
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/meteo_horaria.csv
+  tipo: meteo
+  sha256: fe2c6b0718c1c58c0adcb119331daaf5b60b9c0041d42cd5228bc20d89cd534b
+  unidades: °C, %, km/h, grados, mm
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_ignicion
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/ignicion.geojson
+  tipo: geojson
+  sha256: 07f0622dac70343cfe39c8259a6ad79b78e14611434b85f36a125ebf7853fcf5
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_perimetro_observado
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/perimetro_observado.geojson
+  tipo: geojson
+  sha256: bf6d4c5b8a3a47ea77ef430b3b81e51d6bb987ea8ac1507135d45f57bad61a25
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_perimetro_mapbiomas
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/perimetro_mapbiomas_fuego_2023.geojson
+  tipo: geojson
+  sha256: 7aea423cd0d7be8cf3e5d482d159a8db6a0a22069ff16148514bf3b773ab17c8
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_perimetro_s2
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/perimetro_s2_evento_2023-007.geojson
+  tipo: geojson
+  sha256: 9ef5244e3d92dc7121ebf4676533d7b7287d2d220b395dc13ceb9119cacc0833
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_focos_viirs
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/focos_viirs.geojson
+  tipo: geojson
+  sha256: 43f97d2a9ea791345d95116980031ca5beac00d60ca9c8145191176b7f8d9690
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_yaml
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/caso.yaml
+  tipo: yaml
+  sha256: 7a01ffa925c8c9f3be0dd10e853e6fde30ae6321d1fc48d7ff386ab2732a2313
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_ignicion_t0_06h
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/ignicion_t0_06h.geojson
+  tipo: geojson
+  sha256: edf0dfc80e5ae90e8ab2359daa4e955a921dac528e1b4a16f5b8e649e7617efb
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_ignicion_t0_09h
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/ignicion_t0_09h.geojson
+  tipo: geojson
+  sha256: d88b5ab6136b7f6e14636bac17ac168cfa344cd4f16a0174f3a66e057ae9164f
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_ignicion_t0_15h
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/ignicion_t0_15h.geojson
+  tipo: geojson
+  sha256: 0e3e4a9c9288b0dd2b375079600a0a470c2f69582b49432ac2384880bfc13834
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_ignicion_t0_18h
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/ignicion_t0_18h.geojson
+  tipo: geojson
+  sha256: 1c3bb7c9e289bd6a02d2aafb1fa7eb7a66d17aed5cedd17decf3e13df6bbf3ed
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_la_aguada_2023_ignicion_snmf_original
+  ruta: conjunto_prueba/las_lagunas_la_aguada_2023/ignicion_snmf_original.geojson
+  tipo: geojson
+  sha256: d5f132caed60efe1e96499be94694654880a5cb4b3d6112123c736110d70b9bb
+  crs: EPSG:4326
+  origen: *id001
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_la_aguada_2023
+- nombre: caso_las_lagunas_potrerillos_2024_combustible_pre_evento
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/combustible_pre_evento.tif
+  tipo: raster
+  sha256: b3181da583bbe0f28a42ab2fc429d403619debc1ce9986192bbf16d78ad0df0e
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -9999
+  unidades: código FBFM40
+  bandas: 1
+  origen: &id002
+    ruta: C:\Users\Usuario\Documents\conjunto_pruebas\casos\SM05_2024_LAS_LAGUNAS_POTRERILLOS
+    fuente: conjunto_pruebas (formato anterior, SM05_2024_LAS_LAGUNAS_POTRERILLOS)
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+  codigos: combustible
+- nombre: caso_las_lagunas_potrerillos_2024_ndvi_verano
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/ndvi_verano_previo.tif
+  tipo: raster
+  sha256: bc99a3043a7a360a6b199317e772cdd3f7eec3315176f636ce401f0beac0e42a
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768
+  rango:
+  - -10000
+  - 10000
+  bandas: 1
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_indices_mes_evento
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/indices_mes_evento.tif
+  tipo: raster
+  sha256: f3aca19f4a22452086eb3e1825d34ab412f603780bf32dae70c295db08fae41e
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -32768
+  rango:
+  - -10000
+  - 10000
+  bandas: 2
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_meteo
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/meteo_horaria.csv
+  tipo: meteo
+  sha256: 8afba8657be0e13957d5b2adacebbd7fc030303b4cad375de148349a3be69ddf
+  unidades: °C, %, km/h, grados, mm
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_ignicion
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/ignicion.geojson
+  tipo: geojson
+  sha256: 8eb91e6bed446691e85f02518b833978020991c5884766369a8334e0ca007c91
+  crs: EPSG:4326
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_perimetro_observado
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/perimetro_observado.geojson
+  tipo: geojson
+  sha256: 38beffb3ec23212ce097b2ab6de2579c67b2d7b70668b600c39b3cfaab9d388d
+  crs: EPSG:4326
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_perimetro_mapbiomas
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/perimetro_mapbiomas_fuego_2024.geojson
+  tipo: geojson
+  sha256: f55e5646a4c3b45c989af338d7a02df35b803e5c5599e3baefd9aa3a082f3b36
+  crs: EPSG:4326
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_perimetro_s2
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/perimetro_s2_evento_2024-003.geojson
+  tipo: geojson
+  sha256: 88bc749c01dea0c5b4a602954e29777807f58673a6aa7d46ce3374bac9703fd4
+  crs: EPSG:4326
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_focos_viirs
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/focos_viirs.geojson
+  tipo: geojson
+  sha256: 6e022122e795ef9b720cfa7c79a26e1d95a00b6d5ce55f8a748d11dfd0e517fb
+  crs: EPSG:4326
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_yaml
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/caso.yaml
+  tipo: yaml
+  sha256: c8ddf45cdbb0bd556faca6acab8003354bce6bc10a2ae84796f275087241256a
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_ignicion_parte_potrerillos_12h
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/ignicion_parte_potrerillos_12h.geojson
+  tipo: geojson
+  sha256: a2d459917cfeca6b8897f49e06762c9aadd4d5494d2aaf557b9e8f609af306d1
+  crs: EPSG:4326
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_ignicion_parte_las_lagunas_12h
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/ignicion_parte_las_lagunas_12h.geojson
+  tipo: geojson
+  sha256: 9251601c364deddd4e0959b310ce045ba27359e619da94dda47ba912aa612808
+  crs: EPSG:4326
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_ignicion_dos_partes_12h
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/ignicion_dos_partes_12h.geojson
+  tipo: geojson
+  sha256: 22690b20b2d6e5f4b93a13541f1f95e5965a246a386a26f72102498f37323a65
+  crs: EPSG:4326
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+- nombre: caso_las_lagunas_potrerillos_2024_combustible_bosque_gs2
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/combustible_bosque_gs2.tif
+  tipo: raster
+  sha256: e932d9c20686c9b60a5cbef919208476079518d537777727ca98ac24ac61be3d
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -9999
+  unidades: código FBFM40
+  bandas: 1
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+  codigos: combustible
+- nombre: caso_las_lagunas_potrerillos_2024_combustible_agricola_gr1
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/combustible_agricola_gr1.tif
+  tipo: raster
+  sha256: 8a2156a90d6308e99f5831284824cffd633158c78a1b17cab3aea43d7d942707
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -9999
+  unidades: código FBFM40
+  bandas: 1
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+  codigos: combustible
+- nombre: caso_las_lagunas_potrerillos_2024_combustible_bosque_gs2_agricola_gr1
+  ruta: conjunto_prueba/las_lagunas_potrerillos_2024/combustible_bosque_gs2_agricola_gr1.tif
+  tipo: raster
+  sha256: 468ee7f63a5d21861b9b1cfc2814b7363119dddc6dc50ca0dfd941f11fedbe1f
+  crs: EPSG:5345
+  dtype: int16
+  nodata: -9999
+  unidades: código FBFM40
+  bandas: 1
+  origen: *id002
+  fecha_preparacion: '2026-10-07'
+  descripcion: caso las_lagunas_potrerillos_2024
+  codigos: combustible

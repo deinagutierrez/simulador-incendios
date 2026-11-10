@@ -1,0 +1,33 @@
+# Parámetros del modelo de propagación v1. Etiquetas: BIBLIO / MEDIDO / CALIBRAR / HIPOTESIS (ver docs/02_diseno_metodologico_etapa2.md)
+automata:
+  vecindad: 16                    # 8 u 16 (saltos de caballo)
+  dt_s: 60
+  ros_min_m_min: 0.05             # bajo este valor no se propaga (HIPOTESIS)
+  horas_sin_propagacion_para_terminar: 12
+  guardar_estado_cada_s: 3600
+propagacion:
+  modelo: rothermel_1972          # Andrews 2018 (BIBLIO)
+  elipse: anderson_1983_LB        # LB = f(viento a media llama) (BIBLIO vía Andrews 2018)
+  combinacion_viento_pendiente: vectorial   # Rothermel/Finney (BIBLIO); limitaciones: Sharples 2008
+  # CALIBRADO con SL-2024-LASLAGUNAS (Etapa 7, 2026-10-14): barrido por grupos de clase, objetivo IoU al fin del 20/09 + captura de focos.
+  # Valores iniciales (hipótesis) = 1.0. Pastizal/pastura/arbustal abierto 0.5; bosque abierto 3; bosque cerrado y plantación 5.
+  k_clase: {1: 0.5, 2: 0.5, 3: 0.5, 4: 3.0, 5: 3.0, 6: 5.0, 7: 5.0}
+viento:
+  herramienta: windninja_4.0.0
+  solver: conservacion_de_masa
+  malla_m: 100
+  vegetacion: brush
+  altura_salida_m: 10
+  bins_direccion_deg: 5
+  bins_velocidad_ms: 0.25
+  waf_por_clase: {1: 0.4, 2: 0.4, 3: 0.3, 4: 0.3, 5: 0.2, 6: 0.1, 7: 0.1}   # Andrews 2012 (BIBLIO, verificar)
+  # v3.1 (docs/v3.1/04, 2026-10-28): velocidad = promedio escalar de los 16 puntos IFS (el vectorial pierde 5-10 %); dirección = vectorial.
+  # Opciones: biblioteca (v3.0) | escalar | idw_puntos | windninja_diurno | windninja_puntos
+  fuente_horaria: escalar
+humedad:
+  muerto_1h: ffmc_horario_vanwagner_1977   # BIBLIO
+  muerto_10h_offset: 1.0                   # HIPOTESIS
+  muerto_100h_offset: 2.0                  # HIPOTESIS
+  vivo_herbaceo: {ndmi_min: -0.1, ndmi_max: 0.4, lfmc_min: 30, lfmc_max: 120}   # CALIBRAR
+  vivo_lenoso:   {ndmi_min: -0.1, ndmi_max: 0.4, lfmc_min: 60, lfmc_max: 150}   # CALIBRAR
+  lluvia_24h_mm_extincion: 5.0             # HIPOTESIS

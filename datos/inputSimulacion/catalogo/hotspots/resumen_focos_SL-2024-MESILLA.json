@@ -1,0 +1,22 @@
+{
+  "evento": "SL-2024-MESILLA",
+  "ventana": [
+    "2024-08-30",
+    "2024-09-13"
+  ],
+  "margen_m": 5000.0,
+  "radio_cicatriz_m": 3000.0,
+  "viirs_dominio": 488,
+  "modis_dominio": 111,
+  "viirs": 90,
+  "modis": 26,
+  "viirs_por_dia": {
+    "2024-09-02": 50,
+    "2024-09-03": 17,
+    "2024-09-04": 23
+  },
+  "modis_por_dia": {
+    "2024-09-03": 9,
+    "2024-09-04": 17
+  }
+}

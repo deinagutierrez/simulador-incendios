@@ -1,0 +1,48 @@
+{
+  "evento": "SL-2024-LASLAGUNAS",
+  "dominio": "las_lagunas_potrerillos",
+  "inicio_utc": "2026-10-14T22:58:08Z",
+  "pasos": {
+    "dominio": {
+      "estado": "ok",
+      "segundos": 0.0,
+      "salida": {
+        "mascara": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\grilla\\mascara_dominio_las_lagunas_potrerillos.tif",
+        "dem_viento": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\dem\\dem_copernicus_glo30_viento_las_lagunas_potrerillos.tif",
+        "dem": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\dem\\dem_copernicus_glo30_las_lagunas_potrerillos.tif",
+        "pendiente": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\dem\\pendiente_copernicus_glo30_las_lagunas_potrerillos.tif",
+        "orientacion": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\dem\\orientacion_copernicus_glo30_las_lagunas_potrerillos.tif",
+        "cobertura": "{2021: WindowsPath('C:/Users/lisan/OneDrive/Documentos/Proyectos/Datos_SL_Completo/data/derivados/cobertura/cobertura_mapbiomas_col3_2021_las_lagunas_potrerillos.tif'), 2022: WindowsPath('C:/Users/lisan/OneDrive/Documentos/Proyectos/Datos_SL_Completo/data/derivados/cobertura/cobertura_mapbiomas_col3_2022_las_lagunas_potrerillos.tif'), 2023: WindowsPath('C:/Users/lisan/OneDrive/Documentos/Proyectos/Datos_SL_Completo/data/derivados/cobertura/cobertura_mapbiomas_col3_2023_las_lagunas_potrerillos.tif'), 2024: WindowsPath('C:/Users/lisan/OneDrive/Documentos/Proyectos/Datos_SL_Completo/data/derivados/cobertura/cobertura_mapbiomas_col3_2024_las_lagunas_potrerillos.tif'), 2025: WindowsPath('C:/Users/lisan/OneDrive/Documentos/Proyectos/Datos_SL_Completo/data/derivados/cobertura/cobertura_mapbiomas_col3_2025_las_lagunas_potrerillos.tif')}",
+        "infraestructura": "{'caminos': WindowsPath('C:/Users/lisan/OneDrive/Documentos/Proyectos/Datos_SL_Completo/data/derivados/infraestructura/caminos_las_lagunas_potrerillos.gpkg'), 'viviendas': WindowsPath('C:/Users/lisan/OneDrive/Documentos/Proyectos/Datos_SL_Completo/data/derivados/infraestructura/viviendas_las_lagunas_potrerillos.gpkg'), 'electricidad_mt': WindowsPath('C:/Users/lisan/OneDrive/Documentos/Proyectos/Datos_SL_Completo/data/derivados/infraestructura/electricidad_mt_las_lagunas_potrerillos.gpkg')}",
+        "cicatriz_mensual": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\cicatrices\\fuego_mensual_las_lagunas_potrerillos.tif"
+      }
+    },
+    "cicatriz_evento": {
+      "estado": "ok",
+      "segundos": 0.4,
+      "salida": {
+        "cicatriz": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\eventos\\SL-2024-LASLAGUNAS\\cicatriz_referencia_SL-2024-LASLAGUNAS.tif"
+      }
+    },
+    "tabla_combustibles": {
+      "estado": "ok",
+      "segundos": 0.0,
+      "salida": {
+        "tabla": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\combustibles\\tabla_combustibles_v1.csv"
+      }
+    },
+    "combustibles": {
+      "estado": "ok",
+      "segundos": 0.2,
+      "salida": {
+        "clase": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\combustibles\\SL-2024-LASLAGUNAS\\combustible_clase_SL-2024-LASLAGUNAS.tif",
+        "curado": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\combustibles\\SL-2024-LASLAGUNAS\\combustible_curado_SL-2024-LASLAGUNAS.tif",
+        "calidad": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\combustibles\\SL-2024-LASLAGUNAS\\combustible_calidad_SL-2024-LASLAGUNAS.tif",
+        "ndvi30": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\combustibles\\SL-2024-LASLAGUNAS\\ndvi_30m_SL-2024-LASLAGUNAS.tif",
+        "ndmi30": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\combustibles\\SL-2024-LASLAGUNAS\\ndmi_30m_SL-2024-LASLAGUNAS.tif",
+        "resumen": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\data\\derivados\\combustibles\\SL-2024-LASLAGUNAS\\resumen_combustibles_SL-2024-LASLAGUNAS.json"
+      }
+    }
+  },
+  "segundos_total": 0.6
+}

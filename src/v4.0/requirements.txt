@@ -1,0 +1,19 @@
+# Entorno verificado el 2026-10-25 (Python 3.14.7, Windows 11). Instalar: pip install -r requirements.txt && pip install -e . --no-deps
+# Solo dependencias directas (versiones de `pip freeze` del entorno de V.4). v4.0 no usa numba, xarray ni netCDF4.
+numpy==2.5.4
+pandas==3.0.6
+scipy==1.18.1
+geopandas==1.2.0
+pyogrio==0.13.0
+shapely==2.2.0
+pyproj==3.8.0
+rasterio==1.5.2
+affine==3.0.1
+matplotlib==3.11.2
+imageio==2.38.1
+pyyaml==6.0.3
+pytest==9.1.1
+# banco de evaluación (app/): tablas, descargas ERA5/Open-Meteo y compuestos Sentinel-2 en Earth Engine
+tabulate==0.10.0
+requests==2.34.2
+earthengine-api==1.7.43

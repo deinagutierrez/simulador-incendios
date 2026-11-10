@@ -1,0 +1,70 @@
+{
+  "evento": "SL-2024-LASLAGUNAS",
+  "clases": [
+    {
+      "clase": 0,
+      "nombre": "no_combustible",
+      "celdas": 15903,
+      "ha": 1431.27,
+      "pct": 0.5692018932593439
+    },
+    {
+      "clase": 1,
+      "nombre": "pastizal_natural",
+      "celdas": 469372,
+      "ha": 42243.48,
+      "pct": 16.799813308364758
+    },
+    {
+      "clase": 2,
+      "nombre": "pastura_cultivo",
+      "celdas": 373319,
+      "ha": 33598.71,
+      "pct": 13.361873960239263
+    },
+    {
+      "clase": 3,
+      "nombre": "arbustal_abierto",
+      "celdas": 577895,
+      "ha": 52010.55,
+      "pct": 20.68408024304273
+    },
+    {
+      "clase": 4,
+      "nombre": "arbustal_cerrado",
+      "celdas": 11870,
+      "ha": 1068.3,
+      "pct": 0.4248523217624607
+    },
+    {
+      "clase": 5,
+      "nombre": "bosque_abierto",
+      "celdas": 854081,
+      "ha": 76867.29,
+      "pct": 30.56935937853447
+    },
+    {
+      "clase": 6,
+      "nombre": "bosque_cerrado",
+      "celdas": 490851,
+      "ha": 44176.59,
+      "pct": 17.568591995739308
+    },
+    {
+      "clase": 7,
+      "nombre": "plantacion",
+      "celdas": 621,
+      "ha": 55.89,
+      "pct": 0.02222689905766538
+    }
+  ],
+  "celdas_con_indices_validos": 0,
+  "pct_con_indices": 0.0,
+  "umbrales": {
+    "ndvi_cultivo_suelo_desnudo": 0.15,
+    "ndvi_pastizal_curado": 0.35,
+    "curado_alto": 0.8,
+    "curado_bajo": 0.5
+  },
+  "nota": "clasificación provisional por reglas; no validada en campo; curado = HIPÓTESIS"
+}

@@ -1,0 +1,7 @@
+# Las Lagunas–Potrerillos 2024 con barreras viales y combate local según los reportes del SNMF (v3.0 docs/10 y docs/13) sobre SIM
+descripcion: Modelo v3 completo. Despacho SNMF escalonado con la superficie (región serrana), medios aéreos de la ficha y retardo vial desde el cuartel más cercano (la ficha no declara cuarteles, cuarteles_id vacío = todos).
+evento: SL-2024-LASLAGUNAS
+hipotesis: 1
+variante: local
+validar: true
+figuras: true

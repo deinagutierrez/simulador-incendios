@@ -1,0 +1,1 @@
+"""Autómata celular de propagación."""

@@ -1,0 +1,74 @@
+nombre: las_lagunas_la_aguada_2023
+descripcion: 'Incendio ''Las Lagunas y La Aguada'' (parte SNMF, Libertador General San Martín), 31-08-2023 → 01-09-2023 (extinguido). Cicatriz
+  COE de 105,4 ha, 100 % dentro del dominio Las Lagunas–Potrerillos. Caso SM01 de conjunto_pruebas adaptado al estándar 7.1. La hora de ignición
+  es supuesta (12:00 local): no hay focos VIIRS sobre esta cicatriz.'
+fechas:
+  inicio: '2023-08-31'
+  fin: '2023-09-01'
+  origen: parte SNMF (fecha_inicio, fecha_extincion)
+fuentes:
+  perimetro: COE San Luis (AQ2023_0060)
+  ignicion: parte SNMF proyectado al borde de la cicatriz
+  meteo: ERA5 (ECMWF/C3S) vía Open-Meteo Historical Weather API, models=era5, celda (-32.5, -65.75), descargado 2026-10-07; punto = centroide
+    de la cicatriz (-32.5911, -65.6285)
+  combustible: MapBiomas Col.3 2022 + NDVI/NDMI verano 2023 (regla 3.3)
+  indices_mes: NDVI/NDMI 2023-08 (compuesto mensual S2)
+  focos: FIRMS VIIRS S-NPP (archivo local del proyecto)
+escenario:
+  nombre: las_lagunas_la_aguada_2023
+  grilla:
+    xmin: 3529230.0
+    ymin: 6388890.0
+    xmax: 3540540.0
+    ymax: 6400170.0
+  t_inicio: '2023-08-31T12:00:00-03:00'
+  duracion_h: 36
+  dt_min: 2.0
+  vecindad: 8
+  modo: determinista
+  semilla: 42
+  ignicion: ignicion.geojson
+  meteo: meteo_horaria.csv
+  combustible: combustible_pre_evento.tif
+  indices_mes_evento: indices_mes_evento.tif
+  ndvi_verano: ndvi_verano_previo.tif
+  perimetro_observado: perimetro_observado.geojson
+  focos: focos_viirs.geojson
+  salidas:
+    png: true
+    gif: true
+    dpi: 110
+variantes:
+  t0_06h:
+    t_inicio: '2023-08-31T06:00:00-03:00'
+    ignicion: ignicion_t0_06h.geojson
+  t0_09h:
+    t_inicio: '2023-08-31T09:00:00-03:00'
+    ignicion: ignicion_t0_09h.geojson
+  t0_15h:
+    t_inicio: '2023-08-31T15:00:00-03:00'
+    ignicion: ignicion_t0_15h.geojson
+  t0_18h:
+    t_inicio: '2023-08-31T18:00:00-03:00'
+    ignicion: ignicion_t0_18h.geojson
+  ignicion_snmf_original:
+    ignicion: ignicion_snmf_original.geojson
+  vecindad_16:
+    vecindad: 16
+  dt_1min:
+    dt_min: 1.0
+  dt_5min:
+    dt_min: 5.0
+evaluacion:
+  perimetros_alternativos:
+    mapbiomas_fuego_2023: perimetro_mapbiomas_fuego_2023.geojson
+  nombre_toa: sim_SM01_2023_LAS_LAGUNAS_Y_LA_AGUADA_simulador_toa.tif
+  tolerancias:
+    sorensen_min: 0.5
+    error_superficie_pct_max: 50
+incertidumbres:
+- 'Hora de ignición desconocida: el parte da el día (31-08) pero no la hora. Variantes t0 06/09/12/15/18 h.'
+- Punto de ignición del parte a 88,7 m fuera de la cicatriz; se usa el punto proyectado al borde (derivado).
+- El perímetro COE no tiene fecha propia; se asume el final del evento (01-09). La ventana de 36 h cubre hasta el fin del 01-09.
+- La meteorología es reanálisis ERA5 (celda de 0,25°) en el punto de ignición; no hay estaciones.
+- El evento Sentinel-2/VIIRS 2023-007 (145 ha, 8 km al NO) es otra cicatriz con el mismo nombre de parte; no se simula en el caso base.

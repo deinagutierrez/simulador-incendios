@@ -1,0 +1,33 @@
+{
+  "producto": "cicatriz_referencia_SL-2024-LASLAGUNAS.tif",
+  "fuente": "MapBiomas Fuego Col. 1 polígono rasterizado",
+  "generado_utc": "2026-10-14T22:58:08Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "oid": "2024_41914",
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3513060.0,
+      "ymin": 6367770.0,
+      "xmax": 3563220.0,
+      "ymax": 6417900.0,
+      "ncol": 1672,
+      "nfil": 1671
+    },
+    "mes": null,
+    "calendar_year": 2024
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\Fuego_MapBiomas\\Coleccion_1\\incendios_mapbiomas_fuego_sanluis.gpkg",
+      "bytes": 20078592,
+      "sha256": "45e28dd7d3a799f6b86696dfeb719691fba95f9371521f046416169d8d0dbc3a"
+    }
+  ],
+  "sha256_producto": "2ea435f22992fecd663858153e7914be849c9a59af0fac493138b736b2bc8d2d",
+  "bytes_producto": 56827,
+  "area_ha_rasterizada": 40054.05,
+  "area_ha_poligono_5345": 40048.30714015764
+}

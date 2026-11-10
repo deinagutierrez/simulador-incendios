@@ -1,0 +1,45 @@
+# Incendio Rincón del Carmen (Ayacucho), septiembre de 2023. Evento de VALIDACIÓN (incorporado 2026-10-20).
+id: SL-2023-RINCON
+nombre: Rincón del Carmen (Ayacucho)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2023_26561 restringido a septiembre de 2023 (raster mensual; 4 ha de octubre-noviembre)
+  oid: "2023_26561"
+  calendar_year: 2023
+  mes: 9
+  superficie_ha: 163
+  superficie_ha_sat_compilador: 95.7
+inicio:
+  fecha_local: "2023-09-19"       # SNMF fecha_inicio (2 reportes, 22 y 25/09); MapBiomas detecta por primera vez el 22/09
+  hora_utc_hipotesis: ["2023-09-19T16:00:00Z", "2023-09-19T13:00:00Z", "2023-09-19T11:00:00Z", "2023-09-19T04:00:00Z", "2023-09-19T02:00:00Z"]   # HIPÓTESIS h0–h2: 13, 10 y 8 h local (originales); h3, h4 (E036, D43): 01 h local del 19/09 y 23 h del 18/09 = primera detección VIIRS − 1 h y − 3 h
+  cota_superior_utc: "2023-09-19T05:25:00Z"  # E036: primera detección VIIRS S-NPP (FIRMS, REPO/datos/crudos/FIRMS/viirs_snpp_san_luis.csv): 1 foco nocturno dentro de la cicatriz (FRP 0,8 MW, confianza n). Antes la cota era 2023-09-19T17:47:00Z (43 detecciones de la tarde sobre toda la cicatriz; MODIS 28 px ese día), posterior a este foco; h0–h2 son posteriores a la cota nueva
+  confianza: media                # día confirmado por VIIRS; el 19/09 fue calmo (viento máx 2,7 m/s), el fuego recorrió la cicatriz en la tarde
+fin:
+  fecha_extincion_snmf: "2023-09-23"
+  fecha_contenido_snmf: "2023-09-22"
+  propagacion_principal: "2023-09-19 a 2023-09-22"
+  fin_simulacion_utc: "2023-09-24T03:00:00Z"
+  evaluacion_utc: ["2023-09-20T03:00:00Z", "2023-09-23T03:00:00Z", "2023-09-24T03:00:00Z"]   # fin del 19/09, contenido, extinción
+ignicion:
+  fuente: SNMF (punto informado a 680 m del polígono; se desplaza a la celda combustible quemada más cercana si no es combustible -> HIPÓTESIS)
+  puntos:
+    - {nombre: Rincón del Carmen, lon: -65.484667, lat: -32.456278}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: extremo O (a barlovento del viento NO del 20-21/09) de la parte principal de la cicatriz. No es una observación."
+    puntos:
+      - {nombre: extremo O cicatriz (hipótesis), lon: -65.48584, lat: -32.44257}
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2023-09-18T00:00:00Z", fin_utc: "2023-09-24T03:00:00Z"}
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2023-08-05", "2023-09-18"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+cobertura_anio: 2022
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [12, 18, 20, 31, 21]    # El Volcán, Los Molles, Luján, Lafinur-Los Cajones, San Francisco del Monte de Oro
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2023-09-19", contencion_dia: 3, extincion_dia: 4}
+notas:
+  - Superficie dNBR del compilador (95,7 ha) menor que MapBiomas (163 ha): discrepancia registrada.
+  - Combate: BBVV Luján, Quines, Lafinur-Los Cajones, Los Molles, El Volcán, San Francisco y brigada forestal San Luis Solidario (SNMF).

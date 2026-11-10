@@ -1,0 +1,34 @@
+# Rutas del banco de pruebas de V.4 portado a v4.0 (app/rutas.py). Rutas relativas = relativas a src/v4.0/ (la raíz del
+# banco); también se admiten absolutas. Todo queda dentro del repositorio estándar (datos/ compartido, resultados/v4.0/).
+# Las entradas que V.4 tenía copiadas en datos/entradas/ y que ya existen en datos/inputSimulacion/ de v3.0 apuntan a esos
+# archivos (sha256 idéntico, verificado 2026-10-25); el resto está en datos/inputSimulacion/banco_v4/entradas/.
+
+crudos:                                               # solo lectura (reemplazan a ../Contexto/extraido/... de V.4)
+  carpeta: ../../datos/crudos
+  snmf: ../../datos/crudos/registros_incendios_san_luis_2020-2026(SNMF).csv      # sha f097f7a9… = el de resumen_fase1.json
+  dominio_geojson: ../../datos/crudos/dominio_lagunas_potrerillos.geojson       # features dominio_exacto_25_celdas, celda_grilla_10km
+  caminos: ../../datos/crudos/caminos_sanluis_integrado.geojson                 # red vial del despacho L03 (clave de caché por tamaño)
+  cuarteles: ../../datos/crudos/bomberos_san_luis.geojson                       # cuarteles (campo localidad; V.4 usaba localidad_mas_cercana)
+  conjunto_pruebas: null                              # CP/ de la entrega: no está en este equipo (eventos_fase1 y A1/A3 de la aceptación)
+  salidas_sim_entrega: null                           # salidas de SIM entregadas (A1 de la aceptación): no están en este equipo
+
+entradas:
+  mascara_dominio: ../../datos/inputSimulacion/grilla/mascara_dominio_las_lagunas_potrerillos.tif
+  fuego_mensual: ../../datos/inputSimulacion/cicatrices/fuego_mensual_las_lagunas_potrerillos.tif
+  cobertura: ../../datos/inputSimulacion/cobertura/cobertura_mapbiomas_col3_{anio}_las_lagunas_potrerillos.tif
+  poligonos_mapbiomas: ../../datos/inputSimulacion/banco_v4/entradas/incendios_mapbiomas_fuego_sanluis.gpkg
+  meteo_ifs: ../../datos/inputSimulacion/banco_v4/entradas/meteo_ifs              # serie IFS del dominio por evento (viento medio de B1)
+  firms_viirs: ../../datos/inputSimulacion/banco_v4/entradas/viirs_snpp_san_luis.csv
+  red_vial_grafo: ../../datos/inputSimulacion/banco_v4/entradas/red_vial_grafo.npz  # caché del grafo vial (despacho L03)
+  indices_extra: ../../datos/inputSimulacion/banco_v4/entradas/indices_extra      # NDVI/NDMI 2022 generados con el método de AS/
+  indices_mensuales:                                  # compuestos NDVI_NDMI_AAAA_MM.tif: se usa el primero que exista
+    - ../../datos/inputSimulacion/sim_v4/dinamicos/indices                        # los de la entrega (AS/, 2023-2024) que copió SIM
+    - ../../datos/inputSimulacion/banco_v4/entradas/indices_extra
+
+protocolo: ../../datos/inputSimulacion/banco_v4/protocolo          # eventos_fase1.csv, focos_atribuidos.csv, conciliacion_cp.csv
+banco: ../../resultados/v4.0/banco                                  # casos/, corridas/, fase1/, web/, registro_corridas.csv
+
+sim:
+  datos: null                                         # null = simulador.rutas.raiz_datos() (datos/inputSimulacion/sim_v4)
+  insumos_banco: ../../datos/inputSimulacion/sim_v4/conjunto_prueba/_banco     # insumos por evento que arma el adaptador
+  modelos: ../../escenarios/v4.0/modelos              # modelos de parámetros (YAML parcial sobre DEFAULTS)

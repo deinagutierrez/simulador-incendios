@@ -1,0 +1,71 @@
+# Incendio sin parte SNMF al NE del dominio (Libertador General San Martín), octubre de 2022. Evento NO VISTO (lote X-49, incorporado 2026-11-04).
+# Nombre provisorio por el topónimo más cercano (Estancia La Juli, 2,5 km; Estación de Fomento Ganadero, 2,9 km). Componente del banco V4: MB_2022_43580_2022-09-10.
+id: SL-2022-LAJULI
+nombre: Estancia La Juli (Libertador General San Martín), octubre 2022 (sin parte SNMF; MapBiomas 2022_43580)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2022_43580 restringido a los píxeles quemados en SEPTIEMBRE y OCTUBRE de 2022 (raster mensual; el polígono completo mide 509 ha). Componente MB_2022_43580_2022-09-10 de eventos_fase1.csv (banco V4, docs/v4.0/16).
+  oid: "2022_43580"
+  calendar_year: 2022
+  mes: [9, 10]
+  superficie_ha: 506
+inicio:
+  fecha_local: "2022-10-01"       # único pase VIIRS S-NPP con focos: 01/10/2022 18:07 UTC, 23 detecciones (FRP máx 33 MW) sobre toda la cicatriz; nada el 30/09 ni después
+  hora_utc_hipotesis: ["2022-10-01T16:00:00Z", "2022-10-01T14:00:00Z", "2022-10-01T17:00:00Z", "2022-09-30T21:00:00Z"]   # HIPÓTESIS 13, 11 y 14 h local del 01/10; 18 h local del 30/09 (MapBiomas fecha parte de los píxeles en septiembre)
+  cota_superior_utc: "2022-10-01T18:07:00Z"
+  confianza: baja                 # sin parte SNMF; un solo pase con focos: día acotado por VIIRS, hora desconocida
+fin:
+  propagacion_principal: "2022-10-01"
+  fin_simulacion_utc: "2022-10-03T03:00:00Z"   # fin del 02/10 local (T100 + 48 h del banco, redondeado al fin del día); la serie IFS llega al 04/10 03 UTC
+  evaluacion_utc: ["2022-10-02T03:00:00Z", "2022-10-03T03:00:00Z"]   # fin del 01/10 (único pase con focos) y fin de la simulación
+ignicion:
+  fuente: "Primer (y único) pase VIIRS S-NPP, 01/10/2022 18:07 UTC: las 23 detecciones a <= 1 km del componente (regla §4.1 del banco, docs/v4.0/16); la misma ignición de la Fase 1 (sim_v4/conjunto_prueba/_banco/MB_2022_43580_2022-09-10/ignicion.geojson). No hay punto SNMF."
+  puntos:
+    - {nombre: VIIRS 01/10 18:07 n01, lon: -65.59638, lat: -32.4537}
+    - {nombre: VIIRS 01/10 18:07 n02, lon: -65.58282, lat: -32.4297}
+    - {nombre: VIIRS 01/10 18:07 n03, lon: -65.57978, lat: -32.4306}
+    - {nombre: VIIRS 01/10 18:07 n04, lon: -65.59109, lat: -32.43092}
+    - {nombre: VIIRS 01/10 18:07 n05, lon: -65.58392, lat: -32.4312}
+    - {nombre: VIIRS 01/10 18:07 n06, lon: -65.58805, lat: -32.43181}
+    - {nombre: VIIRS 01/10 18:07 n07, lon: -65.58323, lat: -32.43455}
+    - {nombre: VIIRS 01/10 18:07 n08, lon: -65.58738, lat: -32.43515}
+    - {nombre: VIIRS 01/10 18:07 n09, lon: -65.59151, lat: -32.43576}
+    - {nombre: VIIRS 01/10 18:07 n10, lon: -65.58669, lat: -32.4385}
+    - {nombre: VIIRS 01/10 18:07 n11, lon: -65.57867, lat: -32.4291}
+    - {nombre: VIIRS 01/10 18:07 n12, lon: -65.59083, lat: -32.4391}
+    - {nombre: VIIRS 01/10 18:07 n13, lon: -65.59014, lat: -32.44245}
+    - {nombre: VIIRS 01/10 18:07 n14, lon: -65.59429, lat: -32.44305}
+    - {nombre: VIIRS 01/10 18:07 n15, lon: -65.58946, lat: -32.4458}
+    - {nombre: VIIRS 01/10 18:07 n16, lon: -65.59361, lat: -32.4464}
+    - {nombre: VIIRS 01/10 18:07 n17, lon: -65.58878, lat: -32.44914}
+    - {nombre: VIIRS 01/10 18:07 n18, lon: -65.59292, lat: -32.44975}
+    - {nombre: VIIRS 01/10 18:07 n19, lon: -65.59707, lat: -32.45035}
+    - {nombre: VIIRS 01/10 18:07 n20, lon: -65.5881, lat: -32.45249}
+    - {nombre: VIIRS 01/10 18:07 n21, lon: -65.59224, lat: -32.4531}
+    - {nombre: VIIRS 01/10 18:07 n22, lon: -65.58601, lat: -32.44184}
+    - {nombre: VIIRS 01/10 18:07 n23, lon: -65.59177, lat: -32.42757}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: la detección de mayor FRP del primer pase (33 MW), como punto único de ignición. No es una observación del origen."
+    puntos:
+      - {nombre: foco FRP máx 01/10 (hipótesis), lon: -65.58946, lat: -32.4458}
+  - fuente: "HIPÓTESIS derivada: extremo N de la cicatriz, a barlovento del viento N del 01/10 (IFS 3 m/s, máx 4). No es una observación."
+    puntos:
+      - {nombre: extremo N cicatriz (hipótesis), lon: -65.58493, lat: -32.42464}
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2022-09-30T00:00:00Z", fin_utc: "2022-10-04T03:00:00Z"}   # serie ya descargada para el banco V4 (banco_v4/entradas/meteo_ifs); preparar_evento_desde_banco.py la copia a inputSimulacion/meteo
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2022-08-16", "2022-09-30"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+  # sin GEE: preparar_evento_desde_banco.py convierte el compuesto mensual previo del banco (indices_mes.tif de MB_2022_43580_2022-09-10, método E020) en ndvi_30m/ndmi_30m
+cobertura_anio: 2021
+combate:
+  fuente: "sin parte SNMF a <= 2 km ni en la ventana del evento (catalogo/eventos_snmf_en_aoi.csv): cuarteles, medios y fechas de contención desconocidos"
+  cuarteles_id: []
+  aereo: []
+  snmf: null
+notas:
+  - "Evento no visto por v3.x ni por los lotes de v4 (E033 a E059). M1 (V4 original) y M2 (V2) lo corrieron una sola vez, congelados, en la Fase 1 del banco (E023, X-11)."
+  - "Un solo pase con focos, instante degenerado (docs/v4.0/16 §5): sirve para el eje de forma (IoU a igual superficie), no para extensión y tiempo."
+  - "Meteorología IFS del 01/10: T máx 22 °C, HR mín 33 %, viento N 3 m/s; 03/10 viento N 8 m/s; sin lluvia hasta el 04/10. Sin NOAA-20 en los archivos locales (sólo S-NPP)."
+  - "Topónimos (viviendas_sanluis_integrado.geojson): Estancia La Juli 2,5 km, Estación de Fomento Ganadero 2,9 km, Tala Verde 4,6 km. Celda F06-C10 de la grilla de 10 km."

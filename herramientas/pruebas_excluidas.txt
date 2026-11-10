@@ -1,0 +1,13 @@
+# Pruebas de las versiones congeladas que NO se exigen en un clon mínimo, con su motivo.
+# Formato: version | identificador de pytest (relativo a la raíz del repositorio) | motivo
+# Las versiones están congeladas: sus pruebas no se editan. Esta lista es la línea base medida el 2026-11-10;
+# cualquier otra prueba que falle es un error nuevo.
+#
+# --- Ya fallaban en la copia de trabajo original (Drive) antes de crear este repositorio ---
+v4.0 | test/v4.0/test_viento_windninja.py::test_atajo_viento_en_la_corrida | prueba vieja: espera viento windninja en modelo_v3, que pasó a "serie" por la decisión D41 (2026-10-28)
+v4.0 | test/v4.0/test_escenarios.py::test_las_diez_corridas_se_traducen | prueba vieja: espera contención activa en prueba_rapida_v4; la contención se apartó por la decisión D42
+v4.0 | test/v4.0/test_escenarios.py::test_corridas_de_ejemplo_ejercitan_el_modelo | prueba vieja: misma causa (D42)
+v4.0 | test/v4.0/test_banco.py::test_rutas_resuelven_a_archivos_existentes | pide resultados/v4.0/banco (corridas del banco de evaluación), que no se versionan
+#
+# --- Piden datos históricos que no van en el clon mínimo (se bajan aparte, ver DATOS.md) ---
+v4.0 | test/v4.0/test_banco.py::test_compuestos_ndvi_ndmi_y_faltantes | pide datos/inputSimulacion/banco_v4/entradas/indices_extra (64 MB)

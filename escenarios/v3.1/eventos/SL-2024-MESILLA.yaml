@@ -1,0 +1,60 @@
+# Incendio Mesilla del Cura (Libertador General San Martín), septiembre de 2024. Evento de VALIDACIÓN (misma estación que el de calibración, escala pequeña).
+id: SL-2024-MESILLA
+nombre: Mesilla del Cura (Libertador General San Martín)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2024_41892 completo (13 partes; la principal de 169 ha, alargada N-S de 3,4 km)
+  oid: "2024_41892"
+  calendar_year: 2024
+  # sin `mes`: el raster mensual reparte el polígono entre agosto (96 ha) y septiembre (85 ha), pero el SNMF registra un único
+  # evento (02-09/09) y la superficie dNBR del compilador (196,9 ha) coincide con el polígono completo (181 ha) -> HIPÓTESIS: un solo evento.
+  superficie_ha: 181
+  superficie_ha_sat_compilador: 196.9
+inicio:
+  fecha_local: "2024-09-02"       # SNMF fecha_inicio (8 reportes diarios, 02 al 09/09); coherente con la meteorología: primer día seco y ventoso tras lloviznas del 30-31/08
+  hora_utc_hipotesis: ["2024-09-02T16:00:00Z", "2024-09-02T13:00:00Z", "2024-09-02T11:00:00Z"]   # HIPÓTESIS 13, 10 y 8 h local (todas anteriores a la primera detección VIIRS)
+  cota_superior_utc: "2024-09-02T17:28:00Z"  # primera detección VIIRS NOAA-20 (acq_time 62880 s): 50 detecciones ese día ya sobre la mitad sur de la cicatriz (lat -32,536 a -32,520)
+  confianza: media                # día del SNMF confirmado por VIIRS; hora desconocida
+fin:
+  fecha_extincion_snmf: "2024-09-09"
+  fecha_contenido_snmf: "2024-09-03"   # 'Contenido' el 03/09, vuelve a 'Activo' del 04 al 06/09, 'Extinguido' desde el 07/09
+  propagacion_principal: "2024-09-02 a 2024-09-06"
+  fin_simulacion_utc: "2024-09-10T03:00:00Z"        # 00:00 local del 10/09
+  evaluacion_utc: ["2024-09-03T03:00:00Z", "2024-09-04T03:00:00Z", "2024-09-07T03:00:00Z", "2024-09-10T03:00:00Z"]   # fin del 02/09 local (día de ignición, antes del 'Contenido'), fin del 03/09 (viento S 9,6 m/s), fin del 06/09 (último 'Activo'), extinción
+ignicion:
+  fuente: SNMF (punto informado 'MESILLA DEL CURA', a 1.369 m al SE del polígono; el cargador lo desplaza a la celda combustible quemada más cercana -> HIPÓTESIS)
+  puntos:
+    - {nombre: Mesilla del Cura, lon: -65.8132, lat: -32.5466}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: extremo NO (a barlovento) de la parte principal de la cicatriz; el 02/09 el viento fue del NO (320°) a 5-7 m/s y el punto SNMF queda al SE de la cicatriz (sotavento). No es una observación."
+    puntos:
+      - {nombre: extremo NO cicatriz (hipótesis), lon: -65.83349, lat: -32.50482}
+  - fuente: "HIPÓTESIS derivada: extremo S de la parte principal de la cicatriz (la más cercana al punto SNMF, 1,5 km al SE). La cicatriz es alargada N-S y el SNMF vuelve a 'Activo' el 04/09 tras 'Contenido' el 03/09, día de viento S de 9,6 m/s: compatible con una carrera hacia el N desde el extremo S. No es una observación."
+    puntos:
+      - {nombre: extremo S cicatriz (hipótesis), lon: -65.8254, lat: -32.53554}
+  - fuente: "HIPÓTESIS derivada por búsqueda inversa (2026-10-27): punto que maximiza el IoU con la cicatriz en el instante en que la simulación alcanza su superficie (variante libre_v2, ~40 candidatos sobre la cicatriz principal + 300 m y refinamiento; estable en las 3 hipótesis horarias). IoU 0,38 vs 0,00 del punto SNMF; alt0 0,17, alt1 0,03. Se ajusta a la misma cicatriz con la que se evalúa: no es una observación ni una validación independiente."
+    puntos:
+      - {nombre: búsqueda inversa (hipótesis), lon: -65.82572, lat: -32.51895}
+recomendada:   # ignición espacial y horaria que usan los barridos de v3.1 (2026-10-27, docs/v3.1/02)
+  ignicion: alt2
+  hipotesis: 2
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2024-09-01T00:00:00Z", fin_utc: "2024-09-10T03:00:00Z"}
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2024-07-15", "2024-09-01"]     # anterior a la ignición
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+  # Compuesto propio obtenido el 2026-10-15 (40 escenas S2, proyecto GEE configurado). El respaldo (compuesto de SL-2024-LASLAGUNAS,
+  # 30/07-17/09/2024) sólo se usa si GEE falla; se usó en las corridas preliminares del 2026-10-15 por la mañana, luego reemplazadas.
+  respaldo_evento: SL-2024-LASLAGUNAS
+cobertura_anio: 2023
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [7, 29, 22, 21, 31, 18, 41, 30, 34] # Bomberos de la Policía (11 personas), El Trapiche, La Carolina, San Francisco del Monte de Oro, Lafinur-Los Cajones, Los Molles, Renca, San Martín, Tilisarao
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2024-09-02", contencion_dia: 1, extincion_dia: 5}   # Contenido 03/09, Activo 04-06/09 (reactivación), Extinguido 07/09
+notas:
+  - Incendio pequeño (181 ha) de la misma estación que el evento de calibración; prueba de transferencia de k a otra escala y relieve (Mesilla del Cura, sector O del dominio).
+  - Hubo combate desde el primer día (11 bomberos de policía y cuarteles de 8 localidades, SNMF); la simulación v1 no incluye mitigación.
+  - "Focos de calor (scripts/obtener_focos.py, GEE LANCE VIIRS + FIRMS, radio 3 km a la cicatriz): VIIRS 02/09 (50, mitad sur), 03/09 (17, sector SE), 04/09 (23, mitad norte); MODIS 03/09 (9) y 04/09 (17). Sin detecciones después del 04/09. Otro incendio simultáneo (Paso Grande, borde SE del dominio, 03-06/09) queda fuera por el filtro."
+  - "Meteorología IFS 9 km del 02/09: T máx 21 °C, HR mín 28 %, viento NO 5-7 m/s; 03/09: HR mín 19 %, viento S hasta 9,6 m/s; 05/09: viento N hasta 9,7 m/s; sin lluvia del 01 al 09/09."

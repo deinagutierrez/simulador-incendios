@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>__TITULO__</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<style>
+:root { --bg:#f3f1ec; --panel:#ffffff; --ink:#1c2430; --ink2:#5b6573; --line:#d8d4cb; --accent:#1f5f8b; --burn:#d9541e; --burn2:#f2a541; --obs:#0aa6c9; --foco:#7a1fa2; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#171a1f; --panel:#1f242b; --ink:#e8e6e1; --ink2:#9aa3ae; --line:#343a43; --accent:#6fb3e0; --burn:#ff7a3d; --burn2:#ffc06b; --obs:#3fd0f0; --foco:#c77dff; } }
+:root[data-theme="dark"] { --bg:#171a1f; --panel:#1f242b; --ink:#e8e6e1; --ink2:#9aa3ae; --line:#343a43; --accent:#6fb3e0; --burn:#ff7a3d; --burn2:#ffc06b; --obs:#3fd0f0; --foco:#c77dff; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.45 "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; }
+header { padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+header h1 { font-size: 17px; margin: 0; } header p { margin: 2px 0 0; color: var(--ink2); font-size: 12.5px; }
+main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 340px; min-height: 0; }
+#mapa { min-height: 320px; }
+aside { overflow-y: auto; border-left: 1px solid var(--line); background: var(--panel); padding: 12px 14px; }
+aside h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink2); margin: 14px 0 6px; }
+aside h2:first-child { margin-top: 0; }
+.big { font-size: 26px; font-weight: 700; color: var(--burn); font-variant-numeric: tabular-nums; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; font-variant-numeric: tabular-nums; }
+.kv span:nth-child(odd) { color: var(--ink2); } .kv span:nth-child(even) { text-align: right; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 3px 4px; border-bottom: 1px solid var(--line); text-align: right; } th:first-child, td:first-child { text-align: left; }
+th { color: var(--ink2); font-weight: 600; }
+#barra { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-top: 1px solid var(--line); background: var(--panel); }
+#barra input[type=range] { flex: 1; accent-color: var(--burn); }
+#barra button, #barra select { font: inherit; padding: 4px 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 4px; cursor: pointer; }
+#hora { min-width: 190px; font-variant-numeric: tabular-nums; }
+svg text { fill: var(--ink2); font-size: 10px; }
+.aviso { color: var(--ink2); font-size: 12px; }
+.leaflet-container { background: var(--bg); }
+@media (max-width: 760px) { main { grid-template-columns: 1fr; grid-template-rows: 55vh auto; } aside { border-left: 0; border-top: 1px solid var(--line); } #hora { min-width: 0; font-size: 12px; } }
+</style>
+</head>
+<body>
+<header><h1 id="titulo"></h1><p id="subtitulo"></p></header>
+<main><div id="mapa"></div>
+<aside>
+  <h2>Hora seleccionada</h2>
+  <div class="big" id="ha">—</div>
+  <div class="kv" id="estado"></div>
+  <h2>Superficie quemada (ha)</h2>
+  <svg id="grafico" viewBox="0 0 310 140" width="100%" role="img" aria-label="superficie quemada por hora"></svg>
+  <h2>Corrida</h2>
+  <div class="kv" id="corrida"></div>
+  <div id="validacion"></div>
+  <p class="aviso" id="nota"></p>
+</aside></main>
+<div id="barra"><button id="play" title="reproducir">▶</button>
+  <input type="range" id="t" min="0" max="0" value="0" step="1" aria-label="hora de la simulación">
+  <select id="vel" aria-label="velocidad"><option value="600">lento</option><option value="250" selected>normal</option><option value="80">rápido</option></select>
+  <span id="hora"></span></div>
+<script>
+const B = __DATOS__;
+const $ = id => document.getElementById(id);
+const fmt = (x, d = 0) => x == null || isNaN(x) ? "—" : Number(x).toLocaleString("es-AR", {minimumFractionDigits: d, maximumFractionDigits: d});
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+$("titulo").textContent = B.meta.titulo; $("subtitulo").textContent = B.meta.subtitulo;
+document.title = B.meta.titulo;
+
+const mapa = L.map("mapa", {preferCanvas: true});
+const base = {
+  "OpenStreetMap": L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 18, attribution: "© OpenStreetMap"}),
+  "Satélite (Esri)": L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {maxZoom: 18, attribution: "Esri World Imagery"}),
+  "Topográfico": L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {maxZoom: 17, attribution: "© OpenTopoMap"})
+};
+base["OpenStreetMap"].addTo(mapa);
+const capas = {};
+const gIso = L.layerGroup().addTo(mapa), gActual = L.layerGroup().addTo(mapa);
+capas["Isócronas (hasta la hora)"] = gIso; capas["Perímetro simulado"] = gActual;
+if (B.observado) { capas["Perímetro observado"] = L.geoJSON(B.observado, {style: {color: css("--obs"), weight: 2, fill: false, dashArray: "5 4"}}).addTo(mapa); }
+const gFocos = L.layerGroup(); if (B.focos.length) { capas["Focos de calor (hasta la hora)"] = gFocos.addTo(mapa); }
+const gIgn = L.layerGroup(B.ignicion.map(p => L.circleMarker([p.lat, p.lon], {radius: 7, color: "#000", weight: 1.5, fillColor: "#ffd400", fillOpacity: 1}).bindTooltip("Ignición " + (p.id || "")))).addTo(mapa);
+capas["Ignición"] = gIgn;
+if (B.extra) { capas["Mitigación (barreras extra)"] = L.geoJSON(B.extra, {style: {color: "#2c7a2c", weight: 3}}).addTo(mapa); }
+L.control.layers(base, capas, {collapsed: window.innerWidth < 760}).addTo(mapa);
+L.control.scale({imperial: false}).addTo(mapa);
+
+const F = B.perimetros.features;              // un polígono por hora (área afectada acumulada)
+const capaDe = new Map();
+function capa(i, estilo) { const k = i + estilo; if (!capaDe.has(k)) capaDe.set(k, L.geoJSON(F[i], {style: estiloDe(estilo, i)})); return capaDe.get(k); }
+function colorT(f) { const a = [255, 214, 107], b = [140, 20, 20]; return `rgb(${a.map((v, j) => Math.round(v + (b[j] - v) * f)).join(",")})`; }
+function estiloDe(e, i) { return e === "a" ? {color: css("--burn"), weight: 2, fillColor: css("--burn"), fillOpacity: 0.35} : {color: colorT(F.length > 1 ? i / (F.length - 1) : 1), weight: 1, fill: false, opacity: 0.9}; }
+const todos = F.length ? L.geoJSON(B.perimetros).getBounds() : null;
+if (todos && todos.isValid()) mapa.fitBounds(todos.pad(0.25)); else if (B.ignicion.length) mapa.setView([B.ignicion[0].lat, B.ignicion[0].lon], 12); else mapa.setView([-32.6, -65.6], 10);
+
+const S = B.serie; const hMax = Math.max(1, S.length ? S[S.length - 1].h : 1);
+const serieDe = h => { let r = S[0]; for (const s of S) { if (s.h <= h) r = s; else break; } return r; };
+function grafico() {
+  const g = $("grafico"), W = 310, H = 140, m = {l: 44, r: 8, t: 8, b: 20};
+  const yMax = Math.max(1, ...S.map(s => s.ha), B.meta.ha_ref || 0) * 1.05;
+  const X = h => m.l + (W - m.l - m.r) * h / hMax, Y = v => H - m.b - (H - m.t - m.b) * v / yMax;
+  let s = `<line x1="${m.l}" y1="${H - m.b}" x2="${W - m.r}" y2="${H - m.b}" stroke="${css("--line")}"/>`;
+  for (let k = 0; k <= 4; k++) { const v = yMax * k / 4; s += `<text x="${m.l - 4}" y="${Y(v) + 3}" text-anchor="end">${fmt(v)}</text><line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${css("--line")}" stroke-dasharray="2 3"/>`; }
+  s += `<text x="${W - m.r}" y="${H - 4}" text-anchor="end">${fmt(hMax)} h</text><text x="${m.l}" y="${H - 4}">0</text>`;
+  if (B.meta.ha_ref) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(B.meta.ha_ref)}" y2="${Y(B.meta.ha_ref)}" stroke="${css("--obs")}" stroke-dasharray="5 3"/><text x="${W - m.r}" y="${Y(B.meta.ha_ref) - 3}" text-anchor="end">referencia ${fmt(B.meta.ha_ref)} ha</text>`;
+  for (const e of B.evals) s += `<line x1="${X(e.h)}" x2="${X(e.h)}" y1="${m.t}" y2="${H - m.b}" stroke="${css("--obs")}" stroke-width="0.8"/>`;
+  s += `<polyline fill="none" stroke="${css("--burn")}" stroke-width="2" points="${S.map(p => X(p.h).toFixed(1) + "," + Y(p.ha).toFixed(1)).join(" ")}"/>`;
+  s += `<line id="cursor" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="${css("--ink")}" stroke-width="1"/>`;
+  g.innerHTML = s; grafico.X = X;
+}
+grafico();
+
+const kv = (el, filas) => { el.innerHTML = filas.filter(f => f).map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join(""); };
+const R = B.resumen || {}; const mo = R.modelo || {}; const mi = R.mitigacion || {}; const d = mi.despacho || {};
+kv($("corrida"), [["Corrida", B.meta.run_id], ["Fecha", (R.fecha_corrida || "").slice(0, 16).replace("T", " ")], ["Modelo", mo.nombre || "—"],
+  ["Variante", mo.variante || "—"], ["Barreras / contención", `${mo.barreras ? "sí" : "no"} / ${mo.contencion ? "sí" : "no"}`],
+  ["Supresión L03", mo.supresion_l03 ? "sí" : "no"], d.modo ? ["Despacho", `${d.modo}${d.inicio ? " · inicio " + d.inicio : ""}`] : null,
+  mi.contencion_inicio_min != null ? ["Inicio del combate", fmt(mi.contencion_inicio_min) + " min"] : null,
+  d.region ? ["Región SNMF", d.region] : null, ["Superficie final", fmt((R.superficie || {}).ha_quemadas_final, 1) + " ha"],
+  ["Horas simuladas", fmt(R.horas_simuladas, 1)], ["Fin", R.motivo_fin || "—"], ["Cómputo", fmt((R.costo || {}).segundos, 0) + " s"]]);
+const V = ((R.validacion || {}).espacial || []);
+if (V.length) {
+  $("validacion").innerHTML = "<h2>Ajuste contra la cicatriz</h2><table><tr><th>Evaluación</th><th>ha sim</th><th>ha ref</th><th>IoU</th><th>Dice</th></tr>" +
+    V.map(m => `<tr><td>${(m.t_eval_utc || "").slice(0, 16).replace("T", " ")}</td><td>${fmt(m.ha_sim)}</td><td>${fmt(m.ha_ref)}</td><td>${m.iou == null ? "—" : m.iou.toFixed(3)}</td><td>${m.dice == null ? "—" : m.dice.toFixed(3)}</td></tr>`).join("") + "</table>";
+}
+$("nota").textContent = B.meta.nota || "";
+
+const t = $("t"); t.max = Math.max(0, F.length - 1); t.value = t.max;
+function mostrar(i) {
+  i = Math.max(0, Math.min(F.length - 1, i)); gIso.clearLayers(); gActual.clearLayers();
+  if (!F.length) { $("hora").textContent = "sin perímetros"; return; }
+  const p = F[i].properties; const paso = Math.max(1, Math.round(F.length / 24));
+  for (let k = 0; k < i; k += paso) capa(k, "i").addTo(gIso);
+  capa(i, "a").addTo(gActual);
+  const s = serieDe(p.hora) || {};
+  $("ha").textContent = fmt(p.ha, 1) + " ha";
+  kv($("estado"), [["Hora", `${p.hora} h desde t0`], ["Fecha local", (p.timestamp || "").slice(0, 16).replace("T", " ")], ["Incremento", fmt(s.inc, 1) + " ha/h"],
+    ["Celdas activas", fmt(s.act)], ["Viento 10 m", `${fmt(s.V, 1)} km/h desde ${s.Dtxt || fmt(s.D) + "°"}`], ["HR / T", `${fmt(s.HR)} % / ${fmt(s.T, 1)} °C`],
+    s.m1 != null ? ["Humedad muerta 1 h", fmt(s.m1, 1) + " %"] : null, s.I != null ? ["Intensidad máx.", fmt(s.I) + " kW/m"] : null]);
+  $("hora").textContent = `hora ${p.hora} · ${(p.timestamp || "").slice(0, 16).replace("T", " ")}`;
+  const c = document.getElementById("cursor"); if (c) { const x = grafico.X(p.hora); c.setAttribute("x1", x); c.setAttribute("x2", x); }
+  gFocos.clearLayers();
+  for (const f of B.focos) if (f[2] <= p.hora) gFocos.addLayer(L.circleMarker([f[1], f[0]], {radius: 3, color: css("--foco"), weight: 1, fillOpacity: 0.8}));
+}
+t.addEventListener("input", () => mostrar(+t.value));
+let reloj = null;
+$("play").addEventListener("click", () => {
+  if (reloj) { clearInterval(reloj); reloj = null; $("play").textContent = "▶"; return; }
+  if (+t.value >= +t.max) t.value = 0;
+  $("play").textContent = "❚❚";
+  reloj = setInterval(() => { if (+t.value >= +t.max) { clearInterval(reloj); reloj = null; $("play").textContent = "▶"; return; } t.value = +t.value + 1; mostrar(+t.value); }, +$("vel").value);
+});
+$("vel").addEventListener("change", () => { if (reloj) { $("play").click(); $("play").click(); } });
+mostrar(+t.value);
+</script>
+</body>
+</html>

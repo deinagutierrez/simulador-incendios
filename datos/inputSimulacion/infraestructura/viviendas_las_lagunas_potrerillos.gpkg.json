@@ -1,0 +1,30 @@
+{
+  "producto": "viviendas_las_lagunas_potrerillos.gpkg",
+  "fuente": "viviendas_sanluis_integrado.geojson recortado al dominio + 1 km",
+  "generado_utc": "2026-10-14T19:43:54Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "bbox": [
+      3512040.0,
+      6366750.0,
+      3564240.0,
+      6418920.0
+    ],
+    "crs": "EPSG:5345"
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\viviendas_sanluis_integrado.geojson",
+      "bytes": 16553762,
+      "sha256": "25bf37064004a33f7e75f5b5d35eefd5da123011845def370cd76f78665e09a9"
+    }
+  ],
+  "sha256_producto": "0e10a5a5d0c31bb595d92e0c3337df9657de13bc3deff6cee8536f20bcdcb5e5",
+  "bytes_producto": 229376,
+  "entidades": 325,
+  "capas": [
+    "polygon",
+    "point"
+  ]
+}

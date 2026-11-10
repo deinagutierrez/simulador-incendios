@@ -1,0 +1,12 @@
+# Corrida corta para comprobar que la instalación de v4 funciona (6 horas simuladas de Las Lagunas 2024 con caminos como barrera, sin combate)
+# Desde E043 (D46, combustible 3.3b de modelo_v3): 47,43 ha a las 6 h. Con 3.3 (E036: barreras, viento uniforme) daba 152,82 ha.
+# Antes (E033, variante local y viento WindNinja): 121,41 ha (prueba_rapida_v4_20261027-1132, en resultados/v4.0/_archivo_mitigacion/).
+# La parada anticipada está apagada para que la prueba de humo ejercite siempre las 6 h (propagación y barreras).
+descripcion: Prueba de humo de v4. Si corre, SIM y los insumos derivados de la ficha de v3.0 están bien instalados.
+evento: SL-2024-LASLAGUNAS
+hipotesis: 1
+horas: 6
+variante: barreras           # modelo_v3 + caminos como barrera (cruce según la llama y el ancho de la vía), sin combate
+ajustes:
+  parada: {horas_sin_avance: null, contenido: false}     # simular las 6 h aunque el frente se detenga
+validar: false

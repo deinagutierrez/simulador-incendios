@@ -1,0 +1,9 @@
+# Caso de prueba de SIM Las Lagunas–La Aguada 2023 con el modelo "V.4 tal como se entregó". Sin tope daba lo mismo que V.4 (2783,0 ha en 36 h);
+# desde E031, a pedido del usuario, termina al igualar la superficie del perímetro observado. Para repetir la verificación: parar_en_cicatriz: off.
+descripcion: V.4 tal como se entregó (modelo sim_v4_original, sin mitigación) sobre el caso base del conjunto de prueba, hasta igualar la superficie del perímetro observado; la verificación sin tope (2783,0 ha) está en resultados/v4.0/verificacion_V4_original_aguada_2023_base_20261025-1539.
+caso: las_lagunas_la_aguada_2023 # carpeta de datos/inputSimulacion/sim_v4/conjunto_prueba
+variante_caso: base              # base | t0_06h | t0_09h | t0_15h | t0_18h | ignicion_snmf_original | vecindad_16 | dt_1min | dt_5min
+variante: v4_original
+parar_en_cicatriz: on            # tope de la cicatriz (E031); desde E032 también es el valor por defecto de la variante
+validar: true
+figuras: true

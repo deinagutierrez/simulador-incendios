@@ -1,0 +1,15 @@
+clave,clase,ndvi_p33,ndvi_p67
+3,Bosques cerrados,0.533,0.597
+4,Bosques abiertos,0.491,0.541
+9,Silvicultura,0.683,0.739
+11,Herbáceas inundables,0.19,0.19
+12,Herbáceas (< cota),0.393,0.468
+12_alt,Pastizal de altura (>= cota),0.377,0.439
+15,Pasturas,0.366,0.47
+19,Cultivos temporarios,0.492,0.681
+24,Áreas urbanas,0.364,0.506
+25,Otras áreas no vegetadas,0.141,0.245
+33,"Ríos, lagunas, lagos",-0.214,0.048
+63,Mosaico arbustos-herbáceas,0.24,0.308
+66,Arbustales cerrados,0.441,0.485
+77,Arbustales abiertos,0.408,0.455

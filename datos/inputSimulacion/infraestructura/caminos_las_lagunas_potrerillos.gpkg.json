@@ -1,0 +1,29 @@
+{
+  "producto": "caminos_las_lagunas_potrerillos.gpkg",
+  "fuente": "caminos_sanluis_integrado.geojson recortado al dominio + 1 km",
+  "generado_utc": "2026-10-14T19:43:53Z",
+  "version_codigo": "0.1.0",
+  "host": "LisandroV-PC",
+  "parametros": {
+    "bbox": [
+      3512040.0,
+      6366750.0,
+      3564240.0,
+      6418920.0
+    ],
+    "crs": "EPSG:5345"
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\lisan\\OneDrive\\Documentos\\Proyectos\\Datos_SL_Completo\\caminos_sanluis_integrado.geojson",
+      "bytes": 47484516,
+      "sha256": "0a1aeebd6b0277280f6f4239e2cf7c7d13b017fedc99a86f6de20a11650fac54"
+    }
+  ],
+  "sha256_producto": "ff460489aa6e3e8dbf0143249f06a7def8dde7e66369055596ed10da6e55c8f7",
+  "bytes_producto": 884736,
+  "entidades": 825,
+  "capas": [
+    "linestring"
+  ]
+}

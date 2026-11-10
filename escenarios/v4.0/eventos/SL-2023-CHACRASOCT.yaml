@@ -1,0 +1,71 @@
+# Incendio Las Chacras, al O de Potrerillos (Libertador General San Martín; el parte SNMF dice Coronel Pringles), octubre de 2023. Evento NO VISTO (lote X-49, incorporado 2026-11-04).
+# Es el polígono 2023_26601 que docs/v4.0/06 descartó por '73 ha vs 1.336 ha': las 72,7 ha son el dNBR del compilador, no una cifra del SNMF; 46 detecciones VIIRS en 7 pases cubren todo el polígono. Componente del banco V4: MB_2023_26601_2023-10.
+id: SL-2023-CHACRASOCT
+nombre: Las Chacras - O de Potrerillos (Libertador General San Martín), octubre 2023 (MapBiomas 2023_26601)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2023_26601 restringido a los píxeles quemados en OCTUBRE de 2023 (raster mensual; 28 ha de junio a noviembre excluidas). Componente MB_2023_26601_2023-10 de eventos_fase1.csv (banco V4).
+  oid: "2023_26601"
+  calendar_year: 2023
+  mes: 10
+  superficie_ha: 1308
+  superficie_ha_sat_compilador: 72.7   # dNBR 'anclado en focos VIIRS' del compilador del archivo SNMF: inconsistente con MapBiomas y con los focos
+inicio:
+  fecha_local: "2023-10-17"       # VIIRS S-NPP: 4 detecciones el 17/10 a las 17:22 UTC (FRP máx 92 MW, centro-S de la cicatriz) y 11 a las 19:02 UTC; SNMF registra inicio 19/10 (primer reporte 20/10), que es la reactivación tras la lluvia del 18/10
+  hora_utc_hipotesis: ["2023-10-17T15:00:00Z", "2023-10-17T13:00:00Z", "2023-10-17T17:00:00Z", "2023-10-17T11:00:00Z", "2023-10-17T06:00:00Z"]   # HIPÓTESIS 12, 10, 14 y 8 h local del 17/10 (24 °C, HR 23 %, viento E 3,4 m/s, máx 6,4)
+  # hipótesis 4 (2026-11-04, barrido de hora de v3.1 según docs/v3.1/02, resultados/v3.1/paso2_hora_x49): 03 h local del 17/10, la de mejor puntaje (0,430; IoU 0,49, 37 % de primeras detecciones a tiempo)
+  # entre las horas cada 2 h de la ventana [pase nocturno S-NPP sin focos ~05 UTC, primer pase 17:22 UTC]. La hipótesis 1 (13 UTC) casi empata (0,422; IoU 0,41, 43 % a tiempo, error mediano 0 h).
+  cota_superior_utc: "2023-10-17T17:22:00Z"
+  confianza: media                # día fijado por VIIRS; hora desconocida; el SNMF da una fecha posterior
+fin:
+  fecha_extincion_snmf: "2023-10-23"
+  fecha_contenido_snmf: "2023-10-23"   # estado 'Controlado' el 23/10 (no hay 'Contenido'); 'Extinguido' el 24/10 con fecha_extincion 23/10
+  propagacion_principal: "2023-10-17 a 2023-10-19"   # VIIRS: 17/10 (4 + 11), 18/10 (2, lluvia 7,8 mm), 19/10 (10 + 5 nocturnos y 12 a las 18:25 UTC = T80 del banco), 20/10 (2)
+  fin_simulacion_utc: "2023-10-23T03:00:00Z"   # fin del 22/10 local: fin de la serie IFS del banco (la extinción SNMF, 23/10, queda un día después)
+  evaluacion_utc: ["2023-10-18T03:00:00Z", "2023-10-20T03:00:00Z", "2023-10-21T03:00:00Z", "2023-10-23T03:00:00Z"]   # fin del 17/10, fin del 19/10 (T80), fin del 20/10 (último pase), fin de la simulación (controlado)
+ignicion:
+  fuente: "Primer pase VIIRS S-NPP, 17/10/2023 17:22 UTC: las 4 detecciones (regla §4.1 del banco, docs/v4.0/16); la misma ignición de la Fase 1 (_banco/MB_2023_26601_2023-10/ignicion.geojson). El punto SNMF (19/10) queda a 1,05 km al E del polígono (alt2)."
+  puntos:
+    - {nombre: VIIRS 17/10 17:22 n01, lon: -65.77206, lat: -32.6567}
+    - {nombre: VIIRS 17/10 17:22 n02, lon: -65.76725, lat: -32.65643}
+    - {nombre: VIIRS 17/10 17:22 n03, lon: -65.77269, lat: -32.6508}
+    - {nombre: VIIRS 17/10 17:22 n04, lon: -65.768, lat: -32.65054}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: la detección de mayor FRP del primer pase (92 MW), como punto único. No es una observación del origen."
+    puntos:
+      - {nombre: foco FRP máx 17/10 (hipótesis), lon: -65.77206, lat: -32.6567}
+  - fuente: "HIPÓTESIS derivada: extremo E de la cicatriz (alargada E-O, 6 km), a barlovento del viento E del 17/10. No es una observación."
+    puntos:
+      - {nombre: extremo E cicatriz (hipótesis), lon: -65.74991, lat: -32.62445}
+  - fuente: "Punto SNMF del parte 'LAS CHACRAS' (Coronel Pringles según el parte; inicio 19/10, controlado y extinguido 23/10), a 1,05 km al E del polígono. El parte es posterior a los primeros focos (17/10): referencia administrativa de la reactivación. Si no es combustible se desplaza a la celda quemada más cercana (HIPÓTESIS)."
+    puntos:
+      - {nombre: Las Chacras (SNMF 19/10), lon: -65.741472, lat: -32.640056}
+  - fuente: "HIPÓTESIS derivada: PUNTO ÚNICO de ignición elegido con v3.1 libre_v2 (2026-11-04, resultados/v3.1/paso2_hora_x49/barrido_punto_unico_chacrasoct.csv): entre los 40 candidatos de grilla sobre la cicatriz y los 4 focos del primer pase por separado, a las 06 y 13 UTC, es el de mejor puntaje (0,464; IoU 0,53; 40 % de primeras detecciones a tiempo) frente a 0,430 de los 4 focos juntos y 0,452 del mejor foco solo (n04). Barrido de hora con este punto: 04 UTC 0,465 y 06 UTC 0,464 (meseta), 08 UTC 0,417, 13 UTC 0,255. Hipótesis de trabajo: los 4 focos del primer pase son el fuego ya desarrollado, no el origen; el origen es anterior y único. No es una observación. Queda a 400 m al E del foco n02 y a 1,1 km al E del n04."
+    puntos:
+      - {nombre: punto único v3.1 librev2 (hipótesis), lon: -65.75638, lat: -32.6557}
+  - fuente: "HIPÓTESIS derivada: PUNTO ÚNICO de ignición elegido con v4.0 modelo_v3 libre, sin parada en cicatriz (2026-11-04, resultados/v4.0/busqueda_punto_x49/barrido_punto_unico_chacrasoct_v40.csv, misma métrica de v3.1): entre los mismos 44 candidatos a las 06 y 13 UTC, el mejor es el foco n04 del primer pase (puntaje 0,374; IoU 0,55; 20 % a tiempo); barrido de hora con v4.0: 06 UTC 0,374, 04 UTC 0,343, 08 UTC 0,332, 13 UTC 0,188. Los dos motores coinciden en la hora (06 UTC) y eligen puntos a 1,3 km uno del otro (alt3 el de v3.1, alt4 el de v4.0). No es una observación."
+    puntos:
+      - {nombre: "punto único v4.0 = foco n04 (hipótesis)", lon: -65.767908, lat: -32.650586}
+recomendada:   # ignición espacial y horaria elegida con los focos como en v3.1 (docs/v3.1/02): punto único alt3 y las 03 h local del 17/10 (06 UTC). Antes (2026-11-04, primera vuelta): snmf = los 4 focos del primer pase, hipótesis 4
+  ignicion: alt3
+  hipotesis: 4
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2023-10-16T00:00:00Z", fin_utc: "2023-10-23T03:00:00Z"}   # serie del banco V4 (banco_v4/entradas/meteo_ifs), copiada por preparar_evento_desde_banco.py
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2023-09-02", "2023-10-16"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+  # sin GEE: ndvi_30m/ndmi_30m derivados del compuesto mensual previo del banco (indices_mes.tif de MB_2023_26601_2023-10)
+cobertura_anio: 2022
+combate:
+  fuente: "SNMF, reportes del 20, 23 y 24/10/2023 (registros_snmf_en_aoi.csv). cuarteles_id = id en bomberos_san_luis.geojson. Además BB. PL San Luis (Cuartel 6), Brigada Forestal San Luis Solidario y 1 observador SNMF"
+  cuarteles_id: [6, 15, 33, 34]         # Merlo, Carpintería, La Toma, Tilisarao
+  # 1 AT-802 informado en el reporte del 20/10; sólo de día (08-19 h local)
+  aereo:
+    - ["2023-10-20T11:00:00Z", "2023-10-20T22:00:00Z"]
+  snmf: {inicio: "2023-10-19", contencion_dia: 4, extincion_dia: 4}   # 'Controlado' y fecha_extincion el 23/10 (sin estado 'Contenido')
+notas:
+  - "Evento no visto por v3.x ni por los lotes de v4 (E033 a E059). M1 y M2 lo corrieron una sola vez en la Fase 1 del banco (E023, X-11). docs/v4.0/06 y 02 lo dejaron como 'exploratorio' por la discrepancia de superficie del compilador."
+  - "El mayor de los cinco eventos nuevos (1.308 ha) y el mejor observado: 7 pases con focos (46 detecciones S-NPP; sin NOAA-20 local) y combate documentado. Sirve para forma, tiempo y, más adelante, contención."
+  - "Secuencia meteorológica (IFS): 16/10 viento S 8 m/s y HR 16 % (sin focos); 17/10 E 3 m/s, HR 23 %; 18/10 lluvia 7,8 mm y calma (2 focos nocturnos); 19/10 HR 26 %, calmo (reactivación, 27 focos); 20-21/10 N 4 m/s, 27-29 °C. Prueba de la recuperación de la humedad del combustible muerto tras lluvia (limitación 3 de la Etapa 9)."
+  - "Topónimos: Laguna Larga 4,1 km, La Totora 5,3 km. Celda F08-C08 de la grilla de 10 km; 4,4 km del borde del dominio."

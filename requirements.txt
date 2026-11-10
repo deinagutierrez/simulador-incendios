@@ -1,0 +1,30 @@
+# Entorno único para los dos motores (v3.1 y v4.0) y para el simulador interactivo.
+# Versiones del entorno donde se verificó el 2026-11-10 (Python 3.14.7, Windows 11): pasan las pruebas de v3.1 y de v4.0
+# y las corridas de humo de los dos motores. En Linux lo comprueba la integración continua.
+# NO instalar los motores con "pip install -e": los dos paquetes se llaman incendios_sl. Se usan por PYTHONPATH
+# (lo hace herramientas/probar.py y lo hará el simulador).
+numpy==2.5.2
+scipy==1.18.1
+numba==0.68.0
+pandas==3.0.5
+pyarrow==25.0.1
+rasterio==1.5.1
+affine==3.0.1
+geopandas==1.1.4
+shapely==2.1.2
+pyproj==3.8.0
+pyogrio==0.13.0
+xarray==2026.9.0
+netCDF4==1.7.4
+pyyaml==6.0.3
+requests==2.34.2
+psutil==7.2.2
+matplotlib==3.11.2
+pillow==12.3.0
+imageio==2.38.0
+fastapi==0.143.1
+uvicorn==0.54.0
+pytest==9.1.1
+httpx2==2.13.1
+# Opcional (solo si se quieren índices por Google Earth Engine; la vía principal no lo necesita):
+# earthengine-api==1.7.43

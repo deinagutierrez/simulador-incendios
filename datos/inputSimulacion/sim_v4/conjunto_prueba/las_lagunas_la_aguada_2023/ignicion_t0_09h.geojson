@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"name": "ignicion_t0_09h",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": "snmf_original", "hora_ignicion": "2023-08-31T09:00:00-03:00", "usar": false, "origen": "parte_SNMF", "dentro_de_cicatriz": false, "dist_a_cicatriz_m": 88.7, "nota": "parte SNMF", "frp": null }, "geometry": { "type": "Point", "coordinates": [ -65.627417, -32.596694000000539 ] } },
+{ "type": "Feature", "properties": { "id": "centroide_cicatriz", "hora_ignicion": "2023-08-31T09:00:00-03:00", "usar": false, "origen": "derivado_geometria", "dentro_de_cicatriz": true, "dist_a_cicatriz_m": 0.0, "nota": "derivado", "frp": null }, "geometry": { "type": "Point", "coordinates": [ -65.628485702052799, -32.591117347381847 ] } },
+{ "type": "Feature", "properties": { "id": "snmf_proyectado", "hora_ignicion": "2023-08-31T09:00:00-03:00", "usar": true, "origen": "derivado_proyeccion_borde", "dentro_de_cicatriz": true, "dist_a_cicatriz_m": 0.0, "nota": "derivado", "frp": null }, "geometry": { "type": "Point", "coordinates": [ -65.627938, -32.596027000000511 ] } }
+]
+}

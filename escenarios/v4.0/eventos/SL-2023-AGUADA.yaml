@@ -1,0 +1,43 @@
+# Incendio Las Lagunas y La Aguada (Libertador General San Martín), agosto de 2023. Evento de VALIDACIÓN (incorporado 2026-10-20).
+id: SL-2023-AGUADA
+nombre: Las Lagunas y La Aguada (Libertador General San Martín), 2023
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2023_26594 restringido a agosto de 2023 (raster mensual; 9 ha de septiembre). El mismo polígono vuelve a quemarse en septiembre de 2024 (58 ha, Las Lagunas 2024).
+  oid: "2023_26594"
+  calendar_year: 2023
+  mes: 8
+  superficie_ha: 126
+  superficie_ha_sat_compilador: 145.5
+inicio:
+  fecha_local: "2023-08-31"       # SNMF fecha_inicio (1 reporte el 04/09) confirmada por MODIS: 21 px el 31/08 y ninguno entre el 19/08 y el 14/09 (la fecha MapBiomas 21/08 es un artefacto de la asignación mensual); sin VIIRS en GEE para agosto de 2023
+  hora_utc_hipotesis: ["2023-08-31T16:00:00Z", "2023-08-31T13:00:00Z", "2023-08-31T19:00:00Z"]   # HIPÓTESIS 13, 10 y 16 h local
+  confianza: media                # día confirmado por MODIS; un solo reporte SNMF, posterior a la extinción
+fin:
+  fecha_extincion_snmf: "2023-09-01"
+  propagacion_principal: "2023-08-31 a 2023-09-01"
+  fin_simulacion_utc: "2023-09-02T03:00:00Z"
+  evaluacion_utc: ["2023-09-01T03:00:00Z", "2023-09-02T03:00:00Z"]   # fin del 31/08 y extinción
+ignicion:
+  fuente: SNMF (punto informado dentro del polígono)
+  puntos:
+    - {nombre: Las Lagunas y La Aguada, lon: -65.627417, lat: -32.596694}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: extremo N de la cicatriz (barlovento del viento NO-N del 30/08). No es una observación."
+    puntos:
+      - {nombre: extremo N cicatriz (hipótesis), lon: -65.6319, lat: -32.58189}
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2023-08-29T00:00:00Z", fin_utc: "2023-09-02T03:00:00Z"}
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2023-07-05", "2023-08-19"]     # anterior a la primera fecha posible de ignición (MapBiomas 21/08)
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+cobertura_anio: 2022
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [15, 33, 18, 6, 41, 4]  # Carpintería, La Toma, Los Molles, Merlo, Renca, San Pablo
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2023-08-31", contencion_dia: 1, extincion_dia: 1}   # un único reporte, el 04/09
+notas:
+  - Mismo sector que el foco "Las Lagunas" del megaincendio de 2024, un año antes: permite comparar el combustible pre-2024.
+  - Combate: BBVV Los Molles, Renca, San Pablo, Merlo, La Toma y Carpintería, BB PL San Luis (SNMF).

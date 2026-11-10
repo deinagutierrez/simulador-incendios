@@ -1,0 +1,46 @@
+codigo,clave,descripcion,w1h,w10h,w100h,wherb,wwoody,sav1h,savherb,savwoody,profundidad_ft,mx_muerto_pct,calor_muerto,calor_vivo,dinamico
+91,NB1,Urbano / desarrollado,0.0,0.0,0.0,0.0,0.0,0,0,0,0.0,0,0,0,0
+92,NB2,Nieve / hielo,0.0,0.0,0.0,0.0,0.0,0,0,0,0.0,0,0,0,0
+93,NB3,Agrícola,0.0,0.0,0.0,0.0,0.0,0,0,0,0.0,0,0,0,0
+98,NB8,Agua,0.0,0.0,0.0,0.0,0.0,0,0,0,0.0,0,0,0,0
+99,NB9,Suelo desnudo / roca,0.0,0.0,0.0,0.0,0.0,0,0,0,0.0,0,0,0,0
+101,GR1,"Pasto corto, carga muy baja, seco",0.1,0.0,0.0,0.3,0.0,2200,2000,9999,0.4,15,8000,8000,1
+102,GR2,"Pasto, carga baja, seco",0.1,0.0,0.0,1.0,0.0,2000,1800,9999,1.0,15,8000,8000,1
+103,GR3,"Pasto grueso, carga baja, húmedo",0.1,0.4,0.0,1.5,0.0,1500,1300,9999,2.0,30,8000,8000,1
+104,GR4,"Pasto, carga moderada, seco",0.25,0.0,0.0,1.9,0.0,2000,1800,9999,2.0,15,8000,8000,1
+105,GR5,"Pasto, carga baja, húmedo",0.4,0.0,0.0,2.5,0.0,1800,1600,9999,1.5,40,8000,8000,1
+106,GR6,"Pasto, carga moderada, húmedo",0.1,0.0,0.0,3.4,0.0,2200,2000,9999,1.5,40,9000,9000,1
+107,GR7,"Pasto alto, carga alta, seco",1.0,0.0,0.0,5.4,0.0,2000,1800,9999,3.0,15,8000,8000,1
+108,GR8,"Pasto alto, carga alta, húmedo",0.5,1.0,0.0,7.3,0.0,1500,1300,9999,4.0,30,8000,8000,1
+109,GR9,"Pasto muy alto, carga muy alta, húmedo",1.0,1.0,0.0,9.0,0.0,1800,1600,9999,5.0,40,8000,8000,1
+121,GS1,"Pasto-arbusto, carga baja, seco",0.2,0.0,0.0,0.5,0.65,2000,1800,1800,0.9,15,8000,8000,1
+122,GS2,"Pasto-arbusto, carga moderada, seco",0.5,0.5,0.0,0.6,1.0,2000,1800,1800,1.5,15,8000,8000,1
+123,GS3,"Pasto-arbusto, carga moderada, húmedo",0.3,0.25,0.0,1.45,1.25,1800,1600,1600,1.8,40,8000,8000,1
+124,GS4,"Pasto-arbusto, carga alta, húmedo",1.9,0.3,0.1,3.4,7.1,1800,1600,1600,2.1,40,8000,8000,1
+141,SH1,"Arbustal, carga baja, seco",0.25,0.25,0.0,0.15,1.3,2000,1800,1600,1.0,15,8000,8000,1
+142,SH2,"Arbustal, carga moderada, seco",1.35,2.4,0.75,0.0,3.85,2000,9999,1600,1.0,15,8000,8000,0
+143,SH3,"Arbustal, carga moderada, húmedo",0.45,3.0,0.0,0.0,6.2,1600,9999,1400,2.4,40,8000,8000,0
+144,SH4,"Arbustal, carga baja, húmedo",0.85,1.15,0.2,0.0,2.55,2000,1800,1600,3.0,30,8000,8000,0
+145,SH5,"Arbustal, carga alta, seco",3.6,2.1,0.0,0.0,2.9,750,9999,1600,6.0,15,8000,8000,0
+146,SH6,"Arbustal, carga baja, húmedo",2.9,1.45,0.0,0.0,1.4,750,9999,1600,2.0,30,8000,8000,0
+147,SH7,"Arbustal, carga muy alta, seco",3.5,5.3,2.2,0.0,3.4,750,9999,1600,6.0,15,8000,8000,0
+148,SH8,"Arbustal, carga alta, húmedo",2.05,3.4,0.85,0.0,4.35,750,9999,1600,3.0,40,8000,8000,0
+149,SH9,"Arbustal, carga muy alta, húmedo",4.5,2.45,0.0,1.55,7.0,750,1800,1500,4.4,40,8000,8000,1
+161,TU1,"Bosque-pasto-arbusto, carga baja, seco",0.2,0.9,1.5,0.2,0.9,2000,1800,1600,0.6,20,8000,8000,1
+162,TU2,"Bosque-arbusto, carga moderada, húmedo",0.95,1.8,1.25,0.0,0.2,2000,9999,1600,1.0,30,8000,8000,0
+163,TU3,"Bosque-pasto-arbusto, carga moderada, húmedo",1.1,0.15,0.25,0.65,1.1,1800,1600,1400,1.3,30,8000,8000,1
+164,TU4,"Bosque-arbusto, hojarasca de acícula corta",4.5,0.0,0.0,0.0,2.0,2300,9999,2000,0.5,12,8000,8000,0
+165,TU5,"Bosque-arbusto, carga muy alta, seco",4.0,4.0,3.0,0.0,3.0,1500,9999,750,1.0,25,8000,8000,0
+181,TL1,"Hojarasca compacta, carga baja",1.0,2.2,3.6,0.0,0.0,2000,9999,9999,0.2,30,8000,8000,0
+182,TL2,"Hojarasca de latifoliada, carga baja",1.4,2.3,2.2,0.0,0.0,2000,9999,9999,0.2,25,8000,8000,0
+183,TL3,"Hojarasca de conífera, carga moderada",0.5,2.2,2.8,0.0,0.0,2000,9999,9999,0.3,20,8000,8000,0
+184,TL4,Hojarasca con troncos pequeños,0.5,1.5,4.2,0.0,0.0,2000,9999,9999,0.4,25,8000,8000,0
+185,TL5,"Hojarasca de conífera, carga alta",1.15,2.5,4.4,0.0,0.0,2000,9999,9999,0.6,25,8000,8000,0
+186,TL6,"Hojarasca de latifoliada, carga moderada",2.4,1.2,1.2,0.0,0.0,2000,9999,9999,0.3,25,8000,8000,0
+187,TL7,Hojarasca con troncos grandes,0.3,1.4,8.1,0.0,0.0,2000,9999,9999,0.4,25,8000,8000,0
+188,TL8,Hojarasca de acícula larga,5.8,1.4,1.1,0.0,0.0,1800,9999,9999,0.3,35,8000,8000,0
+189,TL9,"Hojarasca de latifoliada, carga muy alta",6.65,3.3,4.15,0.0,0.0,1800,9999,9999,0.6,35,8000,8000,0
+201,SB1,"Restos, carga baja",1.5,3.0,11.0,0.0,0.0,2000,9999,9999,1.0,25,8000,8000,0
+202,SB2,"Restos, carga moderada",4.5,4.25,4.0,0.0,0.0,2000,9999,9999,1.0,25,8000,8000,0
+203,SB3,"Restos, carga alta",5.5,2.75,3.0,0.0,0.0,2000,9999,9999,1.2,25,8000,8000,0
+204,SB4,"Restos, carga muy alta",5.25,3.5,5.25,0.0,0.0,2000,9999,9999,2.7,25,8000,8000,0

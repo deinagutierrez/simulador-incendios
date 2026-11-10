@@ -1,0 +1,7 @@
+# Puertas Coloradas 2022 en modo pronóstico: combate sin la ficha (cuartel más cercano por la red vial, medios aéreos sorteados)
+descripcion: Cómo se usaría el modelo ante un incendio nuevo, sin saber qué recursos fueron. Validación fuera de calibración (sin focos VIIRS en el catálogo).
+evento: SL-2022-PUERTAS
+hipotesis: 0
+variante: local_pronostico
+validar: true
+figuras: true

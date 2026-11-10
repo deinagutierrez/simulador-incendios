@@ -1,0 +1,7 @@
+# Caso de prueba de SIM Las Lagunas–La Aguada 2023 con el modelo corregido de v4.0 (modelo_v3): comparar con v4_original_aguada_2023
+descripcion: Mismo caso base (36 h desde las 12 h local del 31/08/2023) con SIM corregido; barreras viales probabilísticas del modelo, sin combate.
+caso: las_lagunas_la_aguada_2023
+variante_caso: base
+modelo: modelo_v3
+validar: true
+figuras: true

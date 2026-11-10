@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de incendios San Luis</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="barra">
+  <button id="btn-panel" class="solo-movil" aria-label="Mostrar u ocultar el panel">☰</button>
+  <h1>Simulador de incendios · San Luis</h1>
+  <span id="estado-global" class="chip">listo</span>
+</header>
+<div class="app">
+  <aside id="panel" class="panel">
+    <details open>
+      <summary>Incendio y simulación</summary>
+      <label>Incendio histórico <select id="sel-incendio"></select></label>
+      <div id="info-incendio" class="info"></div>
+      <label>Simulación guardada <select id="sel-run"></select></label>
+      <div class="fila">
+        <label>Hipótesis de hora de ignición <select id="sel-hip"></select></label>
+        <label>Ignición <select id="sel-ign"><option value="snmf">punto SNMF</option></select></label>
+      </div>
+      <div class="fila">
+        <label>Fecha-hora inicial (UTC) <input id="t-ini" type="text" readonly></label>
+        <label>Fecha-hora final (UTC) <input id="t-fin" type="text"></label>
+      </div>
+      <div class="fila">
+        <label>k global (vacío = calibrado por clase) <input id="k-global" type="number" step="0.1" min="0.05" placeholder="calibrado"></label>
+        <label>Factor WAF <input id="waf" type="number" step="0.05" min="0.1" value="1.0"></label>
+      </div>
+      <div class="fila">
+        <label><input id="chk-barreras" type="checkbox"> Barreras lineales (rutas y caminos)</label>
+        <label><input id="chk-contencion" type="checkbox"> Contención por combate</label>
+        <label>Despacho <select id="sel-despacho">
+          <option value="auto">según el modelo</option>
+          <option value="local">local SNMF (cuarteles y aéreos registrados)</option>
+          <option value="pronostico">local SNMF, pronóstico (cuartel más cercano)</option>
+          <option value="global">global (tasa fija, docs/10)</option>
+        </select></label>
+      </div>
+      <div class="botones">
+        <button id="btn-iniciar" class="primario">Iniciar simulación</button>
+        <button id="btn-cancelar">Cancelar</button>
+      </div>
+      <div class="progreso"><div id="barra-progreso"></div></div>
+      <div id="estado-proceso" class="info">sin trabajo en curso</div>
+      <div id="mensajes" class="mensajes"></div>
+    </details>
+    <details open>
+      <summary>Reproducción</summary>
+      <div class="botones">
+        <button id="btn-play">▶ Reproducir</button>
+        <button id="btn-pausa">⏸ Pausa</button>
+        <button id="btn-reinicio">⏮ Reiniciar</button>
+      </div>
+      <input id="slider" type="range" min="0" max="0" value="0" step="1">
+      <div class="fila">
+        <span id="hora-sim" class="mono">—</span>
+        <label>Velocidad <select id="sel-vel"><option value="1000">1 h/s</option><option value="400" selected>2,5 h/s</option><option value="150">~7 h/s</option><option value="60">~16 h/s</option></select></label>
+      </div>
+      <label><input id="chk-lado" type="checkbox"> Vista lado a lado (observado | simulado)</label>
+    </details>
+    <details open>
+      <summary>Resultados</summary>
+      <table class="tabla" id="tabla-resultados"></table>
+      <canvas id="graf-area" height="140"></canvas>
+      <canvas id="graf-meteo" height="140"></canvas>
+      <div id="metricas" class="info"></div>
+    </details>
+    <details>
+      <summary>Escala y rendimiento</summary>
+      <table class="tabla" id="tabla-escala"></table>
+    </details>
+    <details>
+      <summary>Leyenda</summary>
+      <div id="leyenda" class="leyenda"></div>
+    </details>
+  </aside>
+  <main class="mapas">
+    <div id="mapa" class="mapa"></div>
+    <div id="mapa2" class="mapa oculto"></div>
+  </main>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Línea base de v4: Las Lagunas–Potrerillos 2024 con SIM corregido, sin barreras ni combate (los caminos solo reducen la carga)
+descripcion: Propagación libre con modelo_v3 (barreras y contención apagadas). Comparable con libre_laslagunas_2024 de v3.0 (variante libre_v2).
+evento: SL-2024-LASLAGUNAS
+hipotesis: 1
+variante: libre
+validar: true
+figuras: true

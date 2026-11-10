@@ -1,0 +1,10 @@
+# Comparación del viento (2 de 2): lo mismo con el viento uniforme de la serie + factor topográfico simple (como V.4)
+descripcion: Propagación libre 48 h con viento uniforme de la serie meteorológica. Comparar con comparar_viento_windninja_laslagunas_2024.
+evento: SL-2024-LASLAGUNAS
+hipotesis: 1
+horas: 48
+variante: libre
+viento: serie
+parar_en_cicatriz: on              # termina al igualar la superficie de la cicatriz (D38; el usuario lo pidió también aquí, E030)
+validar: true
+figuras: true

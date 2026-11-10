@@ -1,0 +1,97 @@
+# Parámetros del modelo v2 = v1 (propagación, viento, humedad, k calibrados) + barreras lineales + contención por combate.
+# Diseño: docs/10_diseno_barreras_contencion.md. Etiquetas: BIBLIO / MEDIDO / CALIBRAR / HIPOTESIS.
+# Con `barreras.activo: false` y `contencion.activo: false` el resultado es idéntico bit a bit a modelo_v1 (prueba automática).
+automata:
+  vecindad: 16
+  dt_s: 60
+  ros_min_m_min: 0.05
+  horas_sin_propagacion_para_terminar: 12
+  guardar_estado_cada_s: 3600
+propagacion:
+  modelo: rothermel_1972
+  elipse: anderson_1983_LB
+  combinacion_viento_pendiente: vectorial
+  # RECALIBRADO el 2026-10-20 con la humedad de retardo sobre 6 eventos (docs/12): kA 0,75 (empata con 0,5 en IoU medio 0,221; menor omisión),
+  # kB 2,0, kC 5,0. Los k de 2024 (0,5 / 3 / 5) dan 0,207: la superficie objetivo es plana y el error restante no es de k.
+  k_clase: {1: 0.75, 2: 0.75, 3: 0.75, 4: 2.0, 5: 2.0, 6: 5.0, 7: 5.0}
+viento:
+  herramienta: windninja_4.0.0
+  solver: conservacion_de_masa
+  malla_m: 100
+  vegetacion: brush
+  altura_salida_m: 10
+  bins_direccion_deg: 5
+  bins_velocidad_ms: 0.25
+  waf_por_clase: {1: 0.4, 2: 0.4, 3: 0.3, 4: 0.3, 5: 0.2, 6: 0.1, 7: 0.1}
+  # v3.1 (docs/v3.1/04, 2026-10-28): velocidad = promedio escalar de los 16 puntos IFS (el vectorial pierde 5-10 %); dirección = vectorial.
+  # Opciones: biblioteca (v3.0) | escalar | idw_puntos | windninja_diurno | windninja_puntos
+  fuente_horaria: escalar
+humedad:
+  # v2 (docs/11): humedad muerta por tiempo de retardo (equilibrio de Simard 1968, τ = 1/10/100 h; BIBLIO Fosberg 1970, NFDRS) en lugar del FFMC,
+  # cuyo tiempo de respuesta efectivo (6-10 h) corresponde a hojarasca de coníferas y secaba demasiado lento tras lluvia (Las Chacras 2023).
+  muerto_1h: retardo_simard        # ffmc_horario_vanwagner_1977 (v1) | retardo_simard
+  retardo: {tau_1h: 1.0, tau_10h: 10.0, tau_100h: 100.0, factor_lluvia_10h: 0.5, factor_lluvia_100h: 0.25}   # factores de lluvia: HIPOTESIS
+  muerto_10h_offset: 1.0           # sólo para la variante FFMC
+  muerto_100h_offset: 2.0
+  vivo_herbaceo: {ndmi_min: -0.1, ndmi_max: 0.4, lfmc_min: 30, lfmc_max: 120}
+  vivo_lenoso:   {ndmi_min: -0.1, ndmi_max: 0.4, lfmc_min: 60, lfmc_max: 150}
+  lluvia_24h_mm_extincion: 15.0    # respaldo: con el modelo de retardo la lluvia actúa a través de la humedad; antes 5 mm (HIPOTESIS)
+  mx_muerto_pct_clase: {}          # humedad de extinción por clase (CALIBRAR con scripts/evaluar_humedad.py); vacío = la del análogo (15-25 %)
+intensidad:
+  # I_B = I_R · t_r · R(θ) (Byram 1959 vía Andrews 2018, BIBLIO); t_r = 384/σ min (Anderson 1969, BIBLIO); L = 0,0775·I_B^0,46 m (Byram 1959, BIBLIO)
+  longitud_llama_a: 0.0775
+  longitud_llama_b: 0.46
+barreras:
+  activo: true
+  # Ancho efectivo (m) por clase de vía (HIPOTESIS, verificar con imágenes). `ruta_pavimentado` = clase ruta con superficie pavimentada.
+  ancho_m: {autopista: 25, ruta_pavimentado: 14, ruta: 10, camino: 6, calle: 8, servicio: 4, huella: 3, senda: 1.5, vado: 6, ferrocarril: 6, otro: 3, contencion: 3}
+  factor_fino: 4                 # subdivisión de la celda para detectar cruces de enlaces (7,5 m)
+  excluir_duplicados: true       # omite tramos con dup_probable = True
+  cruce:
+    modo: probabilistico         # probabilistico | umbral
+    lambda: 1.0                  # cociente L/W con P = 0,5 (HIPOTESIS, CALIBRAR; base: Wilson 1988)
+    beta: 4.0                    # pendiente de la logística (HIPOTESIS, CALIBRAR)
+  semilla: 20261015
+contencion:
+  activo: true
+  retardo_h: 2                   # sólo con retardo_modo: fijo (o sin producto de arribo): inicio del combate = ignición + retardo, salvo `combate.inicio_utc`
+  tasa_linea_m_h: 1000           # sólo con despacho.modo: fijo. CALIBRADO con Mesilla y el modelo de 2024 (docs/10 §10.4); con k y humedad de 2026-10-20 ningún valor fijo funciona (docs/13 §7)
+  m_h_por_bombero: 20            # si la ficha declara `combate.bomberos`, tasa = n · este valor (CALIBRAR)
+  costo_celda_m: 30              # metros de línea por celda asegurada
+  prioridad: flancos             # táctica de ancla y flancos (Finney 1998): línea continua desde la cola; cabeza: sector más activo sostenible primero
+  acumular_max_h: 8              # la producción no usada (frente demasiado intenso) se acumula como línea indirecta hasta 8 h de trabajo (HIPOTESIS, CALIBRAR)
+  intensidad_sostener_kw_m: 1700        # hauling chart: medios terrestres (BIBLIO Andrews & Rothermel 1982)
+  intensidad_sostener_aereo_kw_m: 3500  # con medios aéreos declarados en la ficha (HIPOTESIS)
+  intensidad_escape_kw_m: 3500          # una celda contenida puede escapar si la intensidad hacia un vecino supera esto (CALIBRAR)
+  p_escape_hora: 0.5                    # probabilidad de escape por hora cuando se supera el umbral (HIPOTESIS)
+  # --- Parametrización local con los reportes del SNMF 2020-2026 (docs/13; resultados/v3.0/combate_snmf/ajuste_despacho.csv)
+  usar_ficha: true               # usa `combate:` de la ficha (cuarteles y medios aéreos observados); false = modo pronóstico
+  despacho:
+    modo: snmf                   # fijo (tasa_linea_m_h) | snmf: tasa(t) = kappa · a · max(A_sim, 1 ha)^b, A_sim = superficie simulada (ha). Ablación 2026-10-20: docs/13 §7
+    kappa: 10.0                  # CALIBRADO en Mesilla 2024 con el modelo actual (docs/13 §7): perímetro en celdas y sobreestimación del primer día
+    tasa_max_m_h: 20000
+    # κ(A) = kappa·(A/quiebre)^-gamma por encima del quiebre, con piso `minimo` (docs/13 §8). gamma = 0,62 = valor a priori (κ 10 a la escala de
+    # Mesilla, ~1 a la de Las Lagunas, donde el modelo libre no sobreestima). Quiebre 1.000 ha (elegido en Mesilla + Las Lagunas) empeoró Renca,
+    # Puertas y Chilcas en la validación; 3.000 ha (elegido tras ver la validación) es idéntico a κ constante en 9 de 10 eventos y sólo actúa en Las Lagunas
+    kappa_tamano: {quiebre_ha: 3000, gamma: 0.62, minimo: 1.0}
+    regiones:                    # MEDIDO: ajuste log-log de la tasa efectiva de contención por régimen territorial (186 eventos)
+      periurbano: {a: 25.5, b: 0.41, departamentos: [JUAN MARTIN DE PUEYRREDON, GENERAL PEDERNERA]}
+      llanura_sur: {a: 29.6, b: 0.38, departamentos: [GOBERNADOR DUPUY]}
+      serrano: {a: 17.3, b: 0.36}          # resto de los departamentos (sierras y valle de Conlara)
+    region_defecto: serrano
+  inicio_exacto: false           # true: la primera línea en el minuto de llegada (prorrateada); false: en la hora en punto siguiente (docs/13 §9)
+  retardo_modo: vial             # fijo (retardo_h) | vial: t_aviso + t_despacho + viaje desde el cuartel más cercano (ficha: cuarteles declarados)
+  arribo:
+    t_aviso_h: 0.5               # detección y aviso (HIPOTESIS)
+    t_despacho_h: 0.25           # alistamiento y salida (HIPOTESIS)
+    campo_traviesa_kmh: 3.0      # último tramo sin vía, a pie (HIPOTESIS)
+    velocidad_kmh: {autopista: 80, ruta_pavimentado: 70, ruta: 45, camino: 35, calle: 30, servicio: 20, huella: 15, vado: 15, otro: 15, senda: 4}   # HIPOTESIS
+    res_m: 100
+    margen_m: 120000
+    max_h: 8
+  aereo_auto:                    # medios aéreos sin ficha (o con usar_ficha: false): MEDIDO en el SNMF (docs/13 §2.2)
+    activo: true
+    umbrales_ha: [10, 100, 1000, 10000]
+    prob_clase: [0.014, 0.103, 0.148, 0.259, 0.40]   # P(medio aéreo | clase de superficie final); se sortea al entrar en cada clase
+    demora_h: 24                 # primer medio aéreo: día 2 en mediana, rara vez el día de inicio
+    horas_vuelo_utc: [11, 22]    # sólo de día (08-19 h local)

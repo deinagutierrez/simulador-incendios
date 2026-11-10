@@ -1,0 +1,17 @@
+# Modelo "SIM de V.4 tal como se entregó" (V.4, 2026-10-22). Sirve para reproducir las corridas y la Fase 1 de V.4.
+# Solo cambia los interruptores de las correcciones de la verificación (docs/v4.0/15): todo lo demás es igual a modelo_v3.
+descripcion: SIM de V.4 sin las correcciones de v4.0 (viento 10 m→20 ft invertido, EMC con coeficientes en °C, Huygens sin re-anclaje por forma, extinción definitiva, caminos con la llama de cabeza)
+vecindad: 8
+dt_min: 2.0
+parametros:
+  viento: {factor_10m_20ft: 1.1494252873563218}       # 1/0,87 (V.4); el valor correcto es 0,87
+  humedad: {emc: v4_original, emc_min_pct: 2.0, curado_solo_dinamicos: false, metodo_muerto: retardo, viva_metodo: lineal}
+  limitar_viento: true
+  limite_viento: rothermel_1972
+  huygens: null
+  extincion: definitiva
+  barreras: {activo: true, modo: umbral_tipo, llama: cabeza}
+  credito_desde_activacion: false                       # P7: V.4 contaba el crédito desde la llegada (anulaba el retardo de ignición)
+  spotting: {por_unidad_tiempo: false}                  # P8: V.4 sorteaba p_max por sub-paso (dependía del CFL), ignición en t + Δt
+  contencion: {activo: false}
+  parada: {horas_sin_avance: null, contenido: false}

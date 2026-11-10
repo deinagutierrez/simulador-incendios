@@ -1,0 +1,29 @@
+# Escenario de ejemplo: la misma corrida del caso de prueba, pero como escenario libre (python -m simulador run).
+# Las rutas son relativas a esta carpeta y nunca salen de la raíz del simulador.
+nombre: ejemplo_las_lagunas_2023
+descripcion: Propagación libre desde el punto del parte SNMF (proyectado al borde de la cicatriz), 36 h.
+grilla: {xmin: 3529230, ymin: 6388890, xmax: 3540540, ymax: 6400170}
+t_inicio: "2023-08-31T12:00:00-03:00"
+duracion_h: 36
+dt_min: 2.0
+vecindad: 8
+modo: determinista            # determinista | estocastico
+semilla: 42
+ignicion: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/ignicion.geojson
+meteo: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/meteo_horaria.csv
+combustible: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/combustible_pre_evento.tif
+indices_mes_evento: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/indices_mes_evento.tif
+ndvi_verano: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/ndvi_verano_previo.tif
+modificador_combustible: null   # capa de mitigación (GeoTIFF factor de carga), vacía por ahora
+viento_externo: null            # {u: ruta.tif, v: ruta.tif} multibanda (banda = hora), p. ej. WindNinja
+perimetro_observado: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/perimetro_observado.geojson
+focos: ../../../datos/inputSimulacion/sim_v4/conjunto_prueba/las_lagunas_la_aguada_2023/focos_viirs.geojson
+parametros:
+  humedad: {viva_a: 120, viva_b: 250, curado_k: 1.5, curado_min: 0.3}
+  viento: {k_pendiente: 0.5, k_relieve: 0.3}
+  caminos:
+    umbral_llama_m: {pavimentado: 2.0, ripio: 1.5, tierra: 1.0, huella: 0.5}
+  viviendas_buffer_m: 100
+  spotting: {activo: false}
+ensemble: {n: 0}                # n > 0 → modo estocástico, mapa de probabilidad de quemado
+salidas: {png: true, gif: true, geotiff: true, geojson: true, dpi: 110}

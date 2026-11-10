@@ -1,0 +1,45 @@
+# Incendio Las Chacras (Libertador General San Martín), noviembre de 2023. Evento de VALIDACIÓN (incorporado 2026-10-20).
+id: SL-2023-CHACRAS
+nombre: Las Chacras (Libertador General San Martín), noviembre 2023
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2023_26588 restringido a noviembre de 2023 (raster mensual; 0,1 ha de mayo)
+  oid: "2023_26588"
+  calendar_year: 2023
+  mes: 11
+  superficie_ha: 250
+  superficie_informada_snmf_ha: 250
+inicio:
+  fecha_local: "2023-11-11"       # VIIRS NOAA-20: 31 detecciones el 11/11 a las 18:45 UTC (FRP máx 113 MW) sobre casi toda la cicatriz; SNMF registra inicio 12/11 (primer reporte 15/11)
+  hora_utc_hipotesis: ["2023-11-11T16:00:00Z", "2023-11-11T13:00:00Z", "2023-11-11T18:00:00Z"]   # HIPÓTESIS 13, 10 y 15 h local del 11/11 (28 °C, HR 21 %, viento S 9 m/s)
+  cota_superior_utc: "2023-11-11T18:45:00Z"
+  confianza: media                # día fijado por VIIRS; hora desconocida
+fin:
+  fecha_extincion_snmf: "2023-11-17"
+  fecha_contenido_snmf: "2023-11-15"
+  propagacion_principal: "2023-11-11 a 2023-11-13"   # VIIRS: 11/11 (31), 12/11 (28), 13/11 (15); nada después
+  fin_simulacion_utc: "2023-11-18T03:00:00Z"
+  evaluacion_utc: ["2023-11-12T03:00:00Z", "2023-11-14T03:00:00Z", "2023-11-16T03:00:00Z", "2023-11-18T03:00:00Z"]   # fin del 11/11, fin de los focos, contenido, extinción
+ignicion:
+  fuente: SNMF (punto informado a 62 m del polígono)
+  puntos:
+    - {nombre: Las Chacras, lon: -65.793722, lat: -32.595389}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: extremo N de la cicatriz (barlovento del viento S del 12/11). No es una observación."
+    puntos:
+      - {nombre: extremo N cicatriz (hipótesis), lon: -65.79387, lat: -32.57705}
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2023-11-10T00:00:00Z", fin_utc: "2023-11-18T03:00:00Z"}
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2023-09-28", "2023-11-11"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+cobertura_anio: 2022
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [22, 18, 34, 30]        # La Carolina, Los Molles, Tilisarao, San Martín
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2023-11-12", contencion_dia: 3, extincion_dia: 5}
+notas:
+  - Primavera avanzada con lluvias débiles los días 10, 11, 14 y 15/11 (0,9-6,2 mm): prueba de la regla de extinción por lluvia de 24 h.
+  - Combate: BBVV San Martín, Los Molles, La Carolina, Tilisarao y bomberos oficiales (SNMF); superficie informada 250 ha coincide con MapBiomas.

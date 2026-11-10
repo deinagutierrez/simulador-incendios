@@ -1,0 +1,15 @@
+{
+  "fuente": "COPERNICUS/DEM/GLO30_2024_1 (GEE)",
+  "descargado_utc": "2026-10-14T19:19:25Z",
+  "crs": "EPSG:5345",
+  "resolucion_m": 30,
+  "bbox": [
+    3503060,
+    6357770,
+    3573220,
+    6427900
+  ],
+  "margen_m": 10000,
+  "metodo": "mosaic + getDownloadURL con crs_transform alineado a la grilla de 30 m (remuestreo por defecto de GEE: vecino mas cercano)",
+  "archivo": "copernicus_glo30_2024_1_dominio_margen10km_epsg5345_30m.tif"
+}

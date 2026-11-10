@@ -1,0 +1,8 @@
+# Evento NO VISTO del lote X-49 (docs/v4.0/31): Laguna Larga 2023 (fuego lento de 3 dias con cambio de viento). Primera hipotesis horaria, ignicion = primer pase VIIRS (regla 4.1 del banco), sin barreras ni combate.
+descripcion: "Propagacion libre con modelo_v3 sobre SL-2023-LAGUNALARGA. Insumos: scripts/preparar_evento_desde_banco.py de v3.4 (sin GEE ni Open-Meteo); la primera corrida genera datos/procesados/v4.0/SL-2023-LAGUNALARGA."
+evento: SL-2023-LAGUNALARGA
+hipotesis: 0
+ignicion: snmf
+variante: libre
+validar: true
+figuras: true

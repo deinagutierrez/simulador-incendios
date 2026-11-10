@@ -1,0 +1,51 @@
+# Incendio Planta Piscu Yacu / Ruta 40 (Chacabuco), agosto de 2022. Evento de VALIDACIÓN (incorporado 2026-10-20).
+id: SL-2022-PISCUYACU
+nombre: Planta Piscu Yacu - Ruta 40 (Chacabuco), agosto 2022
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2022_43667 restringido a los píxeles quemados en AGOSTO de 2022 (raster mensual). El mismo polígono contiene el incendio de Renca - San Felipe de septiembre (SL-2022-RENCA, 3.820 ha).
+  oid: "2022_43667"
+  calendar_year: 2022
+  mes: 8
+  superficie_ha: 424
+inicio:
+  fecha_local: "2022-08-28"       # MODIS: 29 px el 28/08 sobre la cicatriz y ninguno el 27/08 (pasadas ~14 y ~18 UTC); SNMF fecha_inicio 27/08 -> HIPÓTESIS: ignición tarde del 27 o mañana del 28
+  hora_utc_hipotesis: ["2022-08-28T13:00:00Z", "2022-08-28T16:00:00Z", "2022-08-27T21:00:00Z", "2022-08-27T12:00:00Z", "2022-08-27T18:00:00Z"]   # HIPÓTESIS 10 y 13 h local del 28/08; 18 h local del 27/08
+  # hipótesis 3 (v3.1, 2026-10-27, docs/v3.1/02): acotada por la primera detección: primer foco VIIRS SNPP 27/08 19:03 UTC (las hipótesis 0-2 son posteriores)
+  # hipótesis 4 (v3.1, 2026-10-27, docs/v3.1/02): 27/08 18 UTC, la mejor con el punto alt1 en el control de hora (puntaje 0,75; 100 % de las primeras detecciones a tiempo)
+  confianza: media                # 27/08 HR mín 18 %, viento S 8,5 m/s; 28/08 HR 16 %, viento S 5 m/s
+fin:
+  fecha_extincion_snmf: "2022-08-29"
+  propagacion_principal: "2022-08-28 a 2022-08-29"
+  fin_simulacion_utc: "2022-08-30T03:00:00Z"
+  evaluacion_utc: ["2022-08-29T03:00:00Z", "2022-08-30T03:00:00Z"]   # fin del 28/08 y extinción
+ignicion:
+  fuente: SNMF (punto informado 'PLANTA PISCU YACU', dentro del polígono)
+  puntos:
+    - {nombre: Planta Piscu Yacu, lon: -65.5, lat: -32.7175}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada por búsqueda inversa (2026-10-27): punto que maximiza el IoU con la cicatriz en el instante en que la simulación alcanza su superficie (variante libre_v2, ~40 candidatos sobre la cicatriz principal + 300 m y refinamiento; estable en las 3 hipótesis horarias, salvo h2 (18 h del 27/08), donde el punto SNMF da 0,23 y éste 0,14). IoU 0,50 vs 0,37 del punto SNMF. Se ajusta a la misma cicatriz con la que se evalúa: no es una observación ni una validación independiente."
+    puntos:
+      - {nombre: búsqueda inversa (hipótesis), lon: -65.49646, lat: -32.7125}
+  - fuente: "HIPÓTESIS derivada por búsqueda conjunta hora + punto (v3.1, 2026-10-27, docs/v3.1/02): punto que maximiza forma + tiempo con la ignición del 27/08 12 UTC: IoU a igual superficie 0,46, 71 % de primeras detecciones a tiempo (puntaje 0,59 vs 0,25 de alt0 con la hipótesis 0). No es una observación."
+    puntos:
+      - {nombre: búsqueda conjunta v3.1 (hipótesis), lon: -65.49472, lat: -32.72688}
+recomendada:   # ignición espacial y horaria que usan los barridos de v3.1 (2026-10-27, docs/v3.1/02)
+  ignicion: alt1
+  hipotesis: 4
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2022-08-26T00:00:00Z", fin_utc: "2022-08-30T03:00:00Z"}
+indices:
+  coleccion: COPERNICUS/S2_SR_HARMONIZED
+  ventana: ["2022-07-12", "2022-08-26"]
+  umbral_cs_cdf: 0.6
+  compuesto: mediana
+  respaldo_evento: SL-2022-RENCA
+cobertura_anio: 2021
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [41, 17]                # Renca, Concarán
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2022-08-27", contencion_dia: 2, extincion_dia: 3}   # "Controlado" el 29/08; reinicio "Ruta 40" el 30/08 con San Pablo
+notas:
+  - La cicatriz de agosto (424 ha) fusiona Piscu Yacu (27-29/08) con el evento SNMF 'RUTA 40' de Junín (30-31/08, 12 px MODIS el 30/08); la simulación termina el 30/08 03 UTC, antes del segundo evento, por lo que parte de la referencia no es alcanzable.
+  - Sin VIIRS en GEE para 2022; focos MODIS. El raster mensual de septiembre (Renca) se excluye por `mes: 8`.

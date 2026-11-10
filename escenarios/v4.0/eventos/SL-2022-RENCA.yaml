@@ -1,0 +1,40 @@
+# Incendio Renca - San Felipe (Chacabuco), septiembre de 2022. Evento de VALIDACIÓN (no se calibra con él).
+id: SL-2022-RENCA
+nombre: Renca - San Felipe (Chacabuco)
+dominio: las_lagunas_potrerillos
+referencia_espacial:
+  fuente: MapBiomas Fuego Col. 1 polígono 2022_43667 restringido a los píxeles quemados en septiembre (raster mensual)
+  oid: "2022_43667"
+  calendar_year: 2022
+  mes: 9                          # el polígono fusiona un evento de agosto (Piscu Yacu / Ruta 40, ~424 ha) y el de septiembre (~3.820 ha)
+  superficie_ha: 3820             # estimación por píxeles mensuales (0,0757 ha/px); se recalcula al rasterizar
+inicio:
+  fecha_local: "2022-09-06"       # MODIS detecta 88 px el 06/09 en el área; SNMF registra inicio 07/09 (primer reporte 08/09)
+  hora_utc_hipotesis: ["2022-09-06T16:00:00Z", "2022-09-06T13:00:00Z", "2022-09-07T13:00:00Z", "2022-09-06T04:00:00Z", "2022-09-06T02:00:00Z"]   # HIPÓTESIS h0–h2: 13 h / 10 h local del 6, 10 h del 7 (originales); h3, h4 (E036, D43): 01 h local del 06/09 y 23 h del 05/09 = primera detección VIIRS − 1 h y − 3 h
+  cota_superior_utc: "2022-09-06T05:12:00Z"  # E036: primera detección VIIRS S-NPP (FIRMS, REPO/datos/crudos/FIRMS/viirs_snpp_san_luis.csv): 4 focos nocturnos, 1 dentro de la cicatriz (FRP hasta 6,8 MW); a las 17:35 UTC, 71 focos. h0–h2 son posteriores a esta cota
+  confianza: media
+fin:
+  fecha_extincion_snmf: "2022-09-11"
+  fecha_contenido_snmf: "2022-09-08"
+  propagacion_principal: "2022-09-06 a 2022-09-08"
+  fin_simulacion_utc: "2022-09-12T03:00:00Z"
+  evaluacion_utc: ["2022-09-07T03:00:00Z", "2022-09-09T03:00:00Z", "2022-09-12T03:00:00Z"]   # fin del día de ignición (añadido 2026-10-20 para la calibración de k, docs/12), contenido (00:00 local 09/09) y extinción
+ignicion:
+  fuente: SNMF (punto informado 'RENCA SAN FELIPE'; no es el origen exacto verificado)
+  puntos:
+    - {nombre: Renca - San Felipe, lon: -65.456528, lat: -32.792417}
+ignicion_alternativas:
+  - fuente: "HIPÓTESIS derivada: extremo norte (a barlovento) de la cicatriz de septiembre; el viento del 06-07/09 fue del N a 5-7 m/s y el punto SNMF está en el extremo sur (sotavento), por lo que no puede ser el origen de un fuego que se propagó 14 km hacia el sur. No es una observación."
+    puntos:
+      - {nombre: extremo norte cicatriz sept (hipótesis), lon: -65.51652, lat: -32.72047}
+meteorologia: {fuente: open-meteo archive, modelo: ecmwf_ifs, inicio_utc: "2022-09-05T00:00:00Z", fin_utc: "2022-09-12T03:00:00Z"}
+indices: {coleccion: COPERNICUS/S2_SR_HARMONIZED, ventana: ["2022-07-20", "2022-09-05"], umbral_cs_cdf: 0.6, compuesto: mediana}
+cobertura_anio: 2021
+combate:
+  fuente: "SNMF, reportes diarios (docs/13; resultados/v3.0/combate_snmf/eventos.csv). cuarteles_id = id en bomberos_san_luis.geojson"
+  cuarteles_id: [41]                    # Renca
+  aereo: []                     # el SNMF no registra medios aéreos
+  snmf: {inicio: "2022-09-07", contencion_dia: 1, extincion_dia: 4}
+notas:
+  - Sin detecciones VIIRS en GEE para 2022 (solo MODIS 1 km); la validación temporal es de baja resolución.
+  - El evento 'RUTA 40 / EL MOLLAR' (06-10/09/2022) a 10 km al este es independiente.
