@@ -1,6 +1,8 @@
 # Entorno único para los dos motores (v3.1 y v4.0) y para el simulador interactivo.
 # Versiones del entorno donde se verificó el 2026-11-10 (Python 3.14.7, Windows 11): pasan las pruebas de v3.1 y de v4.0
 # y las corridas de humo de los dos motores. En Linux lo comprueba la integración continua.
+# Esta lista se prueba en un entorno nuevo (.venv) creado solo con ella: no alcanza con que funcione en un Python
+# que ya tenía otras bibliotecas instaladas.
 # NO instalar los motores con "pip install -e": los dos paquetes se llaman incendios_sl. Se usan por PYTHONPATH
 # (lo hace herramientas/probar.py y lo hará el simulador).
 numpy==2.5.2
@@ -22,6 +24,8 @@ psutil==7.2.2
 matplotlib==3.11.2
 pillow==12.3.0
 imageio==2.38.0
+scikit-image==0.26.0
+firebench==0.10.0
 fastapi==0.143.1
 uvicorn==0.54.0
 pytest==9.1.1

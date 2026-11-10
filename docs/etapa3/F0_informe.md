@@ -72,7 +72,21 @@ Rótulos: **(dato)** medido ese día en ese equipo · **(inferencia)** · **(sin
 (dato) 476 MB en total: datos 443 MB, documentos 34 MB, código de los motores 1,1 MB, pruebas y escenarios menos de 1 MB.
 Ningún archivo supera los 50 MB.
 
-## 7. Cosas que conviene saber
+## 7. Primera subida y primera corrida de la integración continua
+
+- (dato) Primera subida el 2026-11-10: cambio `2e4a4fd`, 528 archivos, con las etiquetas `prerregistro-E-E3-1` a `-4` y
+  `contrato-v1`.
+- (dato) La primera corrida de la integración continua **falló en Windows y en Linux**, en el paso de verificación.
+- (dato) Causa, reproducida en local con un clon limpio y un entorno nuevo creado por `instalar.bat`: a `requirements.txt` le
+  faltaban `firebench` y `scikit-image`, que v3.1 importa. Las pruebas de v3.1 daban 2 fallas y 22 errores por
+  `ModuleNotFoundError`. La lista se había armado y probado con el Python del sistema, que ya tenía esas bibliotecas; nunca se
+  había probado en un entorno creado solo con ella. Fue un error de método de esta F0.
+- (dato) Con las dos bibliotecas agregadas, el clon limpio con entorno nuevo pasa todo en Windows: v3.1 69 pruebas, v4.0 130
+  más 5 excluidas, y las dos corridas cortas.
+- (sin verificar) Linux: recién se sabrá cuando la integración continua corra con la corrección.
+- Regla que queda: `requirements.txt` se valida siempre con `instalar.bat` o `./instalar.sh` sobre un clon limpio.
+
+## 8. Cosas que conviene saber
 
 - `datos/inputSimulacion/sim_v4/manifiesto_datos.yaml` es parte de v4.0 y guarda, como procedencia, rutas absolutas del equipo
   donde se armó (`C:\Users\Usuario\Documents\…`). Quedan a la vista en un repositorio público. No contienen claves.
