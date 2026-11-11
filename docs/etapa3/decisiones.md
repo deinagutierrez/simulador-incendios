@@ -32,3 +32,11 @@ También aprobado: los umbrales propuestos para el prerregistro E-E3-2 (índices
 3. Protección de la rama `main` y revisión obligatoria (ajustes del repositorio, los hace la dueña).
 4. Quién toma cada frente y quién escribe y quién evalúa cada prerregistro.
 5. Si se traen a este repositorio `reporte_avance.md` y `decisiones.md` de las etapas anteriores.
+
+## 2026-11-11 — Quién evalúa el prerregistro E-E3-1
+
+| Código | Decisión | Estado |
+|---|---|---|
+| D-E3-13 | La evaluación formal de E-E3-1 la hace el mismo frente que escribió `app/motores/` (el usuario, con Claude), porque la otra persona no puede hacerla. Es una **desviación declarada** de la regla "escribe una persona, evalúa la otra" de D-E3-12, y vale solo para E-E3-1. Lo que la compensa: el criterio es binario y estaba fijado y etiquetado antes de escribir el código (0 celdas distintas); la evaluación es un guion sin pasos manuales (`herramientas/e_e3_1.py`) que cualquiera puede repetir; el resultado se guarda con el cambio de git, el sha256 del congelado y los sha256 de los datos usados. La otra persona puede repetirla cuando pueda, y ese resultado reemplaza a este | decidida por el usuario |
+| D-E3-14 | Los tres pares de Las Chacras octubre 2023 se corren con los datos del evento tomados de la copia de trabajo anterior (Drive), copiados a `datos/inputSimulacion/` del clon sin registrarlos en git, porque el paquete de datos históricos todavía no existe. Los archivos se listan con su sha256 en el resultado. Descartado: esperar al paquete, que dejaba la evaluación incompleta | decidida por Claude, **a confirmar por el usuario** |
+

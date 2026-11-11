@@ -7,9 +7,13 @@ Por cada par escenario–motor hace tres corridas: la offline (`scripts/correr_e
 órdenes y el proceso con una pausa y una reanudación a mitad de camino. Cuenta las celdas cuyo tiempo de llegada difiere.
 Criterio del prerregistro: 0 celdas distintas. Deja la tabla en resultados/app/E-E3-1/resultados.json y la imprime.
 De paso anota segundos de cómputo y memoria pico (prerregistro E-E3-3).
+
+Para que el resultado se pueda rastrear, guarda también el cambio de git, si había archivos de código sin registrar, el
+sha256 del congelado y, por cada evento, la lista de sus archivos de datos con sha256 y si están o no en el repositorio.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import platform
@@ -103,6 +107,27 @@ def proceso(carpeta: Path, motor: str, definicion: dict, pausar_en_h: int | None
     return leer(carpeta / "salida" / MOTORES[motor][2]), final, pausas
 
 
+def git(*args: str) -> str:
+    return subprocess.run(["git", *args], cwd=REPO, capture_output=True, text=True, encoding="utf-8", errors="replace").stdout
+
+
+def datos_del_evento(evento: str) -> dict:
+    """Archivos de datos propios del evento, con sha256, y cuáles no están registrados en git (vienen de afuera)."""
+    base = REPO / "datos" / "inputSimulacion"
+    rutas = [q for q in base.rglob(f"*{evento}*") if q.is_file()]
+    rutas += [q for d in base.rglob(evento) if d.is_dir() for q in d.rglob("*") if q.is_file()]
+    rutas = sorted(set(rutas))
+    en_git = set(git("ls-files", "datos/inputSimulacion").splitlines())
+    archivos = []
+    for q in rutas:
+        rel = q.relative_to(REPO).as_posix()
+        archivos.append({"archivo": rel, "bytes": q.stat().st_size, "sha256": hashlib.sha256(q.read_bytes()).hexdigest(),
+                         "en_git": rel in en_git})
+    todo = hashlib.sha256("".join(f"{a['archivo']}:{a['sha256']};" for a in archivos).encode()).hexdigest()
+    return {"evento": evento, "n_archivos": len(archivos), "fuera_de_git": sum(not a["en_git"] for a in archivos),
+            "sha256_del_conjunto": todo, "archivos": archivos}
+
+
 def main() -> int:
     pedidos = sys.argv[1:] or list(ESCENARIOS)
     if SALIDA.exists():
@@ -133,10 +158,14 @@ def main() -> int:
                           "memoria_pico_mb": fin["memoria_pico_mb"], "motivo_fin": fin["motivo"]})
             print("   " + json.dumps(filas[-1], ensure_ascii=False), flush=True)
     SALIDA.mkdir(parents=True, exist_ok=True)
-    cab = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip() or None
+    cab = git("rev-parse", "HEAD").strip() or None
+    sin_registrar = [l for l in git("status", "--porcelain", "--", "app", "herramientas", "src", "escenarios", "congelado.json").splitlines() if l.strip()]
+    eventos = sorted({ESCENARIOS[n]["definicion"]["evento"] for n in pedidos if "evento" in ESCENARIOS[n]["definicion"]})
     informe = {"fecha": time.strftime("%Y-%m-%d %H:%M"), "equipo": {"sistema": platform.platform(), "procesador": platform.processor(),
                "nucleos": os.cpu_count(), "python": sys.version.split()[0]}, "cambio_git": cab,
-               "congelado_sha256": json.loads((REPO / "congelado.json").read_text(encoding="utf-8"))["sha256_del_conjunto"], "filas": filas}
+               "codigo_sin_registrar": sin_registrar,
+               "congelado_sha256": json.loads((REPO / "congelado.json").read_text(encoding="utf-8"))["sha256_del_conjunto"],
+               "datos_por_evento": [datos_del_evento(ev) for ev in eventos], "filas": filas}
     (SALIDA / "resultados.json").write_text(json.dumps(informe, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     print("\nescenario        motor          h    ha         distintas  con pausa  s/h sim  MB pico")
     for f in filas:
