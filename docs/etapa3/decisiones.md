@@ -46,3 +46,19 @@ También aprobado: los umbrales propuestos para el prerregistro E-E3-2 (índices
 |---|---|---|
 | D-E3-15 | Los datos del evento Las Chacras octubre 2023 (15 archivos, 21 MB) se registran en el repositorio, en `datos/inputSimulacion/`. **Reemplaza a D-E3-14.** Son los mismos archivos de la evaluación formal de E-E3-1 (mismo sha256 del conjunto, `52d145b3c3df…`), así que cualquiera que clone puede repetir los siete pares. El repositorio pasa de 476 a 497 MB. Es uno de los cinco eventos no vistos (X-49); tenerlo en el repositorio no lo abre de nuevo: E-E3-1 compara el programa contra el motor, sin mirar la cicatriz. El resto de los eventos históricos sigue yendo en el paquete aparte | decidida por el usuario |
 
+## 2026-11-11 — Aprobaciones para empezar la F2
+
+La otra persona del proyecto leyó `F2_pedido_de_aprobacion.md` y lo aprobó completo; lo informó el usuario en la sesión de
+trabajo. También aprobó el contrato servidor–motor 1.1.
+
+| Código | Decisión | Estado |
+|---|---|---|
+| D-E3-16 | Contrato servidor–motor **1.1 aprobado** por las dos personas | aprobada |
+| D-E3-17 | **La F2 (servidor) la hace el frente que hizo la F1** (el usuario, con Claude), y también el motor simulado. Cambia el reparto de D-E3-12, que se la daba al frente B. La F2 se revisa al final, con la rama completa | aprobada |
+| D-E3-18 | **La rama `f1-procesos-motor` se une a `main` sin revisión previa**, autorizado por la otra persona. La F2 se trabaja en la rama `f2-servidor` | aprobada |
+| D-E3-19 | **Alcance y decisiones técnicas de la F2**: los puntos 6 a 23 de `F2_pedido_de_aprobacion.md` (solo servidor y página mínima; datos de un evento con ficha; modo "ambos"; código en `app/servidor/`; avance por canal de una sola vía; `corrida.json` según el contrato 1.1; dos corridas a la vez como máximo; corridas interrumpidas no se retoman; el servidor rechaza pedidos que no vengan de su página; sin bibliotecas nuevas; pruebas con motor simulado y pocas con motores reales; repetición de los siete pares de E-E3-1 por el servidor al cerrar) | aprobada |
+| D-E3-20 | **El programa corre el punto de ignición a la celda combustible más cercana al clic antes de pasárselo al motor** (punto 24 del pedido). El contrato pasa a 1.2 | aprobada |
+| D-E3-21 | **La F1 se cerró sin "evento generado"** (datos bajados en el momento). Esa parte pasa a la F4, porque depende de la descarga de pronóstico e índices | informada en el pedido de la F2, sin objeción |
+
+Siguen pendientes: protección de `main`, licencia del código, y quién evalúa los prerregistros E-E3-2, E-E3-3 y E-E3-4.
+

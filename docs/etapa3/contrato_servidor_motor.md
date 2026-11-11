@@ -3,7 +3,8 @@
 Es el único punto donde se tocan el frente A (motores y datos) y el frente B (servidor e interfaz). Se cambia solo por pedido
 de integración aprobado por las dos personas, subiendo el número de versión.
 
-**Cambios de la 1.0 a la 1.1** (propuestos al implementar la fase F1, 2026-11-11; pendientes de aprobación de la otra persona):
+**Cambios de la 1.0 a la 1.1** (propuestos al implementar la fase F1 y aprobados por las dos personas el 2026-11-11,
+decisión D-E3-16):
 `corrida.json` admite `base` para definir la corrida desde un escenario de los motores; el motor se lee de `corrida.json`;
 el aviso `listo` trae la grilla de la huella; `final` y `error` traen más campos; las órdenes se consultan sin bloquear;
 los resultados del motor quedan en `salida/`; `corrida.json` admite `configuracion` con la ignición, la hora de inicio y la

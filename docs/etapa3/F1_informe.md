@@ -109,14 +109,13 @@ Medido en la tanda de la evaluación formal (proceso sin órdenes).
 
 El contrato pasa de la versión 1.0 a la 1.1 (`contrato_servidor_motor.md`). Lo que cambia para el frente B: la corrida se
 define con `base` en `corrida.json`; el aviso `listo` trae la grilla de la huella; los resultados del motor quedan en
-`salida/`; las órdenes se atienden en hora en punto. **Falta la aprobación de la otra persona**, como pide la regla de trabajo.
+`salida/`; las órdenes se atienden en hora en punto. Aprobado por las dos personas el 2026-11-11 (decisión D-E3-16).
 
 ## 7. Lo que sigue
 
 1. Fase de datos (F4): pronóstico e índices bajados en el momento, y con ellos el primer evento generado.
 2. Paquete de datos históricos y `bajar_historicos.py`, para los otros 13 eventos.
 3. Medir el modo "ambos" y repetir las mediciones en un segundo equipo y en Linux.
-4. Aprobación del contrato 1.1 por la otra persona.
 
 ## 8. Segunda parte: ignición en un punto y una hora elegidos
 
