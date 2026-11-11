@@ -1,4 +1,4 @@
-# Contrato entre los dos frentes — versión 1.2
+# Contrato entre los dos frentes — versión 1.3
 
 Es el único punto donde se tocan el frente A (motores y datos) y el frente B (servidor e interfaz). Se cambia solo por pedido
 de integración aprobado por las dos personas, subiendo el número de versión.
@@ -15,6 +15,10 @@ a la 1.0.
 un punto elegido por el usuario que cae en una celda que no quema se corre a la combustible más cercana al clic, sin mirar la
 cicatriz del evento base; el motor simulado existe (§3); el servidor existe y su interfaz está en §4; el servidor agrega a
 `corrida.json` los campos `formato`, `id`, `creada_utc`, `grupo` y `programa`.
+
+**Cambios de la 1.2 a la 1.3** (fase F3, 2026-11-11; **propuestos, pendientes de aprobación de la otra persona**):
+pedidos nuevos del servidor para la pantalla (capas de fondo, vectores, contorno, exportación, comparación entre dos
+corridas) y color plano en la imagen de la huella. La raíz `/` pasa a ser la pantalla; la página de prueba queda en `/prueba`.
 
 ## 1. Paquete de corrida
 
@@ -134,7 +138,15 @@ su propia página: los que traen otro origen se rechazan con 403.
 | `POST /api/corridas/<id>/intervenciones` | solo en pausa; devuelve el aviso `intervencion` del motor (hoy `rechazada`) |
 | `GET /api/corridas/<id>/eventos` | avance en vivo por un canal de una sola vía (`text/event-stream`). Cada evento es un aviso del motor o un cambio de estado, numerado con `n`; con `?desde=N` manda los posteriores al N. Cierra con un evento `cierre` |
 | `GET /api/corridas/<id>/quemado.png?hora=N` | huella hasta la hora N (o completa), lista para superponer en un mapa web con el recuadro `huella.limites` |
-| `GET /` | página mínima de prueba |
+| `GET /api/corridas/<id>/quemado.png?hora=N&color=rrggbb` | con `color`, la huella de un solo color (para comparar dos motores) |
+| `GET /api/corridas/<id>/perimetro.geojson?hora=N` | contorno del área quemada hasta la hora N, en grados |
+| `GET /api/corridas/<id>/exportar` | zip con `corrida.json`, las salidas del motor y `perimetros_por_hora.geojson`. Solo con la corrida terminada |
+| `GET /api/comparacion?a=<id>&b=<id>&hora=N` | superficie de cada huella, de la parte común y de la envolvente, y su cociente (`iou`) |
+| `GET /api/capas?evento=<id>` | capas de fondo disponibles, con leyenda y recuadro |
+| `GET /api/capas/<capa>.png?evento=<id>` | capa ráster lista para superponer: `relieve`, `pendiente`, `cobertura`, `arribo`, y por evento `ndvi`, `ndmi`, `combustible`, `cicatriz` |
+| `GET /api/vectores/<capa>.geojson` | `dominio`, `caminos`, `red_mt`, `viviendas`, `cuarteles` |
+| `GET /` | la pantalla del simulador |
+| `GET /prueba` | página mínima de prueba de la F2 |
 
 **Estados de una corrida:** `creada` → `iniciando` → `corriendo` ⇄ `pausando` → `pausada`; y al final `terminada`, `detenida`,
 `error` o `interrumpida`. `pausando` es el rato entre que se pide la pausa y que el motor llega a la hora en punto.
@@ -146,8 +158,8 @@ que guarden lo simulado y espera hasta 15 segundos.
 **Archivos que agrega el servidor a la carpeta de la corrida:** `estado.json` (estado y última hora; con esto reconstruye la
 lista al volver a arrancar), `eventos.jsonl` (todos los eventos, numerados) y `arranque.log`.
 
-Todavía no existen los pedidos del borrador del plan (Anexo D) para bajar datos (F4), el perímetro por hora y la exportación
-(F3 y F7) ni el modo histórico (F6).
+Todavía no existen los pedidos del borrador del plan (Anexo D) para bajar datos (F4), el visor autónomo (F7) ni el modo
+histórico (F6).
 
 ## 5. Advertencia para quien escriba el servidor o las pruebas
 

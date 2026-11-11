@@ -9,24 +9,35 @@
     POST /api/corridas/<id>/iniciar|pausar|reanudar|detener
     POST /api/corridas/<id>/intervenciones        solo en pausa; hoy el motor contesta "rechazada" (llega con la fase F5)
     GET  /api/corridas/<id>/eventos               avance en vivo, por un canal de una sola vía (text/event-stream)
-    GET  /api/corridas/<id>/quemado.png?hora=N    huella para el mapa, hasta la hora simulada N (o completa)
-    GET  /                                        página mínima de prueba
+    GET  /api/corridas/<id>/quemado.png?hora=N    huella para el mapa, hasta la hora simulada N (o completa);
+                                                  con color=rrggbb, de un solo color (para comparar dos motores)
+    GET  /api/corridas/<id>/perimetro.geojson?hora=N   contorno del área quemada hasta la hora N
+    GET  /api/corridas/<id>/exportar              zip con corrida.json, los resultados del motor y los perímetros por hora
+    GET  /api/comparacion?a=<id>&b=<id>&hora=N    coincidencia entre dos huellas (superficies, envolvente, IoU)
+    GET  /api/capas?evento=<id>                   capas de fondo disponibles, con su leyenda
+    GET  /api/capas/<capa>.png?evento=<id>        capa ráster lista para superponer en un mapa web
+    GET  /api/vectores/<capa>.geojson             caminos, viviendas, red de media tensión, cuarteles, borde del dominio
+    GET  /                                        la pantalla del simulador (app/web/index.html)
+    GET  /prueba                                  página mínima de prueba de la fase F2
 
 Seguridad: el servidor escucha solo en 127.0.0.1 y además rechaza los pedidos que no vengan de su propia página.
 """
 from __future__ import annotations
 
 import asyncio
+import io
 import json
+import zipfile
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import VERSION, datos, huella
+from . import VERSION, capas, datos, huella
 from .corridas import ACTIVOS, FINALES, MOTORES_REALES, Gestor, Rechazo, sha_congelado
 
 WEB = Path(__file__).resolve().parents[1] / "web"
@@ -180,19 +191,94 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
                                  headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
     @app.get("/api/corridas/{id_}/quemado.png")
-    def quemado(id_: str, hora: float | None = None):
+    def quemado(id_: str, hora: float | None = None, color: str | None = None):
         c = gestor.obtener(id_)
         if not c.listo:
             raise HTTPException(404, "la corrida todavía no tiene huella")
-        imagen = huella.png(c.carpeta, c.listo["grilla"], hora)
+        rgb = None
+        if color:
+            if len(color) != 6 or any(ch not in "0123456789abcdefABCDEF" for ch in color):
+                raise HTTPException(422, "color: seis cifras hexadecimales, por ejemplo 2a78d6")
+            rgb = tuple(int(color[i:i + 2], 16) for i in (0, 2, 4))
+        imagen = huella.png(c.carpeta, c.listo["grilla"], hora, rgb)
         if imagen is None:
             raise HTTPException(404, "la corrida todavía no tiene huella")
         return Response(imagen, media_type="image/png", headers={"Cache-Control": "no-store"})
 
-    # ------------------------------------------------------------------ página mínima de prueba
+    @app.get("/api/corridas/{id_}/perimetro.geojson")
+    def perimetro(id_: str, hora: float | None = None):
+        c = gestor.obtener(id_)
+        figura = huella.perimetro(c.carpeta, c.listo["grilla"], hora) if c.listo else None
+        if figura is None:
+            raise HTTPException(404, "la corrida todavía no tiene huella")
+        return JSONResponse(figura, media_type="application/geo+json")
+
+    @app.get("/api/corridas/{id_}/exportar")
+    def exportar(id_: str):
+        """Zip con lo que deja la corrida: lo pedido y los resultados, las salidas del motor y los perímetros por hora."""
+        c = gestor.obtener(id_)
+        if c.estado not in FINALES:
+            raise HTTPException(409, "la corrida todavía está en marcha; se exporta cuando termina")
+        memoria = io.BytesIO()
+        with zipfile.ZipFile(memoria, "w", zipfile.ZIP_DEFLATED) as z:
+            for nombre in ("corrida.json", "estado.json", "eventos.jsonl", "escenario_base.yaml"):
+                if (c.carpeta / nombre).exists():
+                    z.write(c.carpeta / nombre, f"{id_}/{nombre}")
+            salida = c.carpeta / "salida"
+            if salida.is_dir():
+                for ruta in sorted(q for q in salida.rglob("*") if q.is_file()):
+                    z.write(ruta, f"{id_}/salida/{ruta.relative_to(salida).as_posix()}")
+            if c.listo and c.ultima_hora:
+                figuras = []
+                for h in range(int(c.ultima_hora["h"]) + 1):
+                    f = huella.perimetro(c.carpeta, c.listo["grilla"], h)
+                    if f:
+                        figuras += f["features"]
+                z.writestr(f"{id_}/perimetros_por_hora.geojson", json.dumps({"type": "FeatureCollection", "features": figuras}))
+        return Response(memoria.getvalue(), media_type="application/zip",
+                        headers={"Content-Disposition": f'attachment; filename="{id_}.zip"'})
+
+    @app.get("/api/comparacion")
+    def comparacion(a: str, b: str, hora: float | None = None):
+        ca, cb = gestor.obtener(a), gestor.obtener(b)
+        r = huella.comparar(ca.carpeta, cb.carpeta, ca.listo["grilla"], cb.listo["grilla"], hora) if ca.listo and cb.listo else None
+        if r is None:
+            raise HTTPException(409, "las dos corridas tienen que tener huella y la misma grilla")
+        return r | {"a": {"id": a, "motor": ca.motor}, "b": {"id": b, "motor": cb.motor}}
+
+    # ------------------------------------------------------------------ capas de fondo
+    @app.get("/api/capas")
+    def lista_de_capas(evento: str | None = None):
+        if evento is not None and evento not in datos.eventos_base():
+            raise HTTPException(404, f"el evento {evento} no tiene datos en este clon")
+        return {"capas": capas.lista(evento)}
+
+    @app.get("/api/capas/{nombre}.png")
+    def capa(nombre: str, evento: str | None = None):
+        if evento is not None and evento not in datos.eventos_base():
+            raise HTTPException(404, f"el evento {evento} no tiene datos en este clon")
+        imagen = capas.png(nombre, evento)
+        if imagen is None:
+            raise HTTPException(404, f"no existe la capa {nombre}")
+        return Response(imagen, media_type="image/png", headers={"Cache-Control": "max-age=3600"})
+
+    @app.get("/api/vectores/{nombre}.geojson")
+    def vector(nombre: str):
+        texto = capas.geojson(nombre)
+        if texto is None:
+            raise HTTPException(404, f"no existe la capa {nombre}")
+        return Response(texto, media_type="application/geo+json", headers={"Cache-Control": "max-age=3600"})
+
+    # ------------------------------------------------------------------ páginas
     @app.get("/")
-    def pagina():
+    def pantalla():
+        return FileResponse(WEB / "index.html", media_type="text/html; charset=utf-8", headers={"Cache-Control": "no-cache"})
+
+    @app.get("/prueba")
+    def pagina_de_prueba():
         return FileResponse(WEB / "prueba.html", media_type="text/html; charset=utf-8")
+
+    app.mount("/web", StaticFiles(directory=WEB), name="web")
 
     return app
 

@@ -223,6 +223,79 @@ def test_pedidos_invalidos(servidor):
     assert servidor.pedir("/")[0] == 200                         # la página mínima de prueba
 
 
+# ---------------------------------------------------------------------- lo que usa la pantalla (fase F3)
+def test_pantalla_y_archivos_de_la_interfaz(servidor):
+    codigo, pagina = servidor.pedir("/")
+    assert codigo == 200 and b"Simulador de incendios" in pagina and b"/web/app.js" in pagina
+    for ruta in ("/web/app.js", "/web/estilo.css", "/web/vendor/leaflet/leaflet.js", "/web/vendor/leaflet/leaflet.css", "/prueba"):
+        assert servidor.pedir(ruta)[0] == 200, ruta
+
+
+def test_capas_de_fondo(servidor):
+    codigo, r = servidor.pedir("/api/capas?evento=SL-2024-LASLAGUNAS")
+    assert codigo == 200
+    capas = {c["id"]: c for c in r["capas"]}
+    assert {"relieve", "pendiente", "cobertura", "arribo", "ndvi", "ndmi", "combustible", "cicatriz",
+            "dominio", "caminos", "red_mt", "viviendas", "cuarteles"} <= set(capas)
+    (sur, oeste), (norte, este) = capas["relieve"]["limites"]
+    assert -33.2 < sur < norte < -32.2 and -66.3 < oeste < este < -65.2
+    assert {i["nombre"] for i in capas["combustible"]["leyenda"]["items"]} >= {"No combustible", "Pastizal natural", "Bosque cerrado"}
+    assert capas["pendiente"]["leyenda"]["unidad"] == "grados"
+    sin_evento = {c["id"] for c in servidor.pedir("/api/capas")[1]["capas"]}
+    assert "relieve" in sin_evento and "ndvi" not in sin_evento             # las del evento solo aparecen con evento
+    codigo, imagen = servidor.pedir("/api/capas/arribo.png")
+    assert codigo == 200 and imagen[:8] == b"\x89PNG\r\n\x1a\n"
+    codigo, imagen = servidor.pedir("/api/capas/cicatriz.png?evento=SL-2024-LASLAGUNAS")
+    assert codigo == 200 and imagen[:4] == b"\x89PNG"
+    assert servidor.pedir("/api/capas/no_existe.png")[0] == 404
+    assert servidor.pedir("/api/capas/ndvi.png?evento=SL-1900-NADA")[0] == 404
+    for nombre, tipos in (("dominio", {"LineString"}), ("cuarteles", {"Point"}), ("viviendas", {"Point"}), ("caminos", {"LineString", "MultiLineString"})):
+        codigo, g = servidor.pedir(f"/api/vectores/{nombre}.geojson")
+        assert codigo == 200 and g["type"] == "FeatureCollection" and len(g["features"]) > 0, nombre
+        assert {f["geometry"]["type"] for f in g["features"]} <= tipos, nombre
+        lon, lat = (g["features"][0]["geometry"]["coordinates"] if nombre in ("cuarteles", "viviendas") else
+                    g["features"][0]["geometry"]["coordinates"][0] if g["features"][0]["geometry"]["type"] == "LineString" else
+                    g["features"][0]["geometry"]["coordinates"][0][0])[:2]
+        assert -67.5 < lon < -64.5 and -34.0 < lat < -31.5, (nombre, lon, lat)        # en grados y cerca del dominio
+    assert servidor.pedir("/api/vectores/no_existe.geojson")[0] == 404
+
+
+def test_contorno_comparacion_y_exportacion(servidor):
+    import io
+    import zipfile
+    punto = [{"lon": -65.55, "lat": -32.64}]
+    a = servidor.crear(motor="simulado", horas=8, iniciar=True, ignicion=punto, simulado={"s_por_hora": 0.02})["id"]
+    b = servidor.crear(motor="simulado", horas=5, iniciar=True, ignicion=punto, simulado={"s_por_hora": 0.02})["id"]
+    fin_a, fin_b = servidor.esperar(a, "terminada"), servidor.esperar(b, "terminada")
+
+    codigo, g = servidor.pedir(f"/api/corridas/{a}/perimetro.geojson")
+    assert codigo == 200 and g["features"][0]["geometry"]["type"] == "MultiPolygon"
+    assert g["features"][0]["properties"]["ha"] == fin_a["ultima_hora"]["ha"]
+    codigo, temprano = servidor.pedir(f"/api/corridas/{a}/perimetro.geojson?hora=2")
+    assert 0 < temprano["features"][0]["properties"]["ha"] < g["features"][0]["properties"]["ha"]
+
+    codigo, c = servidor.pedir(f"/api/comparacion?a={a}&b={b}&hora=5")
+    assert codigo == 200 and c["iou"] == 1.0 and c["ha_a"] == c["ha_b"] == c["ha_comun"] == c["ha_envolvente"]     # mismo círculo a la misma hora
+    codigo, c = servidor.pedir(f"/api/comparacion?a={a}&b={b}")                      # al final: 8 h contra 5 h
+    assert codigo == 200 and 0 < c["iou"] < 1 and c["ha_comun"] == fin_b["ultima_hora"]["ha"] and c["ha_envolvente"] == fin_a["ultima_hora"]["ha"]
+
+    codigo, plana = servidor.pedir(f"/api/corridas/{a}/quemado.png?color=2a78d6")
+    assert codigo == 200 and plana[:4] == b"\x89PNG" and plana != servidor.pedir(f"/api/corridas/{a}/quemado.png")[1]
+    assert servidor.pedir(f"/api/corridas/{a}/quemado.png?color=azul")[0] == 422
+
+    codigo, paquete = servidor.pedir(f"/api/corridas/{a}/exportar")
+    assert codigo == 200
+    nombres = zipfile.ZipFile(io.BytesIO(paquete)).namelist()
+    assert f"{a}/corrida.json" in nombres and f"{a}/perimetros_por_hora.geojson" in nombres
+    por_hora = json.loads(zipfile.ZipFile(io.BytesIO(paquete)).read(f"{a}/perimetros_por_hora.geojson"))
+    assert [f["properties"]["hora"] for f in por_hora["features"]] == list(range(9))
+    larga = servidor.simulada(horas=240, s_por_hora=0.2)
+    servidor.esperar(larga, "corriendo")
+    assert servidor.pedir(f"/api/corridas/{larga}/exportar")[0] == 409              # en marcha no se exporta
+    servidor.pedir(f"/api/corridas/{larga}/detener", {})
+    servidor.esperar(larga, "detenida")
+
+
 # ---------------------------------------------------------------------- el gestor, sin HTTP
 def test_al_volver_a_arrancar_las_corridas_en_marcha_quedan_interrumpidas(tmp_path):
     for id_, estado in (("vieja-en-marcha", "corriendo"), ("vieja-terminada", "terminada")):

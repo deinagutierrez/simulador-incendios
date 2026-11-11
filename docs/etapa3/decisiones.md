@@ -62,3 +62,10 @@ trabajo. También aprobó el contrato servidor–motor 1.1.
 
 Siguen pendientes: protección de `main`, licencia del código, y quién evalúa los prerregistros E-E3-2, E-E3-3 y E-E3-4.
 
+## 2026-11-11 — La F3 (pantalla)
+
+| Código | Decisión | Estado |
+|---|---|---|
+| D-E3-22 | **La F3 (pantalla) la hace el mismo frente que la F1 y la F2**, por pedido del usuario. Cambia otra vez el reparto de D-E3-12. A diferencia de la F2, no tuvo pedido de aprobación previo: las decisiones de diseño están en `F3_informe.md` §5 y el contrato 1.3 queda **pendiente de aprobación de la otra persona** | decidida por el usuario; diseño a revisar |
+| D-E3-23 | **Leaflet 1.9.4 se copia dentro del repositorio** (`app/web/vendor/leaflet/`, licencia BSD de 2 cláusulas) para que la pantalla funcione sin internet. Es la biblioteca que nombra el plan (§2.1) | decidida por Claude, a revisar |
+

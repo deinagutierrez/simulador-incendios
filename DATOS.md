@@ -48,6 +48,11 @@ que los baje y verifique.
 | Focos de calor activos (opcional) | NASA FIRMS | clave personal del usuario, por variable de entorno |
 | Índices por Google Earth Engine (opcional) | Google Earth Engine | credenciales personales |
 
+## Biblioteca de terceros incluida
+
+`app/web/vendor/leaflet/`: Leaflet 1.9.4 (mapas en el navegador), © Volodymyr Agafonkin, licencia BSD de 2 cláusulas
+(archivo `LICENSE` en esa carpeta). Bajada de `unpkg.com/leaflet@1.9.4` el 2026-11-11.
+
 ## Atribuciones a mostrar
 
 Relieve: Copernicus DEM GLO-30 · Cobertura y cicatrices: MapBiomas · Meteorología: Open-Meteo, ECMWF · Imágenes: datos
