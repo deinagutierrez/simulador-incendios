@@ -1,0 +1,63 @@
+{
+  "evento": "SL-2023-CHACRASOCT",
+  "clases": [
+    {
+      "clase": 0,
+      "nombre": "no_combustible",
+      "celdas": 385811,
+      "ha": 34722.99,
+      "pct": 13.808988973167372
+    },
+    {
+      "clase": 1,
+      "nombre": "pastizal_natural",
+      "celdas": 461390,
+      "ha": 41525.1,
+      "pct": 16.514120702441595
+    },
+    {
+      "clase": 3,
+      "nombre": "arbustal_abierto",
+      "celdas": 586672,
+      "ha": 52800.48,
+      "pct": 20.998227574812663
+    },
+    {
+      "clase": 4,
+      "nombre": "arbustal_cerrado",
+      "celdas": 38216,
+      "ha": 3439.44,
+      "pct": 1.3678311986920133
+    },
+    {
+      "clase": 5,
+      "nombre": "bosque_abierto",
+      "celdas": 815298,
+      "ha": 73376.82,
+      "pct": 29.181234054615892
+    },
+    {
+      "clase": 6,
+      "nombre": "bosque_cerrado",
+      "celdas": 505883,
+      "ha": 45529.47,
+      "pct": 18.106618962945145
+    },
+    {
+      "clase": 7,
+      "nombre": "plantacion",
+      "celdas": 642,
+      "ha": 57.78,
+      "pct": 0.0229785333253159
+    }
+  ],
+  "celdas_con_indices_validos": 2793912,
+  "pct_con_indices": 100.0,
+  "umbrales": {
+    "ndvi_cultivo_suelo_desnudo": 0.15,
+    "ndvi_pastizal_curado": 0.35,
+    "curado_alto": 0.8,
+    "curado_bajo": 0.5
+  },
+  "nota": "clasificación provisional por reglas; no validada en campo; curado = HIPÓTESIS"
+}

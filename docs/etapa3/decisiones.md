@@ -40,3 +40,9 @@ También aprobado: los umbrales propuestos para el prerregistro E-E3-2 (índices
 | D-E3-13 | La evaluación formal de E-E3-1 la hace el mismo frente que escribió `app/motores/` (el usuario, con Claude), porque la otra persona no puede hacerla. Es una **desviación declarada** de la regla "escribe una persona, evalúa la otra" de D-E3-12, y vale solo para E-E3-1. Lo que la compensa: el criterio es binario y estaba fijado y etiquetado antes de escribir el código (0 celdas distintas); la evaluación es un guion sin pasos manuales (`herramientas/e_e3_1.py`) que cualquiera puede repetir; el resultado se guarda con el cambio de git, el sha256 del congelado y los sha256 de los datos usados. La otra persona puede repetirla cuando pueda, y ese resultado reemplaza a este | decidida por el usuario |
 | D-E3-14 | Los tres pares de Las Chacras octubre 2023 se corren con los datos del evento tomados de la copia de trabajo anterior (Drive), copiados a `datos/inputSimulacion/` del clon sin registrarlos en git, porque el paquete de datos históricos todavía no existe. Los archivos se listan con su sha256 en el resultado. Descartado: esperar al paquete, que dejaba la evaluación incompleta | decidida por Claude, **a confirmar por el usuario** |
 
+## 2026-11-11 — Los datos de Las Chacras entran al repositorio
+
+| Código | Decisión | Estado |
+|---|---|---|
+| D-E3-15 | Los datos del evento Las Chacras octubre 2023 (15 archivos, 21 MB) se registran en el repositorio, en `datos/inputSimulacion/`. **Reemplaza a D-E3-14.** Son los mismos archivos de la evaluación formal de E-E3-1 (mismo sha256 del conjunto, `52d145b3c3df…`), así que cualquiera que clone puede repetir los siete pares. El repositorio pasa de 476 a 497 MB. Es uno de los cinco eventos no vistos (X-49); tenerlo en el repositorio no lo abre de nuevo: E-E3-1 compara el programa contra el motor, sin mirar la cicatriz. El resto de los eventos históricos sigue yendo en el paquete aparte | decidida por el usuario |
+

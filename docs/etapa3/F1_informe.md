@@ -59,7 +59,8 @@ una pausa y una reanudación a mitad de camino.
 
 - (dato) El criterio prerregistrado, 0 celdas distintas, se cumple en los siete pares, con y sin pausa.
 - La evaluó el mismo frente que escribió el código, porque la otra persona no pudo (decisión D-E3-13).
-- Los datos de Las Chacras salieron de la copia de trabajo anterior y no están en el repositorio (decisión D-E3-14).
+- Los datos de Las Chacras salieron de la copia de trabajo anterior. Se corrió con ellos sin registrar en git; después se
+  subieron al repositorio, sin cambios (decisión D-E3-15).
 - (dato) En Las Chacras, v3.1 cortó sola a las 45–46 h por falta de propagación, igual offline que en el proceso.
 - Además, `test/app/test_procesos.py` repite la identidad en 6 horas de Las Lagunas con los tres motores en cada cambio
   (19 pruebas, unos dos minutos), más avisos, pausa, detener e ignición libre.
@@ -113,8 +114,7 @@ define con `base` en `corrida.json`; el aviso `listo` trae la grilla de la huell
 ## 7. Lo que sigue
 
 1. Fases de datos (F2 y F3): pronóstico e índices bajados en el momento, y con ellos el primer evento generado.
-2. Paquete de datos históricos y `bajar_historicos.py`, para que cualquiera pueda repetir los pares de Las Chacras, y
-   confirmación del usuario de la decisión D-E3-14.
+2. Paquete de datos históricos y `bajar_historicos.py`, para los otros 13 eventos.
 3. Medir el modo "ambos" y repetir las mediciones en un segundo equipo y en Linux.
 4. Aprobación del contrato 1.1 por la otra persona.
 

@@ -1,0 +1,43 @@
+{
+  "producto": "combustible_curado_SL-2023-CHACRASOCT.tif",
+  "fuente": "clasificación v1 cobertura + NDVI",
+  "generado_utc": "2026-11-04T13:35:17Z",
+  "version_codigo": "3.2.0",
+  "host": "DESKTOP-CEOMRUQ",
+  "parametros": {
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3513060.0,
+      "ymin": 6367770.0,
+      "xmax": 3563220.0,
+      "ymax": 6417900.0,
+      "ncol": 1672,
+      "nfil": 1671
+    },
+    "cobertura": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\cobertura\\cobertura_mapbiomas_col3_2022_las_lagunas_potrerillos.tif",
+    "ndvi": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\procesados\\indices\\SL-2023-CHACRASOCT\\ndvi_SL-2023-CHACRASOCT.tif",
+    "ndmi": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\procesados\\indices\\SL-2023-CHACRASOCT\\ndmi_SL-2023-CHACRASOCT.tif",
+    "umbrales": {
+      "ndvi_cultivo_suelo_desnudo": 0.15,
+      "ndvi_pastizal_curado": 0.35,
+      "curado_alto": 0.8,
+      "curado_bajo": 0.5
+    },
+    "version_clases": "v1"
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\cobertura\\cobertura_mapbiomas_col3_2022_las_lagunas_potrerillos.tif",
+      "bytes": 478077,
+      "sha256": "d4aa72d876522ed77d57cb26262adeea6ec6235ce749da12334c150014fde280"
+    },
+    {
+      "archivo": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\procesados\\indices\\SL-2023-CHACRASOCT\\ndvi_SL-2023-CHACRASOCT.tif",
+      "bytes": 9308488,
+      "sha256": "74df337aad06e6c9cb3b5e927992f44929bb0eda9633a1ebd26dc68c009abcf2"
+    }
+  ],
+  "sha256_producto": "c32243f849e6d6634348d1b71234cef1a64d2a4977eac0156db16e5a6397592f",
+  "bytes_producto": 404903
+}

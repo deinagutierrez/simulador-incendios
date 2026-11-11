@@ -1,0 +1,70 @@
+{
+  "evento": "SL-2023-CHACRASOCT",
+  "dominio": "las_lagunas_potrerillos",
+  "banco": "MB_2023_26601_2023-10",
+  "inicio_utc": "2026-11-04T13:35:16Z",
+  "codigo": "scripts/preparar_evento_desde_banco.py (v3.4)",
+  "pasos": {
+    "cicatriz_evento": {
+      "estado": "ok",
+      "segundos": 0.1,
+      "salida": {
+        "cicatriz": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\eventos\\SL-2023-CHACRASOCT\\cicatriz_referencia_SL-2023-CHACRASOCT.tif"
+      }
+    },
+    "meteorologia": {
+      "estado": "ok",
+      "segundos": 0.0,
+      "salida": {
+        "dominio_csv": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\meteo\\SL-2023-CHACRASOCT_ecmwf_ifs_20231016T00_20231023T03_0975494d83fd9617_dominio.csv",
+        "origen": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\banco_v4\\entradas\\meteo_ifs\\MB_2023_26601_2023-10_ecmwf_ifs_20231016T00_20231023T03_0975494d83fd9617_dominio.csv",
+        "horas": "172"
+      }
+    },
+    "indices": {
+      "estado": "ok",
+      "segundos": 0.5,
+      "salida": {
+        "ndvi": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\procesados\\indices\\SL-2023-CHACRASOCT\\ndvi_SL-2023-CHACRASOCT.tif",
+        "ndmi": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\procesados\\indices\\SL-2023-CHACRASOCT\\ndmi_SL-2023-CHACRASOCT.tif"
+      }
+    },
+    "combustibles": {
+      "estado": "ok",
+      "segundos": 0.9,
+      "salida": {
+        "clase": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\combustibles\\SL-2023-CHACRASOCT\\combustible_clase_SL-2023-CHACRASOCT.tif",
+        "curado": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\combustibles\\SL-2023-CHACRASOCT\\combustible_curado_SL-2023-CHACRASOCT.tif",
+        "calidad": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\combustibles\\SL-2023-CHACRASOCT\\combustible_calidad_SL-2023-CHACRASOCT.tif",
+        "ndvi30": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\combustibles\\SL-2023-CHACRASOCT\\ndvi_30m_SL-2023-CHACRASOCT.tif",
+        "ndmi30": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\combustibles\\SL-2023-CHACRASOCT\\ndmi_30m_SL-2023-CHACRASOCT.tif",
+        "resumen": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\combustibles\\SL-2023-CHACRASOCT\\resumen_combustibles_SL-2023-CHACRASOCT.json"
+      }
+    },
+    "humedad": {
+      "estado": "ok",
+      "segundos": 0.0,
+      "salida": {
+        "humedad_csv": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\eventos\\SL-2023-CHACRASOCT\\humedad_muerto_SL-2023-CHACRASOCT.csv",
+        "m_1h_min": "7.551216772467081",
+        "m_1h_max": "121.67098566393297"
+      }
+    },
+    "focos": {
+      "estado": "ok",
+      "segundos": 0.5,
+      "salida": {
+        "hotspots": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\catalogo\\hotspots\\viirs_SL-2023-CHACRASOCT.csv",
+        "hotspots_v3.2": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\catalogo\\hotspots_v3.2\\viirs_SL-2023-CHACRASOCT.csv",
+        "evento": "SL-2023-CHACRASOCT",
+        "focos": "46",
+        "pasadas": "7",
+        "snpp": "46",
+        "noaa20": "0",
+        "primera": "2023-10-17 17:22",
+        "dias": "2023-10-17, 2023-10-18, 2023-10-19, 2023-10-20"
+      }
+    }
+  },
+  "segundos_total": 2.0
+}

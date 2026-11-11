@@ -46,10 +46,11 @@ La diferencia de superficie final entre proceso y offline es 0 ha en los siete p
 ## Lo que hay que saber para leerlo
 
 - **Datos de Las Chacras.** El prerregistro decía que este evento necesita el paquete de datos históricos, que todavía no
-  existe. Se usaron los archivos del evento tomados de la copia de trabajo anterior (Drive), copiados a `datos/inputSimulacion/`
-  sin registrarlos en git (decisión D-E3-14, a confirmar por el usuario). Son 15 archivos, 21 MB; están listados con su sha256
-  en `E-E3-1_resultados.json`. Quien clone el repositorio hoy puede repetir cuatro de los siete pares; los tres de Las Chacras,
-  recién cuando exista el paquete.
+  existe. Se usaron los archivos del evento tomados de la copia de trabajo anterior (Drive): 15 archivos, 21 MB, listados con
+  su sha256 en `E-E3-1_resultados.json`. Cuando se corrió la evaluación no estaban registrados en git (por eso el archivo de
+  resultados los marca `"en_git": false`). Después el usuario decidió subirlos (decisión D-E3-15, que reemplaza a D-E3-14):
+  son los mismos archivos, con el mismo sha256 del conjunto (`52d145b3c3df…`). Quien clone el repositorio puede repetir los
+  siete pares.
 - **v3.1 en Las Chacras no llegó a las 72 horas.** (dato) Cortó sola a las 45 h (libre) y a las 46 h (librev2) con su motivo 3,
   "sin propagación físicamente posible según el modelo". Pasa igual en la corrida offline y en el proceso, así que no afecta la
   comparación, pero la corrida comparada es de 45–46 horas y no de 72. La pausa se hizo en la hora 36, antes del corte.
@@ -74,4 +75,4 @@ La diferencia de superficie final entre proceso y offline es 0 ha en los siete p
 python herramientas/e_e3_1.py
 ```
 
-Deja la tabla en `resultados/app/E-E3-1/resultados.json`. Los escenarios sin datos en el clon se informan como "sin datos".
+Deja la tabla en `resultados/app/E-E3-1/resultados.json`. Tarda unos 15 minutos.

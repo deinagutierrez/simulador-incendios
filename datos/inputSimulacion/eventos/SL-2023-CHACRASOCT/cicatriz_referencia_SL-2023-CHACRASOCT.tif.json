@@ -1,0 +1,33 @@
+{
+  "producto": "cicatriz_referencia_SL-2023-CHACRASOCT.tif",
+  "fuente": "MapBiomas Fuego Col. 1 polígono rasterizado",
+  "generado_utc": "2026-11-04T13:35:16Z",
+  "version_codigo": "3.2.0",
+  "host": "DESKTOP-CEOMRUQ",
+  "parametros": {
+    "oid": "2023_26601",
+    "grilla": {
+      "crs": "EPSG:5345",
+      "res": 30.0,
+      "xmin": 3513060.0,
+      "ymin": 6367770.0,
+      "xmax": 3563220.0,
+      "ymax": 6417900.0,
+      "ncol": 1672,
+      "nfil": 1671
+    },
+    "mes": 10,
+    "calendar_year": 2023
+  },
+  "entradas": [
+    {
+      "archivo": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\crudos\\Fuego_MapBiomas\\Coleccion_1\\incendios_mapbiomas_fuego_sanluis.gpkg",
+      "bytes": 20078592,
+      "sha256": "45e28dd7d3a799f6b86696dfeb719691fba95f9371521f046416169d8d0dbc3a"
+    }
+  ],
+  "sha256_producto": "a448db3d8888043c4739a147d098d5806a2cc8c927d0ab269b7a43b0aa14b1b4",
+  "bytes_producto": 17206,
+  "area_ha_rasterizada": 1308.24,
+  "area_ha_poligono_5345": 1336.4999420630193
+}

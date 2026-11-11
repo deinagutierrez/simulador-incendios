@@ -4,7 +4,7 @@ El equipo del proyecto confirmó el 2026-11-10 que todos los datos de este repos
 La columna de licencia repite lo que declaran los documentos del proyecto (`src/v4.0/README.md`); donde dice "a confirmar",
 el proyecto no tiene registrada la licencia exacta.
 
-## En el repositorio (datos mínimos, 443 MB)
+## En el repositorio (datos mínimos, 464 MB)
 
 | Carpeta | Contenido | Fuente | Licencia o condición |
 |---|---|---|---|
@@ -18,6 +18,7 @@ el proyecto no tiene registrada la licencia exacta.
 | `datos/inputSimulacion/sim_v4/dinamicos` | compuestos mensuales NDVI/NDMI 2023 y 2024 | Sentinel-2 (Copernicus), procesado en Google Earth Engine | datos Copernicus Sentinel, uso libre con atribución |
 | `datos/inputSimulacion/sim_v4/conjunto_prueba` | casos La Aguada 2023 y Potrerillos 2024 (v4.0 los exige para arrancar) | cicatrices del COE, MapBiomas Fuego, focos VIIRS, ERA5 | MapBiomas CC-BY 4.0; FIRMS de uso libre; ERA5 CC-BY 4.0; COE a confirmar |
 | `datos/inputSimulacion/{combustibles,eventos,meteo}/SL-2024-LASLAGUNAS` | evento de ejemplo: índices, combustibles, cicatriz, meteorología | Sentinel-2, MapBiomas Fuego, ECMWF IFS vía Open-Meteo | Open-Meteo CC-BY 4.0; el resto como arriba |
+| `datos/inputSimulacion/{combustibles,eventos,meteo}/SL-2023-CHACRASOCT` | Las Chacras octubre 2023 (21 MB), agregado el 2026-11-11 para que cualquiera pueda repetir el prerregistro E-E3-1 (decisión D-E3-15). **Es uno de los cinco eventos no vistos (X-49)**: v3.1 y v4.0 ya se evaluaron una vez contra él; no usarlo para ajustar nada | las mismas | las mismas |
 | `datos/inputSimulacion/catalogo` | focos de calor por evento, incendios y registros del dominio | NASA FIRMS (VIIRS, MODIS); MapBiomas Fuego; Servicio Nacional de Manejo del Fuego | FIRMS de uso libre; SNMF: publicación confirmada por el equipo |
 | `datos/crudos` | cuarteles, departamentos, dominio, registros del SNMF 2020–2026, focos NOAA-20 | Ministerio de Seguridad de San Luis; IGN / CONAE; SNMF; NASA FIRMS | como arriba |
 
@@ -33,7 +34,7 @@ que los baje y verifique.
 
 | Contenido | Tamaño aproximado |
 |---|---|
-| Meteorología, índices, combustibles, cicatriz y focos de los otros 14 eventos | 330 MB |
+| Meteorología, índices, combustibles, cicatriz y focos de los otros 13 eventos | 310 MB |
 | Banco de evaluación de v4.0 (`banco_v4`) y casos del banco | 290 MB |
 | Datos crudos pesados: caminos y viviendas de toda la provincia, MapBiomas cobertura y fuego | 190 MB |
 | Resultados de corridas de referencia | a definir |

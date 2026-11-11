@@ -1,0 +1,13 @@
+{
+  "fuente": "Open-Meteo Historical Weather API, modelo ecmwf_ifs (reanálisis/análisis de modelo, NO observaciones); serie del dominio descargada para el banco V4 (app/motores/sim_adaptador.py) y copiada sin cambios",
+  "modelo": "ecmwf_ifs",
+  "copiado_de": "C:\\Users\\Usuario\\Downloads\\Incendios_SanLuis-20261103T123038Z-1-001\\Incendios_SanLuis\\datos\\inputSimulacion\\banco_v4\\entradas\\meteo_ifs\\MB_2023_26601_2023-10_ecmwf_ifs_20231016T00_20231023T03_0975494d83fd9617_dominio.csv",
+  "sha256_origen": "09754b23a0508c7b63b66bf782b1be45b20885483444729649d83a31c3ed048f",
+  "copiado_utc": "2026-11-04T13:35:16Z",
+  "periodo_utc": [
+    "2023-10-16 00:00:00+00:00",
+    "2023-10-23 03:00:00+00:00"
+  ],
+  "n_puntos": 16,
+  "nota": "sin .parquet ni serie por punto: preparar_evento.py volvería a descargar; usar --sin-meteo"
+}

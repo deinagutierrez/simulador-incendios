@@ -45,7 +45,7 @@ La integración continua de GitHub repite esta comprobación en Windows y en Lin
 |---|---|
 | `src/v3.1`, `src/v4.0` | los dos motores, **congelados**: no se modifican. v4.0 es la línea principal; v3.1 es el control (simulación libre) |
 | `test/`, `escenarios/` | pruebas y escenarios de cada motor |
-| `datos/` | datos mínimos del dominio y un evento de ejemplo (Las Lagunas 2024). Fuentes y licencias: [DATOS.md](DATOS.md) |
+| `datos/` | datos mínimos del dominio, un evento de ejemplo (Las Lagunas 2024) y Las Chacras octubre 2023, que usa la verificación E-E3-1. Fuentes y licencias: [DATOS.md](DATOS.md) |
 | `app/` | el simulador interactivo (todavía vacío) |
 | `docs/etapa3/` | plan, decisiones, informe de F0, prerregistros y contrato entre los dos frentes de trabajo |
 | `docs/v3.0`, `docs/v3.1`, `docs/v4.0` | documentos de los motores |
