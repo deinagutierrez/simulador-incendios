@@ -46,7 +46,7 @@ Al terminar, el proceso completa `corrida.json` con `bitacora` (pausas, reanudac
 `resultados` (`ha_final`, `km2_final`, `t_simulado_h`, `s_computo`, `memoria_pico_mb`, `motivo_fin`, `completa`, `archivos`,
 e `ignicion` = `{pedida, usada: [{id, lon, lat, desplazada_m?}], t_inicio_utc}`).
 
-**Todavía no**: viento manual y cortafuegos (fase F5), y eventos armados con datos bajados en el momento (fases F2 y F3).
+**Todavía no**: viento manual y cortafuegos (fase F5), y eventos armados con datos bajados en el momento (fase F4).
 Hasta entonces los datos son los de un evento con ficha.
 
 ## 2. Proceso motor

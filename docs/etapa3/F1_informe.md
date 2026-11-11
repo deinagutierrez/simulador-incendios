@@ -13,8 +13,8 @@ Rótulos: **(dato)** medido ese día en ese equipo · **(inferencia)** · **(sin
 | Salidas iguales a las de una corrida offline | hecho y verificado (§3) |
 | Medición de tiempo y memoria (prerregistro E-E3-3) | hecha en un equipo (§4); falta el modo "ambos" y un segundo equipo |
 | Ignición en un punto libre y a una hora libre | hecho (§8): `configuracion` en `corrida.json` |
-| Corrida desde un evento **generado** (con datos bajados en el momento) | no hecho: hoy los datos son los de un evento con ficha. Llega con las fases de datos (F2 y F3) |
-| Decisión sobre dónde viven los insumos de una corrida en tiempo real | **no tomada**; se toma al armar el primer evento generado (F2) |
+| Corrida desde un evento **generado** (con datos bajados en el momento) | no hecho: hoy los datos son los de un evento con ficha. Llega con la fase de datos (F4) |
+| Decisión sobre dónde viven los insumos de una corrida en tiempo real | **no tomada**; se toma al armar el primer evento generado (F4) |
 | Intervenciones (viento manual, cortafuegos) | fase F5. La orden `intervenir` ya existe y responde `rechazada` |
 
 ## 2. Cómo se conduce cada motor sin tocarlo
@@ -113,7 +113,7 @@ define con `base` en `corrida.json`; el aviso `listo` trae la grilla de la huell
 
 ## 7. Lo que sigue
 
-1. Fases de datos (F2 y F3): pronóstico e índices bajados en el momento, y con ellos el primer evento generado.
+1. Fase de datos (F4): pronóstico e índices bajados en el momento, y con ellos el primer evento generado.
 2. Paquete de datos históricos y `bajar_historicos.py`, para los otros 13 eventos.
 3. Medir el modo "ambos" y repetir las mediciones en un segundo equipo y en Linux.
 4. Aprobación del contrato 1.1 por la otra persona.
@@ -149,4 +149,4 @@ la misma ficha con dos datos cambiados: los puntos y la hora de inicio. No se es
 - La hora de inicio tiene que caer dentro de la serie meteorológica del evento base. Si cae afuera, el proceso la rechaza
   antes de simular, con un aviso de error que dice de cuándo a cuándo hay datos.
 - Todos los puntos empiezan a la misma hora. No hay igniciones escalonadas.
-- No es todavía "tiempo real": falta bajar el pronóstico y los índices (F2 y F3).
+- No es todavía "tiempo real": falta bajar el pronóstico y los índices (F4).
