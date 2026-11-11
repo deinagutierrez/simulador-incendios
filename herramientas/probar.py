@@ -77,6 +77,18 @@ def paso_pruebas(version: str) -> bool:
     return cod == 0
 
 
+def paso_pruebas_app() -> bool:
+    """Pruebas del programa nuevo. Lanzan los dos motores por su cuenta, así que corren sin PYTHONPATH."""
+    env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", PYTHONIOENCODING="utf-8")
+    env.pop("PYTHONPATH", None)
+    cod, salida = correr([sys.executable, "-m", "pytest", "-q", "test/app", "-p", "no:cacheprovider"], RAIZ, env)
+    ultima = [x for x in salida.strip().splitlines() if x.strip()][-1] if salida.strip() else "(sin salida)"
+    print(f"   {ultima}")
+    if cod != 0:
+        print("\n".join("   " + x for x in salida.strip().splitlines()[-40:]))
+    return cod == 0
+
+
 def paso_humo(version: str, escenario: str) -> bool:
     t = time.time()
     cod, salida = correr([sys.executable, "scripts/correr_escenario.py", "--escenario", escenario], RAIZ / "src" / version, entorno(version))
@@ -109,6 +121,9 @@ def main() -> int:
         for n, (version, escenario) in enumerate(MOTORES.items(), start=5):
             print(f"{n}. Corrida corta con el motor {version} ({escenario}, 6 horas simuladas)")
             pasos.append((f"corrida {version}", paso_humo(version, escenario)))
+        if (RAIZ / "test" / "app").exists():
+            print("7. Pruebas del simulador (test/app): el proceso motor da lo mismo que la corrida offline")
+            pasos.append(("pruebas del simulador", paso_pruebas_app()))
 
     print("\nResumen")
     for nombre, ok in pasos:

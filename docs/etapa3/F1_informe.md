@@ -1,0 +1,108 @@
+# F1 — Procesos motor: informe de la primera parte
+
+Fecha: 2026-11-11 · Rama: `f1-procesos-motor` · Equipo: Windows 11, Intel de 20 núcleos lógicos, 32 GB, Python 3.14.7.
+Rótulos: **(dato)** medido ese día en ese equipo · **(inferencia)** · **(sin verificar)**.
+
+## 1. Qué quedó hecho y qué no
+
+| Entregable de F1 en el plan | Estado |
+|---|---|
+| Un proceso por corrida que conduce a v4.0 o a v3.1 sin modificarlos | hecho (`app/motores/`) |
+| Avance por hora simulada, con huella parcial en disco | hecho |
+| Órdenes pausar, reanudar y detener | hecho |
+| Salidas iguales a las de una corrida offline | hecho y verificado (§3) |
+| Medición de tiempo y memoria (prerregistro E-E3-3) | hecha en un equipo (§4); falta el modo "ambos" y un segundo equipo |
+| **Corrida desde un evento generado: ignición en un punto libre, hora libre** | **no hecho**. Hoy la ignición es la de la ficha del evento (`snmf` o `altN`). Es la segunda parte de F1 |
+| Decisión sobre dónde viven los insumos de una corrida en tiempo real | **no tomada**; depende de lo anterior |
+| Intervenciones (viento manual, cortafuegos) | fase F5. La orden `intervenir` ya existe y responde `rechazada` |
+
+## 2. Cómo se conduce cada motor sin tocarlo
+
+- **v4.0** (`motor_v40.py`): los mismos pasos que `src/v4.0/scripts/correr_escenario.py`. El punto de control es una subclase de
+  `Automata` que redefine `paso_tiempo`: cuando el reloj cae en hora en punto y antes de avanzar, avisa, guarda la huella y
+  atiende órdenes. La subclase reemplaza a `simulador.corrida.Automata` dentro del proceso. Para detener se lanza una excepción
+  propia, porque el bucle de SIM no ofrece otra salida; el proceso la atrapa y escribe los rásteres con `exportar_rasters`.
+- **v3.1** (`motor_v31.py`): el camino sin validación de `src/v3.1/scripts/correr_escenario.py`. El punto de control es una
+  subclase de `Simulacion` que redefine `_tablas_hora`, que el motor llama al empezar cada hora, antes de calcular el viento.
+  Para detener se pone `max_pasos` en 0: el motor corta al terminar el paso en curso y guarda por su camino normal.
+- Los dos paquetes se llaman `incendios_sl`: cada proceso carga uno solo, apuntando `sys.path` a su carpeta.
+- (dato) Después de todas las corridas, `herramientas/congelado.py verificar` da los 244 archivos intactos.
+
+Diferencias entre los dos conductores que conviene conocer:
+
+| | v4.0 | v3.1 |
+|---|---|---|
+| Aviso `hora` | trae `exposicion` y `meteo` (los calcula SIM) | solo superficie y celdas activas |
+| Hora 0 | 0,18 ha: la celda de ignición ya cuenta | 0 ha: la ignición entra en el primer paso |
+| Corrida detenida | deja los rásteres y los `estado_hora_HH.json` hasta ese momento; sin `registro.json` ni resumen | deja todas las salidas normales, con motivo de fin 4 en `registro.json` |
+| Valor por defecto de `definicion` | `variante: barreras`, `parar_en_cicatriz: off` | `variante: libre` o `libre_v2` |
+
+Con un evento que tiene cicatriz, v4.0 activa sola la parada al igualar la superficie observada. En tiempo real no hay
+cicatriz y la decisión D-E3-01 dice sin parada, por eso `definicion` la apaga salvo que se pida lo contrario.
+
+## 3. Identidad con la corrida offline (prerregistro E-E3-1)
+
+Se corrió con `herramientas/e_e3_1.py` sobre el cambio `2efad2d` más el código de esta rama, con `congelado.json`
+`2b327571…`. Por cada par: corrida offline con el guion del motor, proceso sin órdenes, y proceso con una pausa y una
+reanudación a mitad de camino.
+
+| Escenario | Motor | Horas | Superficie final | Celdas quemadas | Celdas distintas | Distintas con pausa |
+|---|---|---|---|---|---|---|
+| Caso La Aguada 2023 | v4.0 | 36 | 1.348 ha | 14.979 | **0** | **0** |
+| Las Lagunas 2024, h1, SNMF | v4.0 | 48 | 12.839 ha | 142.659 | **0** | **0** |
+| Las Lagunas 2024, h1, SNMF | v3.1 libre | 48 | 34.793 ha | 386.588 | **0** | **0** |
+| Las Lagunas 2024, h1, SNMF | v3.1 librev2 | 48 | 32.915 ha | 365.724 | **0** | **0** |
+| Las Chacras oct. 2023, alt4 | los tres | 72 | — | — | sin correr | sin correr |
+
+- (dato) El criterio prerregistrado, 0 celdas distintas, **se cumple en los cuatro pares corridos**, con y sin pausa.
+- **No es todavía la evaluación formal de E-E3-1.** Faltan los tres pares de Las Chacras, que necesitan el paquete de datos
+  históricos, y el prerregistro pide que evalúe la otra persona. Esto es la comprobación de quien escribió el código.
+- Además, `test/app/test_procesos.py` repite la identidad en 6 horas de Las Lagunas con los tres motores en cada cambio
+  (10 pruebas, cerca de un minuto), más avisos, pausa y detener.
+
+## 4. Tiempo y memoria (prerregistro E-E3-3, medición parcial)
+
+| Escenario | Motor | Segundos de cómputo | Por hora simulada | Memoria pico |
+|---|---|---|---|---|
+| La Aguada 36 h | v4.0 | 12,3 | 0,34 s | 224 MB |
+| Las Lagunas 48 h (12.839 ha) | v4.0 | 84,6 | 1,76 s | 527 MB |
+| Las Lagunas 48 h (34.793 ha) | v3.1 libre | 27,8 | 0,58 s | 862 MB |
+| Las Lagunas 48 h (32.915 ha) | v3.1 librev2 | 27,5 | 0,57 s | 874 MB |
+
+- (dato) La memoria de v4.0 por proceso, que nunca se había medido, es de unos 0,2 a 0,5 GB. La de v3.1, 0,9 GB.
+  (inferencia) Los dos motores a la vez caben holgados en 8 GB; el requisito de 16 GB para el modo "ambos" del plan parece
+  conservador. Falta medirlo corriendo los dos juntos.
+- (dato) Metas del prerregistro: v3.1 ≤ 0,5 s por hora y v4.0 ≤ 3 s por hora con unas 30.000 ha. v3.1 dio 0,57–0,58 s, apenas
+  por encima, con un incendio de 33.000–35.000 ha. v4.0 dio 1,76 s con 12.839 ha: cumple, pero con menos superficie que la de
+  la meta.
+- (dato) El tiempo incluye la carga de insumos: unos 4 s en v4.0 y 4 s en v3.1 antes de la primera hora.
+- (sin verificar) Un segundo equipo y Linux.
+
+## 5. Problema encontrado: el proceso se colgaba en la primera hora
+
+- (dato) Lanzado a mano funcionaba. Lanzado con la entrada estándar como tubería, que es como lo lanza el servidor, avisaba la
+  hora 0 y no avanzaba más.
+- (dato) Volcado de hilos: el hilo principal estaba dentro de la carga de una biblioteca (`scipy.linalg`, que numba importa
+  en la primera compilación) y otro hilo estaba bloqueado leyendo la entrada estándar.
+- (inferencia) En Windows, una lectura bloqueante pendiente sobre esa tubería traba a cualquier otro uso del mismo extremo, y
+  las bibliotecas numéricas en Fortran consultan la entrada estándar al iniciarse.
+- (dato) Solución: no hay ningún hilo esperando. Las órdenes se consultan sin bloquear al cumplirse cada hora simulada
+  (`PeekNamedPipe` en Windows, `select` en Linux), que es cuando se atienden de todos modos. Con eso los dos motores corren y
+  cierran solos.
+- Queda como advertencia en el contrato (§5) para quien escriba el servidor.
+- Para diagnosticar algo parecido: con la variable de entorno `SIMULADOR_DIAGNOSTICO_S=25`, el proceso vuelca a `proceso.log`
+  dónde está cada hilo cada 25 segundos.
+
+## 6. Cambios al contrato
+
+El contrato pasa de la versión 1.0 a la 1.1 (`contrato_servidor_motor.md`). Lo que cambia para el frente B: la corrida se
+define con `base` en `corrida.json`; el aviso `listo` trae la grilla de la huella; los resultados del motor quedan en
+`salida/`; las órdenes se atienden en hora en punto. **Falta la aprobación de la otra persona**, como pide la regla de trabajo.
+
+## 7. Lo que sigue
+
+1. **Segunda parte de F1**: ignición en un punto y una hora libres. En v4.0 la configuración de SIM ya acepta una lista de
+   puntos con longitud y latitud. En v3.1 los puntos salen de la ficha del evento, así que hay que entregarle una ficha armada
+   en memoria. Con eso se decide dónde viven los insumos de una corrida en tiempo real.
+2. Paquete de datos históricos, para correr los pares de Las Chacras.
+3. Medir el modo "ambos" y repetir las mediciones en un segundo equipo.
