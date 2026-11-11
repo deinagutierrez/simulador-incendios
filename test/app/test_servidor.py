@@ -214,6 +214,8 @@ def test_pedidos_invalidos(servidor):
     codigo, r = servidor.pedir("/api/corridas", {"motor": "v4.0", **lagunas, "t_inicio_utc": "2025-01-01T12:00:00Z"})
     assert codigo == 422 and "serie meteorológica" in r["detail"]
     assert servidor.pedir("/api/corridas", {"motor": "v4.0", **lagunas, "horas": 0})[0] == 422
+    codigo, r = servidor.pedir("/api/corridas", {"motor": "v4.0", "evento": "SL-2024-LASLAGUNAS"})
+    assert codigo == 422 and "horas" in r["detail"]
     assert servidor.pedir("/api/corridas/no-existe")[0] == 404
     creada = servidor.simulada(horas=3, iniciar=False)
     assert servidor.pedir(f"/api/corridas/{creada}/pausar", {})[0] == 409

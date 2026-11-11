@@ -122,7 +122,7 @@ def main() -> int:
             print(f"{n}. Corrida corta con el motor {version} ({escenario}, 6 horas simuladas)")
             pasos.append((f"corrida {version}", paso_humo(version, escenario)))
         if (RAIZ / "test" / "app").exists():
-            print("7. Pruebas del simulador (test/app): el proceso motor da lo mismo que la corrida offline")
+            print("7. Pruebas del simulador (test/app): procesos motor y servidor; dan lo mismo que la corrida offline")
             pasos.append(("pruebas del simulador", paso_pruebas_app()))
 
     print("\nResumen")

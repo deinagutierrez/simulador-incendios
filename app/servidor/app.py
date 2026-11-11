@@ -2,6 +2,8 @@
 
     GET  /api/estado                              versión, motores, eventos con datos, dominio, corridas en marcha
     POST /api/corridas                            crea una corrida (o dos con motor "ambos"); con "iniciar": true la lanza
+                                                  cuerpo: motor, evento, ignicion [{lon, lat}], t_inicio_utc, horas;
+                                                  o `definicion` (uso avanzado: un caso de prueba, otra hipótesis…)
     GET  /api/corridas                            lista
     GET  /api/corridas/<id>                       estado; al terminar, también bitácora y resultados
     POST /api/corridas/<id>/iniciar|pausar|reanudar|detener
@@ -42,9 +44,10 @@ class PedidoCorrida(BaseModel):
     evento: str | None = None
     ignicion: list[Punto] | None = None
     t_inicio_utc: str | None = None
-    horas: int = Field(ge=1, le=240)
+    horas: int | None = Field(default=None, ge=1, le=240)
     hipotesis: int | None = Field(default=None, ge=0)
     ignicion_ficha: str | None = None
+    definicion: dict | None = None            # uso avanzado: lo mismo que `base.definicion` del contrato
     simulado: dict | None = None
     iniciar: bool = False
 
@@ -101,7 +104,9 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
     @app.post("/api/corridas", status_code=201)
     def crear(pedido: PedidoCorrida):
         p = pedido.model_dump()
-        if p["motor"] != "simulado":
+        if p["horas"] is None and not p.get("definicion"):
+            raise HTTPException(422, "faltan las horas a simular")
+        if p["motor"] != "simulado" and not p.get("definicion"):
             try:
                 datos.revisar_pedido(p)
             except ValueError as e:

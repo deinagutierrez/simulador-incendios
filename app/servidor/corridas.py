@@ -182,11 +182,14 @@ class Gestor:
         if motor == "simulado":
             corrida |= {"configuracion": configuracion, "simulado": pedido.get("simulado") or {}}
         else:
-            definicion = {"evento": pedido["evento"], "validar": False, "figuras": False}
-            if pedido.get("hipotesis") is not None:
-                definicion["hipotesis"] = int(pedido["hipotesis"])
-            if pedido.get("ignicion_ficha") and not pedido.get("ignicion"):
-                definicion["ignicion"] = str(pedido["ignicion_ficha"])
+            if pedido.get("definicion"):              # uso avanzado: la definición llega armada; la valida el proceso motor
+                definicion = {"validar": False, "figuras": False} | dict(pedido["definicion"])
+            else:
+                definicion = {"evento": pedido["evento"], "validar": False, "figuras": False}
+                if pedido.get("hipotesis") is not None:
+                    definicion["hipotesis"] = int(pedido["hipotesis"])
+                if pedido.get("ignicion_ficha") and not pedido.get("ignicion"):
+                    definicion["ignicion"] = str(pedido["ignicion_ficha"])
             corrida |= {"base": {"definicion": definicion}, "configuracion": configuracion}
         escribir_json(carpeta / "corrida.json", corrida)
         guardado = {k: v for k, v in pedido.items() if k not in ("iniciar",) and v is not None} | {"motor": motor}
