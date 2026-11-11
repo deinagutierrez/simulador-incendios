@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de incendios — página de prueba</title>
+<style>
+  :root { --fondo: #f6f5f1; --panel: #ffffff; --texto: #1f2328; --suave: #5b6470; --borde: #d9d6cf; --acento: #b3421c; }
+  body { margin: 0; font: 15px/1.45 system-ui, "Segoe UI", sans-serif; background: var(--fondo); color: var(--texto); }
+  header { padding: 14px 20px; border-bottom: 1px solid var(--borde); background: var(--panel); }
+  header h1 { margin: 0; font-size: 18px; }
+  header p { margin: 2px 0 0; color: var(--suave); font-size: 13px; }
+  main { display: grid; grid-template-columns: 340px 1fr; gap: 16px; padding: 16px 20px; align-items: start; }
+  section { background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 14px; }
+  h2 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--suave); }
+  label { display: block; margin: 8px 0 2px; font-size: 13px; color: var(--suave); }
+  input, select { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--borde); border-radius: 6px; font: inherit; background: #fff; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  button { padding: 6px 12px; border: 1px solid var(--borde); border-radius: 6px; background: #fff; font: inherit; cursor: pointer; }
+  button.principal { background: var(--acento); border-color: var(--acento); color: #fff; margin-top: 12px; width: 100%; }
+  button:disabled { opacity: .45; cursor: default; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: middle; }
+  td.num { font-variant-numeric: tabular-nums; }
+  tr.elegida { background: #fbefe9; }
+  .acciones button { padding: 3px 8px; font-size: 12px; margin-right: 4px; }
+  #mapa { position: relative; background: #e9e6df; border: 1px solid var(--borde); border-radius: 6px; min-height: 280px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  #mapa img { max-width: 100%; max-height: 520px; image-rendering: pixelated; }
+  #mapa span { color: var(--suave); font-size: 13px; }
+  pre { margin: 0; max-height: 220px; overflow: auto; font: 12px/1.4 ui-monospace, Consolas, monospace; background: #faf9f6; border: 1px solid var(--borde); border-radius: 6px; padding: 8px; white-space: pre-wrap; }
+  .aviso { color: #a02c2c; font-size: 13px; min-height: 18px; margin-top: 8px; }
+  .derecha { display: grid; gap: 16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Simulador de incendios — página de prueba del servidor</h1>
+  <p id="pie">Fase F2. Sirve para probar el servidor; la pantalla con mapa llega en la fase siguiente.</p>
+</header>
+<main>
+  <section>
+    <h2>Nueva corrida</h2>
+    <label for="motor">Motor</label><select id="motor"></select>
+    <label for="evento">Evento que aporta los datos</label><select id="evento"></select>
+    <div class="dos">
+      <div><label for="lon">Longitud</label><input id="lon" inputmode="decimal"></div>
+      <div><label for="lat">Latitud</label><input id="lat" inputmode="decimal"></div>
+    </div>
+    <label for="inicio">Hora de inicio (UTC)</label><input id="inicio" placeholder="2024-09-18T15:00:00Z">
+    <label for="horas">Horas a simular</label><input id="horas" type="number" min="1" max="240" value="12">
+    <button class="principal" id="crear">Crear e iniciar</button>
+    <div class="aviso" id="aviso"></div>
+  </section>
+  <div class="derecha">
+    <section>
+      <h2>Corridas</h2>
+      <table><thead><tr><th>Corrida</th><th>Motor</th><th>Estado</th><th>Hora</th><th>Superficie</th><th></th></tr></thead>
+      <tbody id="lista"></tbody></table>
+    </section>
+    <section>
+      <h2>Huella de la corrida elegida</h2>
+      <div id="mapa"><span>Elegí una corrida de la lista.</span></div>
+    </section>
+    <section>
+      <h2>Avisos de la corrida elegida</h2>
+      <pre id="registro"></pre>
+    </section>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let estado = null, elegida = null, canal = null;
+
+async function pedir(ruta, cuerpo) {
+  const r = await fetch(ruta, cuerpo === undefined ? {} : {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(cuerpo)});
+  const datos = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof datos.detail === "string" ? datos.detail : JSON.stringify(datos.detail || datos));
+  return datos;
+}
+
+function proponerEvento() {
+  const ev = estado.eventos_base.find(e => e.id === $("evento").value);
+  if (!ev) return;
+  const p = ev.ignicion_de_la_ficha[0];
+  $("lon").value = p ? p.lon : ""; $("lat").value = p ? p.lat : "";
+  $("inicio").value = ev.inicios_de_la_ficha_utc[0] || "";
+}
+
+async function arrancar() {
+  estado = await pedir("/api/estado");
+  $("pie").textContent = `Fase F2 · programa ${estado.programa.version} · como mucho ${estado.limite_corridas} corridas a la vez. La pantalla con mapa llega en la fase siguiente.`;
+  $("motor").innerHTML = estado.motores.map(m => `<option value="${m.id}">${m.id}${m.de_prueba ? " (de prueba)" : ""}</option>`).join("");
+  $("evento").innerHTML = estado.eventos_base.map(e => `<option value="${e.id}">${e.nombre || e.id}</option>`).join("");
+  $("evento").onchange = proponerEvento; proponerEvento();
+  refrescar(); setInterval(refrescar, 1500);
+}
+
+$("crear").onclick = async () => {
+  $("aviso").textContent = "";
+  const cuerpo = {motor: $("motor").value, evento: $("evento").value, horas: Number($("horas").value), iniciar: true};
+  if ($("lon").value && $("lat").value) cuerpo.ignicion = [{lon: Number($("lon").value), lat: Number($("lat").value)}];
+  if ($("inicio").value) cuerpo.t_inicio_utc = $("inicio").value;
+  try { const r = await pedir("/api/corridas", cuerpo); elegir(r.corridas[0].id); refrescar(); }
+  catch (e) { $("aviso").textContent = e.message; }
+};
+
+async function ordenar(id, orden) {
+  $("aviso").textContent = "";
+  try { await pedir(`/api/corridas/${id}/${orden}`, {}); refrescar(); } catch (e) { $("aviso").textContent = e.message; }
+}
+
+async function refrescar() {
+  const {corridas} = await pedir("/api/corridas");
+  $("lista").innerHTML = "";
+  for (const c of corridas) {
+    const tr = document.createElement("tr");
+    if (c.id === elegida) tr.className = "elegida";
+    const h = c.ultima_hora;
+    tr.innerHTML = `<td>${c.id}</td><td>${c.motor}</td><td>${c.estado}</td><td class="num">${h ? h.h : "—"}</td>
+      <td class="num">${h ? h.ha.toLocaleString("es-AR") + " ha" : "—"}</td><td class="acciones"></td>`;
+    const acciones = tr.lastElementChild;
+    const boton = (texto, accion, activo) => { const b = document.createElement("button"); b.textContent = texto; b.disabled = !activo; b.onclick = accion; acciones.appendChild(b); };
+    boton("Ver", () => elegir(c.id), true);
+    boton("Pausar", () => ordenar(c.id, "pausar"), ["iniciando", "corriendo"].includes(c.estado));
+    boton("Reanudar", () => ordenar(c.id, "reanudar"), ["pausando", "pausada"].includes(c.estado));
+    boton("Detener", () => ordenar(c.id, "detener"), ["iniciando", "corriendo", "pausando", "pausada"].includes(c.estado));
+    $("lista").appendChild(tr);
+  }
+}
+
+function elegir(id) {
+  elegida = id;
+  if (canal) canal.close();
+  $("registro").textContent = ""; $("mapa").innerHTML = "<span>Esperando la primera hora…</span>";
+  canal = new EventSource(`/api/corridas/${id}/eventos`);
+  canal.onmessage = m => {
+    const e = JSON.parse(m.data);
+    const linea = e.aviso === "hora" ? `hora ${e.h}: ${e.ha} ha, ${e.activas} celdas activas, ${e.s_computo} s`
+      : e.aviso === "estado" ? `estado: ${e.estado}${e.motivo ? " — " + e.motivo : ""}` : `${e.aviso}: ${JSON.stringify(e)}`;
+    $("registro").textContent += linea + "\n"; $("registro").scrollTop = $("registro").scrollHeight;
+    if (e.aviso === "hora" || e.aviso === "final") $("mapa").innerHTML = `<img alt="Huella del fuego" src="/api/corridas/${id}/quemado.png?v=${e.n}">`;
+  };
+  canal.addEventListener("cierre", () => canal.close());
+  refrescar();
+}
+
+arrancar().catch(e => { $("aviso").textContent = "No se pudo hablar con el servidor: " + e.message; });
+</script>
+</body>
+</html>
