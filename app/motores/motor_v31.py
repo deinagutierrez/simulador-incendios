@@ -18,11 +18,12 @@ REPO = Path(__file__).resolve().parents[2]
 RAIZ = REPO / "src" / "v3.1"
 
 
-def correr(base: dict, carpeta: Path, control: Control, variante_por_defecto: str) -> dict:
+def correr(base: dict, configuracion: dict, carpeta: Path, control: Control, variante_por_defecto: str) -> dict:
     sys.path.insert(0, str(RAIZ / "scripts"))
     sys.path.insert(0, str(RAIZ / "src"))
     import pandas as pd
     import yaml
+    import ignicion as ignicion_libre
     from correr_escenario import opciones_v3            # src/v3.1/scripts/correr_escenario.py
     from incendios_sl import config as cfgmod
     from incendios_sl.simulation.entradas import cargar_entradas_evento
@@ -31,12 +32,15 @@ def correr(base: dict, carpeta: Path, control: Control, variante_por_defecto: st
     salida = carpeta / "salida"
     salida.mkdir(parents=True, exist_ok=True)
 
+    pedido = {}
     if base.get("escenario"):
+        if configuracion:
+            raise ValueError("`configuracion` solo se combina con `base.definicion`; `base.escenario` se corre tal cual")
         nombre = str(base["escenario"])
         esc = cfgmod.cargar_corrida(nombre)
         ruta = cfgmod.dir_escenarios() / "corridas" / f"{nombre}.yaml"
     else:
-        esc = dict(base["definicion"])
+        esc, pedido = ignicion_libre.aplicar(cfgmod, dict(base["definicion"]), configuracion)
         esc.setdefault("variante", variante_por_defecto)
         ruta = carpeta / "escenario_base.yaml"
         ruta.write_text(yaml.safe_dump(esc, allow_unicode=True, sort_keys=False), encoding="utf-8")
@@ -51,6 +55,19 @@ def correr(base: dict, carpeta: Path, control: Control, variante_por_defecto: st
                                                parche_modelo=v3["parche_modelo"])
     if esc.get("horas"):
         ent.t_fin_utc = min(ent.t_fin_utc, ent.t_inicio_utc + pd.Timedelta(hours=float(esc["horas"])))
+
+    # puntos que usa el motor: la celda de cada ignición y cuánto la corrió respecto del punto pedido
+    from pyproj import Transformer
+    a_lonlat = Transformer.from_crs(g.crs, "EPSG:4326", always_xy=True)
+    usada = []
+    for p, (fila, col, _) in zip(meta.get("puntos_ignicion") or [], ent.igniciones):
+        f0, c0 = (int(v) for v in g.lonlat_a_rc(p["lon"], p["lat"]))
+        lon, lat = a_lonlat.transform(g.xmin + (col + 0.5) * g.res, g.ymax - (fila + 0.5) * g.res)
+        u = {"id": str(p.get("nombre", "")), "lon": round(lon, 7), "lat": round(lat, 7)}
+        if (f0, c0) != (fila, col):
+            u["desplazada_m"] = round(float(np.hypot(fila - f0, col - c0) * g.res), 0)
+        usada.append(u)
+    ign = {"ignicion": {"pedida": pedido, "usada": usada, "t_inicio_utc": str(ent.t_inicio_utc)}}
 
     grilla = {"crs": g.crs, "xmin": g.xmin, "ymax": g.ymax, "res": g.res, "filas": g.nfil, "cols": g.ncol}
     area_celda_ha = g.res ** 2 / 1e4
@@ -89,4 +106,4 @@ def correr(base: dict, carpeta: Path, control: Control, variante_por_defecto: st
         motivo, texto = str(sim.motivo), MOTIVOS.get(sim.motivo, "?")
     return {"motivo_fin": motivo, "motivo_fin_texto": texto, "ha_final": round(ha_final, 2),
             "t_simulado_min": round(sim.t / 60.0, 3), "salida": "salida", "completa": not estado["detenida"],
-            "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())}
+            "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign

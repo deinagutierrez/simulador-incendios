@@ -6,7 +6,9 @@ de integración aprobado por las dos personas, subiendo el número de versión.
 **Cambios de la 1.0 a la 1.1** (propuestos al implementar la fase F1, 2026-11-11; pendientes de aprobación de la otra persona):
 `corrida.json` admite `base` para definir la corrida desde un escenario de los motores; el motor se lee de `corrida.json`;
 el aviso `listo` trae la grilla de la huella; `final` y `error` traen más campos; las órdenes se consultan sin bloquear;
-los resultados del motor quedan en `salida/`. La etiqueta `contrato-v1` apunta a la 1.0.
+los resultados del motor quedan en `salida/`; `corrida.json` admite `configuracion` con la ignición, la hora de inicio y la
+duración elegidas por el usuario, y `resultados.ignicion` informa el punto que usó el motor. La etiqueta `contrato-v1` apunta
+a la 1.0.
 
 ## 1. Paquete de corrida
 
@@ -22,11 +24,30 @@ El archivo `corrida.json` vive en la carpeta de la corrida, `resultados/app/<id>
 Hace falta `base.escenario` o `base.definicion`. Con `definicion`, lo que no se indique toma los valores de la decisión
 D-E3-01: en v4.0, `variante: barreras` y `parar_en_cicatriz: off`; en v3.1, `variante: libre` o `libre_v2` según el motor.
 
-Al terminar, el proceso completa `corrida.json` con `bitacora` (pausas, reanudaciones y detención, con su minuto simulado) y
-`resultados` (`ha_final`, `km2_final`, `t_simulado_h`, `s_computo`, `memoria_pico_mb`, `motivo_fin`, `completa`, `archivos`).
+**Lo que elige el usuario** va en `configuracion`, y solo se combina con `base.definicion` (con `base.escenario` se rechaza):
 
-**Todavía no**: `configuracion.ignicion` con un punto libre (el clic en el mapa), viento manual y cortafuegos. Llegan con la
-segunda parte de F1 y con F5; hasta entonces la ignición es la de la ficha del evento (`ignicion: snmf | altN`).
+| Campo | Contenido |
+|---|---|
+| `configuracion.ignicion` | lista de puntos `{lon, lat}` en grados (WGS84), opcionalmente con `nombre`. Reemplaza a los puntos de la ficha del evento |
+| `configuracion.t_inicio_utc` | hora de inicio con huso, por ejemplo `2024-09-19T16:00:00Z`. Reemplaza a la hora de la ficha |
+| `configuracion.horas` | duración; pisa a `base.definicion.horas` |
+
+El evento de `base.definicion` sigue aportando la meteorología, los índices y la cobertura; la hora de inicio tiene que caer
+dentro de su serie meteorológica. Reglas:
+
+- Un punto fuera del dominio o una hora fuera de la serie meteorológica se rechazan con un aviso `error` (`fatal: true`)
+  antes de simular.
+- Un punto sobre una celda combustible se usa tal cual (el fuego empieza en esa celda de 30 m).
+- Un punto sobre una celda no combustible (agua, roca, urbano) lo corre el motor a la celda combustible más cercana, con su
+  regla de siempre. **Si el evento base tiene cicatriz de referencia, la busca dentro de la cicatriz**, que puede quedar
+  lejos del clic. El corrimiento se informa en `resultados.ignicion.usada[].desplazada_m`; el servidor debe mostrarlo.
+
+Al terminar, el proceso completa `corrida.json` con `bitacora` (pausas, reanudaciones y detención, con su minuto simulado) y
+`resultados` (`ha_final`, `km2_final`, `t_simulado_h`, `s_computo`, `memoria_pico_mb`, `motivo_fin`, `completa`, `archivos`,
+e `ignicion` = `{pedida, usada: [{id, lon, lat, desplazada_m?}], t_inicio_utc}`).
+
+**Todavía no**: viento manual y cortafuegos (fase F5), y eventos armados con datos bajados en el momento (fases F2 y F3).
+Hasta entonces los datos son los de un evento con ficha.
 
 ## 2. Proceso motor
 

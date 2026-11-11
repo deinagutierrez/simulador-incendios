@@ -63,10 +63,12 @@ def _offline(tmp: Path, motor: str) -> np.ndarray:
     return _leer(encontrados[0])
 
 
-def _carpeta(tmp: Path, motor: str) -> Path:
+def _carpeta(tmp: Path, motor: str, definicion: dict | None = None, configuracion: dict | None = None) -> Path:
     tmp.mkdir(parents=True, exist_ok=True)
-    (tmp / "corrida.json").write_text(json.dumps({"formato": "incendios_sl.corrida/1.0", "motor": motor,
-                                                  "base": {"definicion": DEFINICION}}), encoding="utf-8")
+    corrida = {"formato": "incendios_sl.corrida/1.0", "motor": motor, "base": {"definicion": definicion or DEFINICION}}
+    if configuracion:
+        corrida["configuracion"] = configuracion
+    (tmp / "corrida.json").write_text(json.dumps(corrida), encoding="utf-8")
     return tmp
 
 
@@ -213,3 +215,84 @@ def test_detener_deja_salidas_validas(caso, tmp_path):
     corrida = json.loads((carpeta / "corrida.json").read_text(encoding="utf-8"))
     assert corrida["resultados"]["motivo_fin"] == "detenida"
     assert [b["tipo"] for b in corrida["bitacora"]] == ["pausa", "detencion"]
+
+
+# ---------------------------------------------------------------------------------------------------- ignición libre
+PUNTOS_DE_LA_FICHA = [{"lon": -65.5477, "lat": -32.6367}, {"lon": -65.6232, "lat": -32.6422}]     # SL-2024-LASLAGUNAS, SNMF
+HORA_HIPOTESIS_1 = "2024-09-18T15:00:00Z"
+
+
+def test_ignicion_libre_en_los_puntos_de_la_ficha_da_lo_mismo(caso, tmp_path):
+    """Los mismos puntos y la misma hora, pero pasados como ignición libre: tiene que dar la corrida de referencia.
+    La definición base pide la hipótesis 0 (otra hora): la hora tiene que salir de `configuracion`."""
+    motor = caso["motor"]
+    carpeta = _carpeta(tmp_path / "libre", motor, {**DEFINICION, "hipotesis": 0},
+                       {"ignicion": PUNTOS_DE_LA_FICHA, "t_inicio_utc": HORA_HIPOTESIS_1})
+    p = _lanzar(carpeta)
+    avisos = _avisos(p)
+    assert p.returncode == 0, [a for a in avisos if a["aviso"] == "error"]
+    assert avisos[0]["t0_utc"].startswith("2024-09-18 15:00")
+    propio = _raster_del_proceso(carpeta, motor)
+    ref = caso["referencia"]
+    assert int((~((propio == ref) | (np.isnan(propio) & np.isnan(ref)))).sum()) == 0
+    ign = json.loads((carpeta / "corrida.json").read_text(encoding="utf-8"))["resultados"]["ignicion"]
+    assert len(ign["usada"]) == 2 and ign["pedida"]["t_inicio_utc"] == HORA_HIPOTESIS_1
+
+
+def _celda_de_pastizal() -> tuple[int, int, float, float]:
+    """(fila, columna, lon, lat) del centro de una celda de pastizal rodeada de pastizal, cerca del centro del dominio."""
+    import rasterio
+    from pyproj import Transformer
+    from scipy.ndimage import minimum_filter
+    ruta = REPO / "datos" / "inputSimulacion" / "combustibles" / "SL-2024-LASLAGUNAS" / "combustible_clase_SL-2024-LASLAGUNAS.tif"
+    with rasterio.open(ruta) as s:
+        clase, tr, crs = s.read(1), s.transform, s.crs
+    homogeneo = minimum_filter((clase == 1).astype(np.uint8), size=7) == 1
+    ff, cc = np.nonzero(homogeneo)
+    k = int(np.argmin((ff - clase.shape[0] // 2) ** 2 + (cc - clase.shape[1] // 2) ** 2))
+    f, c = int(ff[k]), int(cc[k])
+    x, y = tr * (c + 0.5, f + 0.5)
+    lon, lat = Transformer.from_crs(crs, "EPSG:4326", always_xy=True).transform(x, y)
+    return f, c, float(lon), float(lat)
+
+
+def test_ignicion_en_un_punto_y_una_hora_elegidos(caso, tmp_path):
+    motor = caso["motor"]
+    f, c, lon, lat = _celda_de_pastizal()
+    carpeta = _carpeta(tmp_path / "punto", motor, {"evento": "SL-2024-LASLAGUNAS", "validar": False, "figuras": False},
+                       {"ignicion": [{"lon": lon, "lat": lat}], "t_inicio_utc": "2024-09-19T16:00:00Z", "horas": 3})
+    p = _lanzar(carpeta)
+    avisos = _avisos(p)
+    assert p.returncode == 0, [a for a in avisos if a["aviso"] == "error"]
+    assert avisos[0]["t0_utc"].startswith("2024-09-19 16:00")
+    fin = avisos[-1]
+    assert fin["completa"] is True and fin["t_sim_min"] == 180.0 and fin["ha"] > 0
+    t = _raster_del_proceso(carpeta, motor).astype("float64")
+    if motor.startswith("v3.1"):
+        t = np.where(t >= 0, t, np.nan)
+    assert t[f, c] == 0.0 and np.nanmin(t) == 0.0, "el fuego tiene que empezar en la celda pedida"
+    # todo lo quemado en 3 horas queda cerca del punto pedido, lejos de los puntos de la ficha (a más de 5 km)
+    ff, cc = np.nonzero(~np.isnan(t))
+    assert float(np.hypot(ff - f, cc - c).max()) * 30.0 < 5000.0
+    ign = json.loads((carpeta / "corrida.json").read_text(encoding="utf-8"))["resultados"]["ignicion"]
+    assert len(ign["usada"]) == 1 and "desplazada_m" not in ign["usada"][0]
+    assert abs(ign["usada"][0]["lon"] - lon) < 1e-3 and abs(ign["usada"][0]["lat"] - lat) < 1e-3
+
+
+def test_ignicion_fuera_del_dominio_se_rechaza(tmp_path):
+    carpeta = _carpeta(tmp_path / "fuera", "v4.0", {"evento": "SL-2024-LASLAGUNAS", "horas": 3, "validar": False, "figuras": False},
+                       {"ignicion": [{"lon": -64.0, "lat": -32.6}]})
+    p = _lanzar(carpeta)
+    avisos = _avisos(p)
+    assert p.returncode == 1
+    assert avisos[-1]["aviso"] == "error" and avisos[-1]["fatal"] is True and "fuera del dominio" in avisos[-1]["mensaje"]
+
+
+@pytest.mark.parametrize("motor", ["v4.0", "v3.1-librev2"])
+def test_hora_fuera_de_la_serie_meteorologica_se_rechaza(tmp_path, motor):
+    carpeta = _carpeta(tmp_path / "hora", motor, {"evento": "SL-2024-LASLAGUNAS", "horas": 3, "validar": False, "figuras": False},
+                       {"t_inicio_utc": "2025-01-01T12:00:00Z"})
+    p = _lanzar(carpeta)
+    avisos = _avisos(p)
+    assert p.returncode == 1
+    assert avisos[-1]["aviso"] == "error" and avisos[-1]["fatal"] is True and "serie meteorológica" in avisos[-1]["mensaje"]

@@ -26,10 +26,11 @@ def _sin_listas(d: dict | None) -> dict:
     return {k: v for k, v in (d or {}).items() if not isinstance(v, (list, dict))}
 
 
-def correr(base: dict, carpeta: Path, control: Control) -> dict:
+def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> dict:
     sys.path.insert(0, str(RAIZ / "src"))
     import yaml
-    from incendios_sl import escenario, resumen
+    import ignicion as ignicion_libre
+    from incendios_sl import config as cfgmod, escenario, resumen
     from simulador import corrida as corrida_mod
     from simulador.ca.automata import Automata
     from simulador.outputs import geo
@@ -74,10 +75,13 @@ def correr(base: dict, carpeta: Path, control: Control) -> dict:
     corrida_mod.Automata = AutomataControlado
 
     # --- escenario: uno existente o una definición propia (se escribe como YAML y se carga igual que offline)
+    pedido = {}
     if base.get("escenario"):
+        if configuracion:
+            raise ValueError("`configuracion` solo se combina con `base.definicion`; `base.escenario` se corre tal cual")
         esc, ruta, nombre = escenario.cargar_corrida(str(base["escenario"]), None)
     else:
-        definicion = dict(base["definicion"])
+        definicion, pedido = ignicion_libre.aplicar(cfgmod, dict(base["definicion"]), configuracion)
         for clave, valor in POR_DEFECTO.items():
             definicion.setdefault(clave, valor)
         archivo = carpeta / "escenario_base.yaml"
@@ -94,6 +98,9 @@ def correr(base: dict, carpeta: Path, control: Control) -> dict:
     elif trad["modo"] == "caso":
         extras |= {"caso": ent["caso"], "variante_caso": ent["variante_caso"],
                    "nombre_toa": (trad["caso"].get("evaluacion") or {}).get("nombre_toa")}
+    # puntos que usa el motor, ya corridos a celda combustible si hizo falta (`desplazada_m`)
+    usada = [{k: p[k] for k in ("id", "lon", "lat", "desplazada_m") if k in p} for p in (ent.get("igniciones") or [])]
+    ign = {"ignicion": {"pedida": pedido, "usada": usada, "t_inicio_utc": ent.get("t_inicio_utc")}}
 
     try:
         res = corrida_mod.ejecutar(trad["cfg"], raiz_datos(), carpeta=salida, verificar_sha=True, verbose=True,
@@ -105,7 +112,7 @@ def correr(base: dict, carpeta: Path, control: Control) -> dict:
         t_min = au.minutos(au.t)
         return {"motivo_fin": "detenida", "motivo_fin_texto": "Detenida por el usuario.", "ha_final": round(au.area_quemada_ha(), 2),
                 "t_simulado_min": round(t_min, 3), "salida": "salida", "completa": False,
-                "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())}
+                "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign
 
     segundos = time.time() - t_reloj
     shutil.copy(ruta, salida / f"escenario_{nombre}.yaml")
@@ -134,4 +141,4 @@ def correr(base: dict, carpeta: Path, control: Control) -> dict:
     t_min = float(ind[-1]["minutos_desde_t0"]) if ind else 0.0
     return {"motivo_fin": au.motivo_fin, "motivo_fin_texto": au.motivo_fin_texto, "ha_final": round(au.area_quemada_ha(), 2),
             "t_simulado_min": round(t_min, 3), "salida": "salida", "completa": True,
-            "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())}
+            "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign

@@ -1,4 +1,4 @@
-# F1 — Procesos motor: informe de la primera parte
+# F1 — Procesos motor: informe
 
 Fecha: 2026-11-11 · Rama: `f1-procesos-motor` · Equipo: Windows 11, Intel de 20 núcleos lógicos, 32 GB, Python 3.14.7.
 Rótulos: **(dato)** medido ese día en ese equipo · **(inferencia)** · **(sin verificar)**.
@@ -12,8 +12,9 @@ Rótulos: **(dato)** medido ese día en ese equipo · **(inferencia)** · **(sin
 | Órdenes pausar, reanudar y detener | hecho |
 | Salidas iguales a las de una corrida offline | hecho y verificado (§3) |
 | Medición de tiempo y memoria (prerregistro E-E3-3) | hecha en un equipo (§4); falta el modo "ambos" y un segundo equipo |
-| **Corrida desde un evento generado: ignición en un punto libre, hora libre** | **no hecho**. Hoy la ignición es la de la ficha del evento (`snmf` o `altN`). Es la segunda parte de F1 |
-| Decisión sobre dónde viven los insumos de una corrida en tiempo real | **no tomada**; depende de lo anterior |
+| Ignición en un punto libre y a una hora libre | hecho (§8): `configuracion` en `corrida.json` |
+| Corrida desde un evento **generado** (con datos bajados en el momento) | no hecho: hoy los datos son los de un evento con ficha. Llega con las fases de datos (F2 y F3) |
+| Decisión sobre dónde viven los insumos de una corrida en tiempo real | **no tomada**; se toma al armar el primer evento generado (F2) |
 | Intervenciones (viento manual, cortafuegos) | fase F5. La orden `intervenir` ya existe y responde `rechazada` |
 
 ## 2. Cómo se conduce cada motor sin tocarlo
@@ -101,8 +102,40 @@ define con `base` en `corrida.json`; el aviso `listo` trae la grilla de la huell
 
 ## 7. Lo que sigue
 
-1. **Segunda parte de F1**: ignición en un punto y una hora libres. En v4.0 la configuración de SIM ya acepta una lista de
-   puntos con longitud y latitud. En v3.1 los puntos salen de la ficha del evento, así que hay que entregarle una ficha armada
-   en memoria. Con eso se decide dónde viven los insumos de una corrida en tiempo real.
-2. Paquete de datos históricos, para correr los pares de Las Chacras.
-3. Medir el modo "ambos" y repetir las mediciones en un segundo equipo.
+1. Fases de datos (F2 y F3): pronóstico e índices bajados en el momento, y con ellos el primer evento generado.
+2. Paquete de datos históricos y `bajar_historicos.py`, para que cualquiera pueda repetir los pares de Las Chacras.
+3. Medir el modo "ambos" y repetir las mediciones en un segundo equipo y en Linux.
+4. Aprobación del contrato 1.1 por la otra persona.
+
+## 8. Segunda parte: ignición en un punto y una hora elegidos
+
+**Cómo funciona.** Los dos motores sacan los puntos y la hora de ignición de la ficha del evento, con la misma función
+(`incendios_sl.config.cargar_evento`). `app/motores/ignicion.py` envuelve esa función dentro del proceso y le entrega al motor
+la misma ficha con dos datos cambiados: los puntos y la hora de inicio. No se escribe ningún archivo en `escenarios/` ni en
+`datos/`, y ningún archivo de los motores cambia. El evento sigue aportando la meteorología, los índices y la cobertura.
+
+**Cómo se pide.** En `corrida.json`, junto a `base.definicion`:
+
+```json
+"configuracion": {"ignicion": [{"lon": -65.55, "lat": -32.64}], "t_inicio_utc": "2024-09-19T16:00:00Z", "horas": 24}
+```
+
+**Qué se verificó** (dato, `test/app/test_procesos.py`, tres motores):
+
+| Prueba | Resultado |
+|---|---|
+| Pedir por `configuracion` los mismos puntos y la misma hora que trae la ficha de Las Lagunas 2024 da la misma huella que la corrida offline | 0 celdas distintas en v4.0, v3.1 libre y v3.1 librev2 |
+| Pedir un punto sobre pastizal y otra hora (19/9/2024 16 UTC, 3 h): el fuego empieza en la celda pedida y a la hora pedida | pasa en los tres |
+| Pedir un punto fuera del dominio | rechazado con aviso de error, sin simular |
+| Pedir una hora fuera de la serie meteorológica del evento | rechazado con aviso de error, sin simular |
+
+**Límites.**
+
+- Si el punto cae en una celda que no quema, cada motor lo corre a la celda combustible más cercana, con su regla de siempre.
+  Cuando el evento base tiene cicatriz de referencia, la busca **dentro de la cicatriz**, que puede estar lejos del clic. El
+  proceso informa el corrimiento en `resultados.ignicion.usada[].desplazada_m` y la pantalla tiene que mostrarlo. Con un
+  evento generado, que no tiene cicatriz, el corrimiento es a la combustible más cercana.
+- La hora de inicio tiene que caer dentro de la serie meteorológica del evento base. Si cae afuera, el proceso la rechaza
+  antes de simular, con un aviso de error que dice de cuándo a cuándo hay datos.
+- Todos los puntos empiezan a la misma hora. No hay igniciones escalonadas.
+- No es todavía "tiempo real": falta bajar el pronóstico y los índices (F2 y F3).

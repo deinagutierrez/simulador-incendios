@@ -10,6 +10,12 @@ motores, de una de dos formas:
 
 Con `definicion`, si no trae `variante` se usa la de la decisión D-E3-01: `barreras` en v4.0, `libre` o `libre_v2` en v3.1.
 
+Con `definicion` se puede agregar `configuracion`, lo que elige el usuario en la pantalla (ver ignicion.py):
+
+    "configuracion": {"ignicion": [{"lon": -65.55, "lat": -32.64}], "t_inicio_utc": "2024-09-19T16:00:00Z", "horas": 24}
+
+El evento de `definicion` sigue aportando la meteorología, los índices y la cobertura.
+
 Salida estándar: solo avisos, una línea JSON cada uno (listo, hora, pausado, intervencion, final, error).
 Entrada estándar: órdenes, una línea JSON cada una (pausar, reanudar, detener, intervenir).
 Todo lo que imprimen los motores va a `<carpeta>/proceso.log`. Los resultados del motor quedan en `<carpeta>/salida/`,
@@ -71,14 +77,16 @@ def main() -> int:
         base = corrida.get("base") or {}
         if not (base.get("escenario") or base.get("definicion")):
             raise ValueError("corrida.json: falta `base.escenario` o `base.definicion`")
+        configuracion = {k: v for k, v in (corrida.get("configuracion") or {}).items()
+                         if k in ("ignicion", "t_inicio_utc", "horas") and v not in (None, [], "")}
         version, variante = MOTORES[motor]
         print(f"proceso motor {motor} · corrida {carpeta.name}", flush=True)
         if version == "v4.0":
             import motor_v40
-            res = motor_v40.correr(base, carpeta, control)
+            res = motor_v40.correr(base, configuracion, carpeta, control)
         else:
             import motor_v31
-            res = motor_v31.correr(base, carpeta, control, variante)
+            res = motor_v31.correr(base, configuracion, carpeta, control, variante)
     except Exception as e:                       # cualquier falla se informa como aviso y con código de salida 1
         traceback.print_exc()
         control.aviso("error", mensaje=f"{type(e).__name__}: {e}", fatal=True)
