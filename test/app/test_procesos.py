@@ -296,3 +296,43 @@ def test_hora_fuera_de_la_serie_meteorologica_se_rechaza(tmp_path, motor):
     avisos = _avisos(p)
     assert p.returncode == 1
     assert avisos[-1]["aviso"] == "error" and avisos[-1]["fatal"] is True and "serie meteorológica" in avisos[-1]["mensaje"]
+
+
+def _celda_que_no_quema_lejos_de_la_cicatriz() -> tuple[float, float, float, float]:
+    """(lon, lat, metros a la celda combustible más cercana, metros a la cicatriz) de una celda no combustible de v3.1
+    que está a más de 8 km de la cicatriz de Las Lagunas 2024."""
+    import rasterio
+    from pyproj import Transformer
+    from scipy import ndimage
+    base = REPO / "datos" / "inputSimulacion"
+    with rasterio.open(base / "combustibles" / "SL-2024-LASLAGUNAS" / "combustible_clase_SL-2024-LASLAGUNAS.tif") as src:
+        clase = src.read(1); tr = src.transform; crs = src.crs
+    with rasterio.open(base / "eventos" / "SL-2024-LASLAGUNAS" / "cicatriz_referencia_SL-2024-LASLAGUNAS.tif") as src:
+        cicatriz = src.read(1) == 1
+    res = abs(tr.a)
+    a_combustible = ndimage.distance_transform_edt(clase <= 0) * res
+    a_cicatriz = ndimage.distance_transform_edt(~cicatriz) * res
+    borde = np.zeros_like(clase, dtype=bool); borde[60:-60, 60:-60] = True
+    candidatas = np.argwhere((clase <= 0) & (a_cicatriz > 8000) & (a_combustible < 400) & borde)
+    assert len(candidatas), "no hay celdas no combustibles lejos de la cicatriz"
+    f, c = (int(v) for v in candidatas[len(candidatas) // 2])
+    x, y = tr.c + (c + 0.5) * tr.a, tr.f + (f + 0.5) * tr.e
+    lon, lat = Transformer.from_crs(crs, "EPSG:4326", always_xy=True).transform(x, y)
+    return lon, lat, float(a_combustible[f, c]), float(a_cicatriz[f, c])
+
+
+@pytest.mark.parametrize("motor", ["v4.0", "v3.1-librev2"])
+def test_punto_que_no_quema_se_corre_cerca_del_clic_y_no_a_la_cicatriz(tmp_path, motor):
+    """Decisión D-E3-20: con un punto elegido por el usuario, el corrimiento no mira la cicatriz del evento base."""
+    lon, lat, m_combustible, m_cicatriz = _celda_que_no_quema_lejos_de_la_cicatriz()
+    carpeta = _carpeta(tmp_path / "corrida", motor, {"evento": "SL-2024-LASLAGUNAS", "validar": False, "figuras": False},
+                       {"ignicion": [{"lon": lon, "lat": lat}], "t_inicio_utc": "2024-09-19T16:00:00Z", "horas": 1})
+    p = _lanzar(carpeta)
+    avisos = _avisos(p)
+    assert p.returncode == 0 and avisos[-1]["aviso"] == "final", avisos[-1]
+    usada = json.loads((carpeta / "corrida.json").read_text(encoding="utf-8"))["resultados"]["ignicion"]["usada"]
+    assert len(usada) == 1
+    corrida_m = usada[0].get("desplazada_m", 0.0)
+    assert corrida_m < 2000 and corrida_m < m_cicatriz / 4, (corrida_m, m_combustible, m_cicatriz)
+    if motor.startswith("v3.1"):          # v3.1 usa justo este mapa de clases: el corrimiento es a su vecina más cercana
+        assert abs(corrida_m - m_combustible) <= 30, (corrida_m, m_combustible)

@@ -2,14 +2,19 @@
 
 Los dos motores sacan los puntos y la hora de ignición de la ficha del evento, con `incendios_sl.config.cargar_evento`.
 Acá se envuelve esa función dentro del proceso para que entregue la misma ficha con `ignicion.puntos` y
-`inicio.hora_utc_hipotesis` reemplazados. Todo lo demás de la ficha (meteorología, índices, cobertura, cicatriz) queda igual,
-y cada motor sigue aplicando sus propias reglas: por ejemplo, si el punto cae en una celda no combustible lo corre a la
-combustible más cercana (dentro de la cicatriz de referencia, si el evento base tiene una). Ningún archivo de los motores
-ni de `escenarios/` cambia.
+`inicio.hora_utc_hipotesis` reemplazados. Todo lo demás de la ficha (meteorología, índices, cobertura) queda igual, y cada
+motor sigue aplicando sus propias reglas. Ningún archivo de los motores ni de `escenarios/` cambia.
+
+Punto sobre una celda que no quema (decisión D-E3-20). Cada motor corre ese punto a la celda combustible más cercana, y si
+el evento tiene cicatriz de referencia la busca dentro de la cicatriz: una regla pensada para validar incendios históricos,
+que con un clic libre puede llevar el fuego lejos de donde se marcó. Cuando el punto lo elige el usuario, acá se le oculta
+la cicatriz a ese único paso (`_ignorar_cicatriz`), y el motor corre el punto a la celda combustible más cercana al clic,
+con su propio mapa de combustible. Es lo mismo que hará con un evento generado en tiempo real, que no tiene cicatriz.
 """
 from __future__ import annotations
 
 import copy
+from pathlib import Path
 
 
 def aplicar(cfgmod, definicion: dict, configuracion: dict) -> tuple[dict, dict]:
@@ -74,6 +79,32 @@ def aplicar(cfgmod, definicion: dict, configuracion: dict) -> tuple[dict, dict]:
     cfgmod.cargar_evento = cargar_evento
     if nuevos is not None:
         d["ignicion"] = "snmf"            # los motores llaman así a "los puntos de la ficha"
+        _ignorar_cicatriz(cfgmod)
     if hora is not None:
         d["hipotesis"] = 0
     return d, informe
+
+
+def _ignorar_cicatriz(cfgmod) -> None:
+    """Hace que el motor cargado corra los puntos de ignición sin mirar la cicatriz de referencia. Solo afecta a ese paso:
+    la cicatriz sigue disponible para todo lo demás."""
+    if str(getattr(cfgmod, "VERSION_RESULTADOS", "")).startswith("v4"):
+        from incendios_sl import eventos                      # v4.0: la regla es una función que recibe la cicatriz
+        original = eventos.igniciones
+
+        def igniciones(ficha, hipotesis=0, ignicion="snmf", combustible=None, cicatriz=None):
+            return original(ficha, hipotesis, ignicion, combustible, None)
+
+        eventos.igniciones = igniciones
+    else:
+        import numpy as np
+        from incendios_sl.simulation import entradas         # v3.1: la regla lee la cicatriz al cargar las entradas
+        original = entradas.leer_raster
+
+        def leer_raster(ruta, *a, **k):
+            r = original(ruta, *a, **k)
+            if Path(str(ruta)).name.startswith("cicatriz_referencia_"):
+                return (np.zeros_like(r[0]), *r[1:])
+            return r
+
+        entradas.leer_raster = leer_raster
