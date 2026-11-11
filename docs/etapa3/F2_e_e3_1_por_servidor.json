@@ -1,0 +1,173 @@
+{
+ "fecha": "2026-11-11 12:00",
+ "via": "servidor (HTTP)",
+ "equipo": {
+  "sistema": "Windows-11-10.0.26300-SP0",
+  "nucleos": 20,
+  "python": "3.14.7"
+ },
+ "cambio_git": "aad2731a2d9813892b84f8a6dd1caf06636a527d",
+ "codigo_sin_registrar": [],
+ "congelado_sha256": "2b32757194d2510bcbc680056f803694be064fc968e35de9c1ab579c10621106",
+ "datos_por_evento": [
+  {
+   "evento": "SL-2023-CHACRASOCT",
+   "n_archivos": 18,
+   "fuera_de_git": 0,
+   "sha256_del_conjunto": "52d145b3c3dfa0b853a8cb0ab6fe803a9cc31c4bb082e0afd1e74d22785cd922"
+  },
+  {
+   "evento": "SL-2024-LASLAGUNAS",
+   "n_archivos": 22,
+   "fuera_de_git": 0,
+   "sha256_del_conjunto": "a88c07ba0a8182d2abf3f0772ff54eab33b67bc23e620d0054e91d2de3d9b5da"
+  }
+ ],
+ "filas": [
+  {
+   "escenario": "aguada_36h",
+   "motor": "v4.0",
+   "estado": "corrido",
+   "horas": 36,
+   "horas_simuladas": 36.0,
+   "ha": 1348.11,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    1200.0
+   ],
+   "estado_final": [
+    "terminada",
+    "terminada"
+   ],
+   "s_computo": 7.72,
+   "memoria_pico_mb": 225.9
+  },
+  {
+   "escenario": "laslagunas_48h",
+   "motor": "v4.0",
+   "estado": "corrido",
+   "horas": 48,
+   "horas_simuladas": 48.0,
+   "ha": 12839.31,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    1500.0
+   ],
+   "estado_final": [
+    "terminada",
+    "terminada"
+   ],
+   "s_computo": 45.24,
+   "memoria_pico_mb": 536.4,
+   "detenida_en_min": 1500.0,
+   "detenida_estado": "detenida",
+   "detenida_celdas_quemadas": 31140,
+   "detenida_celdas_distintas": 0
+  },
+  {
+   "escenario": "laslagunas_48h",
+   "motor": "v3.1-libre",
+   "estado": "corrido",
+   "horas": 48,
+   "horas_simuladas": 48.0,
+   "ha": 34792.92,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    1500.0
+   ],
+   "estado_final": [
+    "terminada",
+    "terminada"
+   ],
+   "s_computo": 16.03,
+   "memoria_pico_mb": 864.9,
+   "detenida_en_min": 1501.0,
+   "detenida_estado": "detenida",
+   "detenida_celdas_quemadas": 101115,
+   "detenida_celdas_distintas": 0
+  },
+  {
+   "escenario": "laslagunas_48h",
+   "motor": "v3.1-librev2",
+   "estado": "corrido",
+   "horas": 48,
+   "horas_simuladas": 48.0,
+   "ha": 32915.16,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    1500.0
+   ],
+   "estado_final": [
+    "terminada",
+    "terminada"
+   ],
+   "s_computo": 16.07,
+   "memoria_pico_mb": 877.7,
+   "detenida_en_min": 1501.0,
+   "detenida_estado": "detenida",
+   "detenida_celdas_quemadas": 122274,
+   "detenida_celdas_distintas": 0
+  },
+  {
+   "escenario": "chacrasoct_72h",
+   "motor": "v4.0",
+   "estado": "corrido",
+   "horas": 72,
+   "horas_simuladas": 72.0,
+   "ha": 2356.29,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    2220.0
+   ],
+   "estado_final": [
+    "terminada",
+    "terminada"
+   ],
+   "s_computo": 25.36,
+   "memoria_pico_mb": 498.2
+  },
+  {
+   "escenario": "chacrasoct_72h",
+   "motor": "v3.1-libre",
+   "estado": "corrido",
+   "horas": 72,
+   "horas_simuladas": 45.0,
+   "ha": 1525.86,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    2220.0
+   ],
+   "estado_final": [
+    "terminada",
+    "terminada"
+   ],
+   "s_computo": 23.48,
+   "memoria_pico_mb": 863.9
+  },
+  {
+   "escenario": "chacrasoct_72h",
+   "motor": "v3.1-librev2",
+   "estado": "corrido",
+   "horas": 72,
+   "horas_simuladas": 46.0,
+   "ha": 3064.86,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    2220.0
+   ],
+   "estado_final": [
+    "terminada",
+    "terminada"
+   ],
+   "s_computo": 24.53,
+   "memoria_pico_mb": 877.2
+  }
+ ]
+}
