@@ -1,0 +1,398 @@
+{
+ "fecha": "2026-11-11 10:41",
+ "equipo": {
+  "sistema": "Windows-11-10.0.26300-SP0",
+  "procesador": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+  "nucleos": 20,
+  "python": "3.14.7"
+ },
+ "cambio_git": "7cbe5b476406decbb51eecdbeb0636ebfe762eb8",
+ "codigo_sin_registrar": [],
+ "congelado_sha256": "2b32757194d2510bcbc680056f803694be064fc968e35de9c1ab579c10621106",
+ "datos_por_evento": [
+  {
+   "evento": "SL-2023-CHACRASOCT",
+   "n_archivos": 18,
+   "fuera_de_git": 15,
+   "sha256_del_conjunto": "52d145b3c3dfa0b853a8cb0ab6fe803a9cc31c4bb082e0afd1e74d22785cd922",
+   "archivos": [
+    {
+     "archivo": "datos/inputSimulacion/catalogo/hotspots/viirs_SL-2023-CHACRASOCT.csv",
+     "bytes": 3894,
+     "sha256": "11db4a87e347482edeae4f548ae7d9891b96cea1c8b7d28bbff6c856e5dc2cfe",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/catalogo/hotspots_v3.1/viirs_SL-2023-CHACRASOCT.csv",
+     "bytes": 3894,
+     "sha256": "11db4a87e347482edeae4f548ae7d9891b96cea1c8b7d28bbff6c856e5dc2cfe",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/catalogo/hotspots_v3.2/viirs_SL-2023-CHACRASOCT.csv",
+     "bytes": 3894,
+     "sha256": "11db4a87e347482edeae4f548ae7d9891b96cea1c8b7d28bbff6c856e5dc2cfe",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/combustible_calidad_SL-2023-CHACRASOCT.tif",
+     "bytes": 19364,
+     "sha256": "10fa3d5e405ffe2fac1861b7ee3bc7f60060c0f845860e98c3df15d3f2de178c",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/combustible_calidad_SL-2023-CHACRASOCT.tif.json",
+     "bytes": 2004,
+     "sha256": "5dc20726303385814a32f33dd6e104bf9b9414d22bdffe0801ad19d90d04a6e8",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/combustible_clase_SL-2023-CHACRASOCT.tif",
+     "bytes": 441636,
+     "sha256": "c2e73693307c4003bb8b63e1a10ae123086a02325ab2e215c75c3a8f2c87dfba",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/combustible_clase_SL-2023-CHACRASOCT.tif.json",
+     "bytes": 2003,
+     "sha256": "1cef80aa3523a741cc02264f1111af9ef7b3ad5e65144a1c7a54ad0deebd5ad7",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/combustible_curado_SL-2023-CHACRASOCT.tif",
+     "bytes": 404903,
+     "sha256": "c32243f849e6d6634348d1b71234cef1a64d2a4977eac0156db16e5a6397592f",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/combustible_curado_SL-2023-CHACRASOCT.tif.json",
+     "bytes": 2004,
+     "sha256": "fb63781178b34958491d0d6aba9fe1339c5ba09d7c5994dd7cc75eb6c59799cb",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/ndmi_30m_SL-2023-CHACRASOCT.tif",
+     "bytes": 10238025,
+     "sha256": "0aba622ff0e7b239313c647676e3d759ef38d5cb14cdb752606b4530519e17cc",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/ndvi_30m_SL-2023-CHACRASOCT.tif",
+     "bytes": 10486751,
+     "sha256": "39eadeea6d7a193f01fd04d29720050a8bfd78acb15031629c0edf04099e700c",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2023-CHACRASOCT/resumen_combustibles_SL-2023-CHACRASOCT.json",
+     "bytes": 1415,
+     "sha256": "e938f850e902d7d62957e5d603ec9447deec281664fbae10e2d9c0854c7f35c0",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/eventos/SL-2023-CHACRASOCT/cicatriz_referencia_SL-2023-CHACRASOCT.tif",
+     "bytes": 17206,
+     "sha256": "a448db3d8888043c4739a147d098d5806a2cc8c927d0ab269b7a43b0aa14b1b4",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/eventos/SL-2023-CHACRASOCT/cicatriz_referencia_SL-2023-CHACRASOCT.tif.json",
+     "bytes": 1084,
+     "sha256": "4e35cc65cb58f2bb088ef61eb94518f33f2d374df62b9749bb5eee01110c0bfe",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/eventos/SL-2023-CHACRASOCT/humedad_muerto_SL-2023-CHACRASOCT.csv",
+     "bytes": 30808,
+     "sha256": "1a2ca336233b7f3014897868cdeb6e58e5b289b24186e1e73157c6a6c9abc928",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/eventos/SL-2023-CHACRASOCT/manifiesto_SL-2023-CHACRASOCT.json",
+     "bytes": 4174,
+     "sha256": "98a705f258678dc5ab94f2a65e1f9c51f309527b62f265d20bf95396184578e4",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/meteo/SL-2023-CHACRASOCT_ecmwf_ifs_20231016T00_20231023T03_0975494d83fd9617.json",
+     "bytes": 849,
+     "sha256": "3be0239753a6b845a503c392f756d15f673dad984b38e963dc94aa9b51f7d154",
+     "en_git": false
+    },
+    {
+     "archivo": "datos/inputSimulacion/meteo/SL-2023-CHACRASOCT_ecmwf_ifs_20231016T00_20231023T03_0975494d83fd9617_dominio.csv",
+     "bytes": 27352,
+     "sha256": "09754b23a0508c7b63b66bf782b1be45b20885483444729649d83a31c3ed048f",
+     "en_git": false
+    }
+   ]
+  },
+  {
+   "evento": "SL-2024-LASLAGUNAS",
+   "n_archivos": 22,
+   "fuera_de_git": 0,
+   "sha256_del_conjunto": "a88c07ba0a8182d2abf3f0772ff54eab33b67bc23e620d0054e91d2de3d9b5da",
+   "archivos": [
+    {
+     "archivo": "datos/inputSimulacion/catalogo/hotspots/modis_SL-2024-LASLAGUNAS.csv",
+     "bytes": 94039,
+     "sha256": "3a1dc573bc9f01f90f0bc4350bfb848967865f4d0430284f8f7c577a2c69ad14",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/catalogo/hotspots/viirs_SL-2024-LASLAGUNAS.csv",
+     "bytes": 839922,
+     "sha256": "2239176ac1dd793e4f78b55f42517bfc8a5d6b59fa007ca023a9c42d15de1da1",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/catalogo/hotspots_v3.1/viirs_SL-2024-LASLAGUNAS.csv",
+     "bytes": 813324,
+     "sha256": "054a2c34d7e0200dd38d4dc20d5a4d8835034db49b2f6fe2aa7a950772237920",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/catalogo/hotspots_v3.2/viirs_SL-2024-LASLAGUNAS.csv",
+     "bytes": 813324,
+     "sha256": "054a2c34d7e0200dd38d4dc20d5a4d8835034db49b2f6fe2aa7a950772237920",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/combustible_calidad_SL-2024-LASLAGUNAS.tif",
+     "bytes": 14537,
+     "sha256": "153d5ce5295b8b16e71504981308f38273c2039daaef6d0665dc218b35ebf1ed",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/combustible_calidad_SL-2024-LASLAGUNAS.tif.json",
+     "bytes": 1304,
+     "sha256": "a0232a7d431fab0a537a353e9a6afd4867601e06e46812c3f7e39ce83b32b915",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/combustible_clase_SL-2024-LASLAGUNAS.tif",
+     "bytes": 437279,
+     "sha256": "32ed159618fdb348a6d75b239a3b33bca1ba21bb1a203f804334a556910b2ead",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/combustible_clase_SL-2024-LASLAGUNAS.tif.json",
+     "bytes": 1303,
+     "sha256": "ece128ca1874d8bc505e32e87f47bf7f43ef90049d1f94ed03fa607ee5a244a2",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/combustible_curado_SL-2024-LASLAGUNAS.tif",
+     "bytes": 64355,
+     "sha256": "690b07e03d47aacd81125aa9d5d9344c4cbe098d60ad488acf3442776aa8e216",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/combustible_curado_SL-2024-LASLAGUNAS.tif.json",
+     "bytes": 1303,
+     "sha256": "3699542298bf1c53891baa3c73d2517b6f0fd30eb08822f7d3b3b60fa4eea5e4",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/ndmi_30m_SL-2024-LASLAGUNAS.tif",
+     "bytes": 11815910,
+     "sha256": "c8dbfe3b53a19f975ed3c273b29ac66b70d9a8a8f87d4ffc36723731a1ea6c1f",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/ndvi_30m_SL-2024-LASLAGUNAS.tif",
+     "bytes": 11749553,
+     "sha256": "9caecd1b1e02ec4d3dbd90a691d81ded1a1bcb3251a591654347e7631cd12042",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/resumen_combustibles_SL-2024-LASLAGUNAS.json",
+     "bytes": 1555,
+     "sha256": "69ba3e8e95aa0d5ccdb62108cf43926751e411e454d6b4b698c64860f2622e3b",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/eventos/SL-2024-LASLAGUNAS/cicatriz_referencia_SL-2024-LASLAGUNAS.tif",
+     "bytes": 56827,
+     "sha256": "2ea435f22992fecd663858153e7914be849c9a59af0fac493138b736b2bc8d2d",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/eventos/SL-2024-LASLAGUNAS/cicatriz_referencia_SL-2024-LASLAGUNAS.tif.json",
+     "bytes": 1046,
+     "sha256": "b23b4b7e20dcdf5aeea6d88753a265a04a33415abd23b3dd098de379950bf9c9",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/eventos/SL-2024-LASLAGUNAS/humedad_muerto_SL-2024-LASLAGUNAS.csv",
+     "bytes": 97716,
+     "sha256": "ffd364667bae6d0bf9c4b0d711c30ac82199d490b35a144f68457fb6e55e4fea",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/eventos/SL-2024-LASLAGUNAS/manifiesto_SL-2024-LASLAGUNAS.json",
+     "bytes": 4423,
+     "sha256": "75be0967b0c0cd4d3c64624b09c9d5cb9d9d0ae0f0201bc538028c8a11a10b3f",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2.csv",
+     "bytes": 621326,
+     "sha256": "90875d423075b190873214adc9c72d6642045c22653e87f9d912f35a2eff6e63",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2.json",
+     "bytes": 11196,
+     "sha256": "34ac69cab3051a05d5ac844d9445a11da7ed8276823f66a8db1b50940d6df96e",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2.parquet",
+     "bytes": 92539,
+     "sha256": "aa8848cd44f4b49d74beb20b045f87c0f4a28d6feb5a4e75aaec242b286445fc",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2.parquet.json",
+     "bytes": 2967,
+     "sha256": "5769f3ef7620dc8440c9106adffb3f0935c933b7942da8fe3a1d7b3a179e1e6b",
+     "en_git": true
+    },
+    {
+     "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv",
+     "bytes": 87087,
+     "sha256": "a2496054ef2cd3ff645b8018b0fb753f114b6b4ab5cefa56eab3b6f798e8d15e",
+     "en_git": true
+    }
+   ]
+  }
+ ],
+ "filas": [
+  {
+   "escenario": "aguada_36h",
+   "motor": "v4.0",
+   "estado": "corrido",
+   "horas": 36,
+   "celdas_quemadas": 14979,
+   "ha": 1348.11,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    1080.0
+   ],
+   "s_offline_total": 14.0,
+   "s_computo_proceso": 12.48,
+   "s_por_hora_simulada": 0.347,
+   "memoria_pico_mb": 226.3,
+   "motivo_fin": "horizonte"
+  },
+  {
+   "escenario": "laslagunas_48h",
+   "motor": "v4.0",
+   "estado": "corrido",
+   "horas": 48,
+   "celdas_quemadas": 142659,
+   "ha": 12839.31,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    1500.0
+   ],
+   "s_offline_total": 85.9,
+   "s_computo_proceso": 85.08,
+   "s_por_hora_simulada": 1.772,
+   "memoria_pico_mb": 536.3,
+   "motivo_fin": "horizonte"
+  },
+  {
+   "escenario": "laslagunas_48h",
+   "motor": "v3.1-libre",
+   "estado": "corrido",
+   "horas": 48,
+   "celdas_quemadas": 386588,
+   "ha": 34792.92,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    1440.0
+   ],
+   "s_offline_total": 29.3,
+   "s_computo_proceso": 26.48,
+   "s_por_hora_simulada": 0.552,
+   "memoria_pico_mb": 864.7,
+   "motivo_fin": "1"
+  },
+  {
+   "escenario": "laslagunas_48h",
+   "motor": "v3.1-librev2",
+   "estado": "corrido",
+   "horas": 48,
+   "celdas_quemadas": 365724,
+   "ha": 32915.16,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    1440.0
+   ],
+   "s_offline_total": 15.8,
+   "s_computo_proceso": 16.1,
+   "s_por_hora_simulada": 0.335,
+   "memoria_pico_mb": 877.8,
+   "motivo_fin": "1"
+  },
+  {
+   "escenario": "chacrasoct_72h",
+   "motor": "v4.0",
+   "estado": "corrido",
+   "horas": 72,
+   "celdas_quemadas": 26181,
+   "ha": 2356.29,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    2220.0
+   ],
+   "s_offline_total": 24.9,
+   "s_computo_proceso": 25.54,
+   "s_por_hora_simulada": 0.355,
+   "memoria_pico_mb": 497.5,
+   "motivo_fin": "horizonte"
+  },
+  {
+   "escenario": "chacrasoct_72h",
+   "motor": "v3.1-libre",
+   "estado": "corrido",
+   "horas": 72,
+   "celdas_quemadas": 16954,
+   "ha": 1525.86,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    2160.0
+   ],
+   "s_offline_total": 13.7,
+   "s_computo_proceso": 14.02,
+   "s_por_hora_simulada": 0.312,
+   "memoria_pico_mb": 864.2,
+   "motivo_fin": "3"
+  },
+  {
+   "escenario": "chacrasoct_72h",
+   "motor": "v3.1-librev2",
+   "estado": "corrido",
+   "horas": 72,
+   "celdas_quemadas": 34054,
+   "ha": 3064.86,
+   "celdas_distintas": 0,
+   "celdas_distintas_con_pausa": 0,
+   "pausa_en_min": [
+    2160.0
+   ],
+   "s_offline_total": 14.3,
+   "s_computo_proceso": 14.91,
+   "s_por_hora_simulada": 0.324,
+   "memoria_pico_mb": 876.9,
+   "motivo_fin": "3"
+  }
+ ]
+}

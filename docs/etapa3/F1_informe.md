@@ -43,40 +43,50 @@ cicatriz y la decisión D-E3-01 dice sin parada, por eso `definicion` la apaga s
 
 ## 3. Identidad con la corrida offline (prerregistro E-E3-1)
 
-Se corrió con `herramientas/e_e3_1.py` sobre el cambio `2efad2d` más el código de esta rama, con `congelado.json`
-`2b327571…`. Por cada par: corrida offline con el guion del motor, proceso sin órdenes, y proceso con una pausa y una
-reanudación a mitad de camino.
+**Evaluación formal hecha el 2026-11-11 sobre el cambio `7cbe5b4`: se cumple.** Detalle, condiciones y límites en
+`prerregistros/E-E3-1_resultado.md`. Por cada par: corrida offline con el guion del motor, proceso sin órdenes, y proceso con
+una pausa y una reanudación a mitad de camino.
 
-| Escenario | Motor | Horas | Superficie final | Celdas quemadas | Celdas distintas | Distintas con pausa |
+| Escenario | Motor | Horas simuladas | Superficie final | Celdas quemadas | Celdas distintas | Distintas con pausa |
 |---|---|---|---|---|---|---|
 | Caso La Aguada 2023 | v4.0 | 36 | 1.348 ha | 14.979 | **0** | **0** |
 | Las Lagunas 2024, h1, SNMF | v4.0 | 48 | 12.839 ha | 142.659 | **0** | **0** |
 | Las Lagunas 2024, h1, SNMF | v3.1 libre | 48 | 34.793 ha | 386.588 | **0** | **0** |
 | Las Lagunas 2024, h1, SNMF | v3.1 librev2 | 48 | 32.915 ha | 365.724 | **0** | **0** |
-| Las Chacras oct. 2023, alt4 | los tres | 72 | — | — | sin correr | sin correr |
+| Las Chacras oct. 2023, alt4 | v4.0 | 72 | 2.356 ha | 26.181 | **0** | **0** |
+| Las Chacras oct. 2023, alt4 | v3.1 libre | 45 de 72 | 1.526 ha | 16.954 | **0** | **0** |
+| Las Chacras oct. 2023, alt4 | v3.1 librev2 | 46 de 72 | 3.065 ha | 34.054 | **0** | **0** |
 
-- (dato) El criterio prerregistrado, 0 celdas distintas, **se cumple en los cuatro pares corridos**, con y sin pausa.
-- **No es todavía la evaluación formal de E-E3-1.** Faltan los tres pares de Las Chacras, que necesitan el paquete de datos
-  históricos, y el prerregistro pide que evalúe la otra persona. Esto es la comprobación de quien escribió el código.
+- (dato) El criterio prerregistrado, 0 celdas distintas, se cumple en los siete pares, con y sin pausa.
+- La evaluó el mismo frente que escribió el código, porque la otra persona no pudo (decisión D-E3-13).
+- Los datos de Las Chacras salieron de la copia de trabajo anterior y no están en el repositorio (decisión D-E3-14).
+- (dato) En Las Chacras, v3.1 cortó sola a las 45–46 h por falta de propagación, igual offline que en el proceso.
 - Además, `test/app/test_procesos.py` repite la identidad en 6 horas de Las Lagunas con los tres motores en cada cambio
-  (10 pruebas, cerca de un minuto), más avisos, pausa y detener.
+  (19 pruebas, unos dos minutos), más avisos, pausa, detener e ignición libre.
 
 ## 4. Tiempo y memoria (prerregistro E-E3-3, medición parcial)
 
+Medido en la tanda de la evaluación formal (proceso sin órdenes).
+
 | Escenario | Motor | Segundos de cómputo | Por hora simulada | Memoria pico |
 |---|---|---|---|---|
-| La Aguada 36 h | v4.0 | 12,3 | 0,34 s | 224 MB |
-| Las Lagunas 48 h (12.839 ha) | v4.0 | 84,6 | 1,76 s | 527 MB |
-| Las Lagunas 48 h (34.793 ha) | v3.1 libre | 27,8 | 0,58 s | 862 MB |
-| Las Lagunas 48 h (32.915 ha) | v3.1 librev2 | 27,5 | 0,57 s | 874 MB |
+| La Aguada 36 h (1.348 ha) | v4.0 | 12,5 | 0,35 s | 226 MB |
+| Las Lagunas 48 h (12.839 ha) | v4.0 | 85,1 | 1,77 s | 536 MB |
+| Las Lagunas 48 h (34.793 ha) | v3.1 libre | 26,5 | 0,55 s | 865 MB |
+| Las Lagunas 48 h (32.915 ha) | v3.1 librev2 | 16,1 | 0,34 s | 878 MB |
+| Las Chacras 72 h (2.356 ha) | v4.0 | 25,5 | 0,35 s | 498 MB |
+| Las Chacras 45 h (1.526 ha) | v3.1 libre | 14,0 | 0,31 s | 864 MB |
+| Las Chacras 46 h (3.065 ha) | v3.1 librev2 | 14,9 | 0,32 s | 877 MB |
 
 - (dato) La memoria de v4.0 por proceso, que nunca se había medido, es de unos 0,2 a 0,5 GB. La de v3.1, 0,9 GB.
   (inferencia) Los dos motores a la vez caben holgados en 8 GB; el requisito de 16 GB para el modo "ambos" del plan parece
   conservador. Falta medirlo corriendo los dos juntos.
-- (dato) Metas del prerregistro: v3.1 ≤ 0,5 s por hora y v4.0 ≤ 3 s por hora con unas 30.000 ha. v3.1 dio 0,57–0,58 s, apenas
-  por encima, con un incendio de 33.000–35.000 ha. v4.0 dio 1,76 s con 12.839 ha: cumple, pero con menos superficie que la de
-  la meta.
-- (dato) El tiempo incluye la carga de insumos: unos 4 s en v4.0 y 4 s en v3.1 antes de la primera hora.
+- (dato) Metas del prerregistro: v3.1 ≤ 0,5 s por hora y v4.0 ≤ 3 s por hora con unas 30.000 ha. v3.1 dio entre 0,31 y
+  0,55 s; el valor más alto, apenas por encima de la meta, es con un incendio de 35.000 ha. v4.0 dio 1,77 s con 12.839 ha:
+  cumple, pero con menos superficie que la de la meta.
+- (dato) La medición se mueve entre tandas: Las Lagunas con v3.1 librev2 dio 0,57 s por hora en la tanda anterior y 0,34 s en
+  esta. (sin verificar) Por qué. No es la medición formal de E-E3-3.
+- (dato) El tiempo incluye la carga de insumos: unos 4 s en cada motor antes de la primera hora.
 - (sin verificar) Un segundo equipo y Linux.
 
 ## 5. Problema encontrado: el proceso se colgaba en la primera hora
@@ -103,7 +113,8 @@ define con `base` en `corrida.json`; el aviso `listo` trae la grilla de la huell
 ## 7. Lo que sigue
 
 1. Fases de datos (F2 y F3): pronóstico e índices bajados en el momento, y con ellos el primer evento generado.
-2. Paquete de datos históricos y `bajar_historicos.py`, para que cualquiera pueda repetir los pares de Las Chacras.
+2. Paquete de datos históricos y `bajar_historicos.py`, para que cualquiera pueda repetir los pares de Las Chacras, y
+   confirmación del usuario de la decisión D-E3-14.
 3. Medir el modo "ambos" y repetir las mediciones en un segundo equipo y en Linux.
 4. Aprobación del contrato 1.1 por la otra persona.
 
