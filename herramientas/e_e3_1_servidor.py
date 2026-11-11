@@ -11,7 +11,7 @@ Levanta el servidor en un puerto libre y, por cada par escenario–motor, hace p
   2. una corrida con una pausa y una reanudación a mitad de camino;
   3. solo en Las Lagunas 48 h: una corrida que se detiene a mitad de camino.
 Compara cada una con la corrida offline del motor. Criterio: 0 celdas distintas; en la corrida detenida, 0 celdas distintas
-entre lo que alcanzó a quemar y la misma parte de la corrida offline. Deja la tabla en
+entre lo que ardió antes de la hora de la detención y la misma parte de la corrida offline. Deja la tabla en
 resultados/app/E-E3-1-servidor/resultados.json.
 """
 from __future__ import annotations
@@ -100,9 +100,11 @@ class Servidor:
 
 
 def hasta(a: np.ndarray, tope: float) -> np.ndarray:
-    """La parte de la huella que ardió hasta `tope` (en las unidades del ráster); lo demás, NaN."""
+    """La parte de la huella que ardió ANTES de `tope` (en las unidades del ráster); lo demás, NaN.
+    Antes y no "hasta": el motor se detiene al cumplirse la hora, sin dar el paso que empieza en ese minuto, y las celdas
+    que ese paso enciende llevan justo ese minuto como tiempo de llegada (visto en v4.0 el 2026-11-11: 7 celdas)."""
     a = a.astype("float64")
-    return np.where(np.isfinite(a) & (a >= 0) & (a <= tope), a, np.nan)
+    return np.where(np.isfinite(a) & (a >= 0) & (a < tope), a, np.nan)
 
 
 def main() -> int:
