@@ -39,6 +39,24 @@ Para volver a comprobar más tarde: `probar.bat` o `./probar.sh` (con `--rapido`
 La integración continua de GitHub repite esta comprobación en Windows y en Linux en cada cambio. Pasa en los dos desde el
 2026-11-10.
 
+## Abrir el simulador
+
+Windows:
+
+```
+.venv\Scripts\python app\servir.py
+```
+
+Linux:
+
+```
+.venv/bin/python app/servir.py
+```
+
+Se abre el navegador en `http://127.0.0.1:8000`. Por ahora muestra una página de prueba: se elige motor, punto de ignición,
+hora y duración, y se sigue la corrida hora por hora. Los datos salen de un incendio con ficha (Las Lagunas 2024 o Las
+Chacras octubre 2023); todavía no baja pronóstico ni índices. Se cierra con Ctrl+C.
+
 ## Qué hay
 
 | Carpeta | Qué |
@@ -46,8 +64,8 @@ La integración continua de GitHub repite esta comprobación en Windows y en Lin
 | `src/v3.1`, `src/v4.0` | los dos motores, **congelados**: no se modifican. v4.0 es la línea principal; v3.1 es el control (simulación libre) |
 | `test/`, `escenarios/` | pruebas y escenarios de cada motor |
 | `datos/` | datos mínimos del dominio, un evento de ejemplo (Las Lagunas 2024) y Las Chacras octubre 2023, que usa la verificación E-E3-1. Fuentes y licencias: [DATOS.md](DATOS.md) |
-| `app/` | el simulador interactivo (todavía vacío) |
-| `docs/etapa3/` | plan, decisiones, informe de F0, prerregistros y contrato entre los dos frentes de trabajo |
+| `app/` | el simulador interactivo: procesos que conducen a los motores y servidor local. La pantalla con mapa todavía no está; hay una página mínima de prueba. Ver [app/README.md](app/README.md) |
+| `docs/etapa3/` | plan, decisiones, informes de cada fase (F0, F1, F2), prerregistros y contrato entre los dos frentes de trabajo |
 | `docs/v3.0`, `docs/v3.1`, `docs/v4.0` | documentos de los motores |
 | `herramientas/` | verificación del clon y control de versiones congeladas |
 

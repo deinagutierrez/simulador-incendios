@@ -1,4 +1,4 @@
-# Contrato entre los dos frentes — versión 1.1
+# Contrato entre los dos frentes — versión 1.2
 
 Es el único punto donde se tocan el frente A (motores y datos) y el frente B (servidor e interfaz). Se cambia solo por pedido
 de integración aprobado por las dos personas, subiendo el número de versión.
@@ -10,6 +10,11 @@ el aviso `listo` trae la grilla de la huella; `final` y `error` traen más campo
 los resultados del motor quedan en `salida/`; `corrida.json` admite `configuracion` con la ignición, la hora de inicio y la
 duración elegidas por el usuario, y `resultados.ignicion` informa el punto que usó el motor. La etiqueta `contrato-v1` apunta
 a la 1.0.
+
+**Cambios de la 1.1 a la 1.2** (fase F2, 2026-11-11; aprobados con el pedido de la F2, decisiones D-E3-19 y D-E3-20):
+un punto elegido por el usuario que cae en una celda que no quema se corre a la combustible más cercana al clic, sin mirar la
+cicatriz del evento base; el motor simulado existe (§3); el servidor existe y su interfaz está en §4; el servidor agrega a
+`corrida.json` los campos `formato`, `id`, `creada_utc`, `grupo` y `programa`.
 
 ## 1. Paquete de corrida
 
@@ -39,9 +44,12 @@ dentro de su serie meteorológica. Reglas:
 - Un punto fuera del dominio o una hora fuera de la serie meteorológica se rechazan con un aviso `error` (`fatal: true`)
   antes de simular.
 - Un punto sobre una celda combustible se usa tal cual (el fuego empieza en esa celda de 30 m).
-- Un punto sobre una celda no combustible (agua, roca, urbano) lo corre el motor a la celda combustible más cercana, con su
-  regla de siempre. **Si el evento base tiene cicatriz de referencia, la busca dentro de la cicatriz**, que puede quedar
-  lejos del clic. El corrimiento se informa en `resultados.ignicion.usada[].desplazada_m`; el servidor debe mostrarlo.
+- Un punto de `configuracion.ignicion` sobre una celda no combustible (agua, roca, urbano) lo corre el motor a la celda
+  combustible **más cercana al clic**, con su propio mapa de combustible. La cicatriz del evento base no interviene: el
+  programa se la oculta a ese paso (decisión D-E3-20). El corrimiento se informa en
+  `resultados.ignicion.usada[].desplazada_m`; la pantalla debe mostrarlo.
+- Con los puntos de la ficha (sin `configuracion.ignicion`) vale la regla de siempre de cada motor, que sí busca dentro de
+  la cicatriz: es lo que hacen las corridas offline.
 
 Al terminar, el proceso completa `corrida.json` con `bitacora` (pausas, reanudaciones y detención, con su minuto simulado) y
 `resultados` (`ha_final`, `km2_final`, `t_simulado_h`, `s_computo`, `memoria_pico_mb`, `motivo_fin`, `completa`, `archivos`,
@@ -98,13 +106,48 @@ hora de forma atómica, así que siempre se puede leer entera.
 
 ## 3. Motor simulado
 
-Para que el frente B no espere al A: `app/motores/proceso_simulado.py` cumple este contrato con un fuego de mentira (un círculo
-que crece). Lo escribe el frente B y se usa en las pruebas del servidor. Desde el 2026-11-11 también se puede probar contra
-los procesos reales, que ya cumplen este contrato.
+`app/motores/proceso_simulado.py` cumple este contrato con un fuego de mentira: un círculo que crece tres celdas por hora, sin
+viento, combustible ni relieve. Recibe las mismas órdenes y manda los mismos avisos que el proceso real. Sirve para probar el
+servidor y la interfaz en segundos. Su `corrida.json`:
+
+```json
+{"motor": "simulado",
+ "configuracion": {"ignicion": [{"lon": -65.55, "lat": -32.64}], "horas": 12},
+ "simulado": {"s_por_hora": 0.05, "fallar_en_h": null, "lado": 200}}
+```
+
+`s_por_hora` son los segundos reales por hora simulada; `fallar_en_h` hace que el proceso se caiga sin avisar en esa hora;
+`lado` es el tamaño de la grilla en celdas. El servidor solo lo ofrece si se lo arranca con `--con-simulado`.
 
 ## 4. Interfaz del servidor
 
-La lista de pedidos HTTP está en el Anexo D de `00_plan.md`.
+`python app/servir.py` levanta el servidor en `http://127.0.0.1:8000` (o el puerto libre siguiente). Solo atiende pedidos de
+su propia página: los que traen otro origen se rechazan con 403.
+
+| Pedido | Qué hace |
+|---|---|
+| `GET /api/estado` | versión, motores, eventos con datos en el clon (con su rango meteorológico y los puntos de su ficha), recuadro del dominio, límite de corridas |
+| `POST /api/corridas` | crea una corrida; con `motor: "ambos"` crea dos (v4.0 y v3.1 librev2) con el mismo `grupo`; con `iniciar: true` las lanza. Cuerpo: `motor`, `evento`, `ignicion` `[{lon, lat}]`, `t_inicio_utc`, `horas` (1 a 240), y opcionales `hipotesis`, `ignicion_ficha`. Uso avanzado: `definicion`, igual a `base.definicion` |
+| `GET /api/corridas` | lista, de la más nueva a la más vieja |
+| `GET /api/corridas/<id>` | estado, última hora avisada, recuadro de la huella; al terminar, bitácora y resultados |
+| `POST /api/corridas/<id>/{iniciar,pausar,reanudar,detener}` | control. Contesta 409 si la orden no corresponde al estado |
+| `POST /api/corridas/<id>/intervenciones` | solo en pausa; devuelve el aviso `intervencion` del motor (hoy `rechazada`) |
+| `GET /api/corridas/<id>/eventos` | avance en vivo por un canal de una sola vía (`text/event-stream`). Cada evento es un aviso del motor o un cambio de estado, numerado con `n`; con `?desde=N` manda los posteriores al N. Cierra con un evento `cierre` |
+| `GET /api/corridas/<id>/quemado.png?hora=N` | huella hasta la hora N (o completa), lista para superponer en un mapa web con el recuadro `huella.limites` |
+| `GET /` | página mínima de prueba |
+
+**Estados de una corrida:** `creada` → `iniciando` → `corriendo` ⇄ `pausando` → `pausada`; y al final `terminada`, `detenida`,
+`error` o `interrumpida`. `pausando` es el rato entre que se pide la pausa y que el motor llega a la hora en punto.
+`interrumpida` es una corrida que estaba en marcha cuando el servidor se cerró sin poder guardarla; no se retoma.
+
+**Límites:** como mucho dos corridas en marcha; la tercera se rechaza con 409. Al cerrarse, el servidor pide a los motores
+que guarden lo simulado y espera hasta 15 segundos.
+
+**Archivos que agrega el servidor a la carpeta de la corrida:** `estado.json` (estado y última hora; con esto reconstruye la
+lista al volver a arrancar), `eventos.jsonl` (todos los eventos, numerados) y `arranque.log`.
+
+Todavía no existen los pedidos del borrador del plan (Anexo D) para bajar datos (F4), el perímetro por hora y la exportación
+(F3 y F7) ni el modo histórico (F6).
 
 ## 5. Advertencia para quien escriba el servidor o las pruebas
 
