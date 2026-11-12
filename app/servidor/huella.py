@@ -35,8 +35,9 @@ def limites(grilla: dict) -> list[list[float]]:
                     int(grilla["filas"]), int(grilla["cols"]))[4]
 
 
-def png(carpeta: Path, grilla: dict, hora: float | None = None) -> bytes | None:
-    """PNG de la huella hasta la hora simulada `hora` (o completa). None si todavía no hay huella."""
+def png(carpeta: Path, grilla: dict, hora: float | None = None, color: tuple[int, int, int] | None = None) -> bytes | None:
+    """PNG de la huella hasta la hora simulada `hora` (o completa). None si todavía no hay huella.
+    Sin `color` se pinta con la rampa del tiempo de llegada; con `color`, de un solo color (para comparar dos motores)."""
     ruta = Path(carpeta) / HUELLA
     if not ruta.exists():
         return None
@@ -54,7 +55,10 @@ def png(carpeta: Path, grilla: dict, hora: float | None = None) -> bytes | None:
               dst_transform=destino, dst_crs="EPSG:3857", dst_nodata=np.nan, resampling=Resampling.nearest)
     quemado = np.isfinite(salida)
     rgba = np.zeros((alto, ancho, 4), dtype="uint8")
-    if quemado.any():
+    if quemado.any() and color is not None:
+        rgba[quemado, :3] = color
+        rgba[..., 3][quemado] = 120
+    elif quemado.any():
         tope = max(float(np.nanmax(salida)), 1.0)
         fraccion = np.clip(salida[quemado] / tope, 0.0, 1.0)
         for canal in range(3):
@@ -63,3 +67,51 @@ def png(carpeta: Path, grilla: dict, hora: float | None = None) -> bytes | None:
     memoria = io.BytesIO()
     Image.fromarray(rgba, "RGBA").save(memoria, format="PNG", optimize=False)
     return memoria.getvalue()
+
+
+def _cargar(carpeta: Path, grilla: dict, hora: float | None) -> np.ndarray | None:
+    ruta = Path(carpeta) / HUELLA
+    if not ruta.exists():
+        return None
+    t = np.load(ruta).astype("float32")
+    if t.shape != (int(grilla["filas"]), int(grilla["cols"])):
+        return None
+    return np.isfinite(t) & ((t <= float(hora) * 60.0) if hora is not None else True)
+
+
+def perimetro(carpeta: Path, grilla: dict, hora: float | None = None) -> dict | None:
+    """Contorno del área quemada hasta la hora `hora`, como GeoJSON en grados. None si todavía no hay huella."""
+    quemado = _cargar(carpeta, grilla, hora)
+    if quemado is None:
+        return None
+    from rasterio.features import shapes
+    from rasterio.transform import from_origin
+    from rasterio.warp import transform_geom
+    origen = from_origin(float(grilla["xmin"]), float(grilla["ymax"]), float(grilla["res"]), float(grilla["res"]))
+    celdas = int(quemado.sum())
+    figuras = []
+    if celdas:
+        for geometria, valor in shapes(quemado.astype("uint8"), mask=quemado, transform=origen):
+            if valor == 1:
+                figuras.append(transform_geom(str(grilla["crs"]), "EPSG:4326", geometria, precision=6))
+    ha = celdas * float(grilla["res"]) ** 2 / 1e4
+    return {"type": "FeatureCollection", "features": [
+        {"type": "Feature", "properties": {"hora": hora, "ha": round(ha, 2), "celdas": celdas},
+         "geometry": {"type": "MultiPolygon", "coordinates": [f["coordinates"] for f in figuras]}}]}
+
+
+def comparar(carpeta_a: Path, carpeta_b: Path, grilla_a: dict, grilla_b: dict, hora: float | None = None) -> dict | None:
+    """Coincidencia entre dos huellas hasta la hora `hora`: superficie de cada una, de la parte común y de la envolvente,
+    y el cociente entre esas dos (IoU). None si falta alguna huella o las grillas no coinciden."""
+    misma_grilla = str(grilla_a["crs"]) == str(grilla_b["crs"]) and all(
+        float(grilla_a[k]) == float(grilla_b[k]) for k in ("xmin", "ymax", "res", "filas", "cols"))
+    if not misma_grilla:
+        return None
+    a, b = _cargar(carpeta_a, grilla_a, hora), _cargar(carpeta_b, grilla_b, hora)
+    if a is None or b is None:
+        return None
+    ha = float(grilla_a["res"]) ** 2 / 1e4
+    comun, union = int((a & b).sum()), int((a | b).sum())
+    return {"hora": hora, "ha_a": round(int(a.sum()) * ha, 2), "ha_b": round(int(b.sum()) * ha, 2),
+            "ha_comun": round(comun * ha, 2), "ha_envolvente": round(union * ha, 2),
+            "iou": round(comun / union, 4) if union else None}

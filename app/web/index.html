@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de incendios — San Luis</title>
+<link rel="stylesheet" href="/web/vendor/leaflet/leaflet.css">
+<link rel="stylesheet" href="/web/estilo.css">
+</head>
+<body>
+<div id="pantalla">
+  <aside id="panel">
+    <header>
+      <h1>Simulador de incendios</h1>
+      <p>Las Lagunas – Potrerillos, San Luis</p>
+    </header>
+
+    <section id="sec-config">
+      <h2>1. Configurar</h2>
+      <label for="motor">Motor</label>
+      <select id="motor"></select>
+      <label for="evento">Datos del terreno y del tiempo</label>
+      <select id="evento"></select>
+      <p class="nota" id="nota-evento"></p>
+      <label>Punto de ignición <span class="suave">(clic en el mapa)</span></label>
+      <div class="dos">
+        <input id="lat" inputmode="decimal" aria-label="Latitud" placeholder="Latitud">
+        <input id="lon" inputmode="decimal" aria-label="Longitud" placeholder="Longitud">
+      </div>
+      <div class="dos">
+        <div><label for="fecha">Día de inicio</label><input id="fecha" type="date"></div>
+        <div><label for="hora">Hora <span class="suave">(Argentina)</span></label><input id="hora" type="time" step="3600"></div>
+      </div>
+      <label for="horas">Horas a simular</label>
+      <input id="horas" type="number" min="1" max="240" value="24">
+      <button class="principal" id="iniciar">Iniciar simulación</button>
+      <p class="error" id="error" role="alert"></p>
+    </section>
+
+    <section id="sec-control" hidden>
+      <h2>2. Simulación</h2>
+      <div id="resumen-config" class="resumen"></div>
+      <div class="botones">
+        <button id="pausar">Pausar</button>
+        <button id="reanudar" hidden>Reanudar</button>
+        <button id="detener">Detener</button>
+        <button id="nueva" hidden>Nueva simulación</button>
+      </div>
+      <p class="error" id="error-control" role="alert"></p>
+      <div id="tarjetas"></div>
+      <div id="comparacion" hidden></div>
+    </section>
+
+    <section id="sec-grafico" hidden>
+      <h2>Superficie quemada</h2>
+      <div id="grafico"></div>
+      <button class="enlace" id="ver-tabla">Ver como tabla</button>
+      <div id="tabla" hidden></div>
+    </section>
+
+    <section id="sec-capas">
+      <h2>Capas del mapa</h2>
+      <div id="capas"></div>
+      <label class="casilla"><input type="checkbox" id="en-linea"> Mapa de calles en línea (OpenStreetMap, necesita internet)</label>
+    </section>
+
+    <section id="sec-anteriores">
+      <h2>Simulaciones anteriores</h2>
+      <select id="anteriores"><option value="">Elegir…</option></select>
+    </section>
+
+    <footer>
+      <p><strong>Para leer bien el resultado.</strong> La simulación no incluye el combate del fuego. Los datos del tiempo y de la vegetación son los de un incendio histórico con ficha; todavía no se baja el pronóstico. Los dos motores dan resultados distintos: no se promedian.</p>
+      <p id="version"></p>
+    </footer>
+  </aside>
+
+  <main>
+    <div id="mapa" aria-label="Mapa del dominio"></div>
+    <div id="leyenda" hidden></div>
+    <div id="tiempo" hidden>
+      <button id="reproducir" title="Reproducir" aria-label="Reproducir">▶</button>
+      <input id="deslizador" type="range" min="0" max="0" value="0" step="1" aria-label="Hora simulada">
+      <div id="rotulo-hora"></div>
+      <div id="progreso"><div id="barra"></div></div>
+    </div>
+  </main>
+</div>
+<script src="/web/vendor/leaflet/leaflet.js"></script>
+<script src="/web/app.js"></script>
+</body>
+</html>
