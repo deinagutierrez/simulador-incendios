@@ -47,9 +47,13 @@ La F1 dejó pendiente el "evento generado" (D-E3-21): llega en esta fase.
 | 7 | **Evento generado `RT-<fecha>-<n>`**: con el pronóstico y los índices se escribe una ficha y sus archivos en el formato de un evento con ficha, y los dos motores lo corren con sus cargadores congelados, sin cambios | — | **bloquea** |
 | 8 | **Zona de datos en la pantalla**: botones "Actualizar pronóstico" y "Actualizar índices", fecha y fuente de cada uno, aviso de antigüedad, y la opción "Tiempo real" junto a los eventos con ficha | — | |
 | 9 | **Sin red**: el programa arranca con la última descarga guardada, con su fecha a la vista. Si no hay ninguna, ofrece los eventos con ficha rotulados **EJEMPLO** | — | |
-| 10 | **Carga manual**: un CSV de meteorología en cualquiera de los dos formatos de los motores, con el mismo control de calidad | carga manual de índices en TIF: se deja para F6 si hace falta; con AWS y caché alcanza | |
-| 11 | — | **Google Earth Engine como alternativa** (§4.3 "si falla" (2)). Propuesta: no se escribe en F4. Solo pasa a hacer falta si E-E3-2 no se cumple, y en ese caso el prerregistro ya dice que GEE se vuelve obligatorio y hay que escribirlo igual | |
-| 12 | — | Modo escenario con viento, temperatura y humedad fijos puestos a mano (§4.2 "si falla" (4)): llega con el viento manual de F5 | |
+| 10 | **Carga manual de meteorología**: un CSV en cualquiera de los dos formatos de los motores, con el mismo control de calidad | — | |
+| 10b | **Carga manual de índices en TIF** (GeoTIFF). Controles al cargar: grilla exacta del dominio (forma, transformación, CRS), escala int16 × 10000, nodata −32768 y rango −1 a 1. Quien carga **declara** la ventana de fechas y la fórmula del NDMI (B8 o B8A), porque el programa no puede comprobarlas. La corrida queda rotulada "índices cargados a mano" y esos datos van a `corrida.json` | — | |
+| 11 | **Google Earth Engine como alternativa** cuando la computadora tiene credenciales (`earthengine authenticate`), con el código que ya existe (`gee_indices.py` de v3.1 para la ventana; el método de `descargar_ndvi_ndmi_gee.py` para los mensuales), corrido en el proceso de datos. Si no hay credenciales, la opción aparece deshabilitada con el motivo. Si E-E3-2 no se cumple, pasa a ser la vía principal, como dice el prerregistro | — | |
+| 12 | **Modo escenario**: viento, temperatura, humedad relativa y precipitación constantes puestos a mano, con un evento generado igual que los demás y rotulado "escenario manual" (§4.2 "si falla" (4)). No reemplaza al viento manual durante la corrida, que sigue en F5 | — | |
+
+**Decisión del usuario del 2026-11-12:** los puntos 10, 10b, 11 y 12 entran en la F4, porque son necesarios para la
+implementación final. Suman unos 3 días a los 8 del plan (estimación: carga de TIF 1 d, GEE 1,5 d, modo escenario 0,5 d).
 
 ## 5. Decisiones técnicas
 
