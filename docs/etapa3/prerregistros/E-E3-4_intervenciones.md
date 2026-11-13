@@ -1,7 +1,8 @@
 # Prerregistro E-E3-4 — Las intervenciones son reproducibles
 
 Escrito el 2026-11-10, antes de escribir el código de intervenciones. Se congela con la etiqueta `prerregistro-E-E3-4`.
-Escribe: ____ · Evalúa (la otra persona): ____
+Escribe: deinagutierrez · Evalúa (la otra persona): LisandroV2002 (decidido por el usuario el 2026-11-13). El diseño y el criterio
+no cambian respecto de la etiqueta; solo se agregan los nombres.
 
 ## Pregunta
 ¿Una corrida con cortafuegos dibujados y cambios de viento hechos en pausa se puede reproducir, primero desde su bitácora y
