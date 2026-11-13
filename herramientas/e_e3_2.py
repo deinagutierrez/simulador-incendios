@@ -18,6 +18,11 @@ Lo corre la otra persona (prerregistro `docs/etapa3/prerregistros/E-E3-2_indices
     librev2 con `app/motores/proceso.py`, con los puntos de ignición de la ficha y la hora de la hipótesis 1
     (`configuracion.ignicion` y `configuracion.t_inicio_utc`). Se mide la fracción de celdas que cambian de clase de
     combustible (7 clases de v3.1; SB40 de v4.0), el IoU de las huellas a 24 h y a 48 h y la diferencia de superficie.
+    Verano de v4.0 (opción A, D-E3-27): el SB40 de la regla 3.3b y el NDVI de verano salen de los compuestos de enero a
+    marzo, no de la ventana. Para que el lado AWS lo sea también ahí, se generan por AWS enero, febrero y marzo de 2024 con
+    el método de SIM y la corrida "AWS" de v4.0 los usa (`herramientas/e_e3_2_motor.py`, que se los da a v4.0 sin tocar los
+    del repositorio); la corrida "GEE" usa los de `sim_v4/dinamicos/indices`. Se comprueba en la procedencia del SB40 que
+    cada lado haya usado los suyos. v3.1 no usa el verano.
     Al final se borran los eventos y las tomas que se crearon (`evento_rt.borrar`).
 
 Criterio (fijado en el prerregistro): se habilita AWS si (1) la diferencia absoluta mediana es ≤ 0,02 en NDVI y NDMI, en
@@ -69,6 +74,8 @@ DOCS = REPO / "docs" / "etapa3" / "prerregistros"
 SALIDA_JSON = DOCS / "E-E3-2_resultados.json"
 SALIDA_MD = DOCS / "E-E3-2_resultado.md"
 ENT = comun.ENTRADAS
+MOTOR_VERANO = REPO / "herramientas" / "e_e3_2_motor.py"
+ANIO_VERANO = 2024                                            # verano previo al evento (septiembre de 2024)
 
 
 def insumos() -> dict[str, Path]:
@@ -299,8 +306,10 @@ def proceso_datos(carpeta: Path, tarea: str, parametros: dict) -> dict:
     return final
 
 
-def correr(carpeta: Path, motor: str, evento: str, puntos: list[dict], t_inicio: str, horas: int) -> dict:
-    """Una corrida con `app/motores/proceso.py`; devuelve el aviso final."""
+def correr(carpeta: Path, motor: str, evento: str, puntos: list[dict], t_inicio: str, horas: int,
+           verano: Path | None = None) -> dict:
+    """Una corrida con `app/motores/proceso.py`; devuelve el aviso final. Con `verano` (solo v4.0), la corrida pasa por
+    `herramientas/e_e3_2_motor.py`, que hace que v4.0 tome los compuestos de verano de esa carpeta."""
     if carpeta.exists():
         shutil.rmtree(carpeta)
     carpeta.mkdir(parents=True)
@@ -310,7 +319,11 @@ def correr(carpeta: Path, motor: str, evento: str, puntos: list[dict], t_inicio:
                "configuracion": {"ignicion": [{"nombre": p.get("nombre"), "lon": p["lon"], "lat": p["lat"]} for p in puntos],
                                  "t_inicio_utc": t_inicio, "horas": horas}}
     (carpeta / "corrida.json").write_text(json.dumps(corrida, ensure_ascii=False, indent=1), encoding="utf-8")
-    p = subprocess.Popen([sys.executable, str(REPO / "app" / "motores" / "proceso.py"), "--corrida", str(carpeta)], cwd=REPO,
+    if verano is not None and motor != "v4.0":
+        raise ValueError("otro verano solo tiene sentido en v4.0")
+    orden = ([sys.executable, str(MOTOR_VERANO), "--verano", str(verano), "--corrida", str(carpeta)] if verano is not None
+             else [sys.executable, str(REPO / "app" / "motores" / "proceso.py"), "--corrida", str(carpeta)])
+    p = subprocess.Popen(orden, cwd=REPO,
                          env=entorno(), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          text=True, encoding="utf-8", bufsize=1)
     guardian = threading.Timer(4 * 3600, p.kill)
@@ -387,6 +400,8 @@ def parte_c(carpeta: Path, a30: dict[str, str], creados: dict, horas: int = HORA
     if ev["gee"]["sha256"]["meteo"] != ev["aws"]["sha256"]["meteo"]:
         raise RuntimeError("los dos eventos generados no tienen la misma meteorología")
 
+    verano = verano_aws(carpeta / "verano_aws")
+
     # clases de v3.1 (las arma evento_rt al crear el evento)
     clases = {}
     cl = {v: leer_banda(REPO / ev[v]["archivos"]["clase"])[0] for v in ev}
@@ -399,7 +414,8 @@ def parte_c(carpeta: Path, a30: dict[str, str], creados: dict, horas: int = HORA
         for via in ("gee", "aws"):
             print(f"(c) corrida {motor} · índices {via.upper()} · {horas} h", flush=True)
             dc = carpeta / "corridas" / f"{motor.replace('.', '_')}_{via}"
-            fin = correr(dc, motor, ev[via]["id"], puntos, t_inicio, horas)
+            fin = correr(dc, motor, ev[via]["id"], puntos, t_inicio, horas,
+                         verano=verano["carpeta"] if (motor == "v4.0" and via == "aws") else None)
             corridas[f"{motor}|{via}"] = {"evento": ev[via]["id"], "final": fin}
             huellas[(motor, via)] = {h: huella(dc / "salida", motor, h) for h in CORTES_H}
         if motor == "v4.0":
@@ -410,6 +426,14 @@ def parte_c(carpeta: Path, a30: dict[str, str], creados: dict, horas: int = HORA
                 proc = comun.leer_json(Path(str(ruta) + ".json"), {}) or {}
                 cobertura.setdefault("v40_sb40", {})[via] = (proc.get("parametros") or {}).get("cobertura_anio")
                 cobertura.setdefault("v40_sb40_regla", {})[via] = (proc.get("parametros") or {}).get("regla_indices")
+                usados = [e.get("archivo", "") for e in proc.get("entradas") or [] if "NDVI_NDMI_" in e.get("archivo", "")]
+                cobertura.setdefault("v40_sb40_verano", {})[via] = usados
+            # cada lado tiene que haber usado su verano: AWS los de verano_aws, GEE los del repositorio
+            u = cobertura["v40_sb40_verano"]
+            bien_aws = len(u["aws"]) == 3 and all("verano_aws" in x for x in u["aws"])
+            bien_gee = len(u["gee"]) == 3 and all("sim_v4/dinamicos/indices" in x for x in u["gee"])
+            if not (bien_aws and bien_gee):
+                raise RuntimeError(f"v4.0 no usó el verano que correspondía a cada lado: {u}")
             ctrl = REPO / "datos" / "procesados" / "v4.0" / EVENTO / "combustible_pre_evento_33b.tif"
             clases["v4.0"] = fraccion_cambio_clase(sb["gee"], sb["aws"], nd) | {
                 "fraccion_sobre_combustibles": _sobre_combustibles(sb["gee"], sb["aws"], "v4.0", nd),
@@ -435,7 +459,26 @@ def parte_c(carpeta: Path, a30: dict[str, str], creados: dict, horas: int = HORA
                               for v, t in armado["tomas"].items()},
             "eventos": {v: {"id": e["id"], "sha256": e["sha256"], "avisos": e.get("avisos"), "verano_v40": e.get("verano_v40")}
                         for v, e in ev.items()},
+            "verano_aws": {k: v for k, v in verano.items() if k != "carpeta"},
             "corridas": corridas, "por_motor": por_motor}
+
+
+def verano_aws(carpeta: Path) -> dict:
+    """Enero a marzo de `ANIO_VERANO` por AWS con el método de SIM (el de `NDVI_NDMI_AAAA_MM.tif`), para el lado AWS de
+    v4.0. Informa además la diferencia con los compuestos de GEE del repositorio (informativo: no entra en el criterio, que
+    mide (a) y (b))."""
+    meses, comparacion = {}, {}
+    for m in (1, 2, 3):
+        print(f"(c) verano por AWS {ANIO_VERANO}-{m:02d} (para v4.0)", flush=True)
+        r = sentinel2.compuesto_mensual(ANIO_VERANO, m, carpeta, desplazamiento=DESPLAZAMIENTO,
+                                        progreso=progreso_consola(f"(c) verano {m:02d}"))
+        ruta = Path(r["ruta"])
+        ref = ENT / "sim_v4" / "dinamicos" / "indices" / ruta.name
+        meses[ruta.name] = {"n_escenas": r["n_escenas"], "fechas": r["fechas"], "segundos": r["segundos"],
+                            "producto": describir(ruta), "gee": describir(ref)}
+        comparacion[ruta.name] = {"NDVI": comparar_indices(leer_indice(ruta, 1), leer_indice(ref, 1)),
+                                  "NDMI": comparar_indices(leer_indice(ruta, 2), leer_indice(ref, 2))}
+    return {"carpeta": carpeta, "anio": ANIO_VERANO, "meses": meses, "comparacion_con_gee_informativa": comparacion}
 
 
 def _sobre_combustibles(a: np.ndarray, b: np.ndarray, motor: str, nodata=None) -> float | None:
@@ -572,9 +615,10 @@ NOTAS = [
     "también sobre las celdas combustibles en alguno de los dos. Lo fijó quien escribe, antes de ver resultados.",
     "En (c) los dos eventos generados reciben los índices a 30 m en int16 × 10000 (la carga manual de índices); los de GEE "
     "salen de `ndvi_30m`/`ndmi_30m` del evento y los de AWS de (a). Recorren el mismo camino; la única diferencia es el índice.",
-    "En v4.0 los índices de la ventana entran como `indices_mes_evento`; el combustible SB40 de la regla 3.3b usa el verano "
-    "(enero a marzo, compuestos de `sim_v4/dinamicos/indices`, que siguen siendo los de GEE en las dos corridas). Si en v4.0 "
-    "el cambio de clase es 0, puede ser por construcción: no prueba que AWS reemplace a GEE en el verano.",
+    "En v4.0 los índices de la ventana entran como `indices_mes_evento`, y el combustible SB40 (regla 3.3b) y el NDVI de "
+    "verano salen de los compuestos de enero a marzo. Opción A (D-E3-27, decidida antes de evaluar): el lado AWS de v4.0 usa "
+    "enero a marzo de 2024 hechos por AWS (`verano_aws`) y el lado GEE los del repositorio; la procedencia del SB40 lo "
+    "comprueba. La comparación de esos compuestos con los de GEE es informativa: no entra en el criterio.",
     "La cobertura MapBiomas la elige `evento_rt` (año anterior a la fecha de inicio por defecto del evento generado); se "
     "comprueba que coincida con la del evento real (`cobertura_anio` de la ficha) y si no coincide (c) no se corre.",
     "Un solo evento y una sola época (fin de invierno de un año seco); la comparación (c) usa un evento visto (límites "
@@ -639,6 +683,13 @@ def revisar() -> bool:
         linea(False, f"ficha del evento: {e}")
     linea((REPO / "app" / "datos" / "proceso_datos.py").exists() and (REPO / "app" / "motores" / "proceso.py").exists(),
           "app/datos/proceso_datos.py y app/motores/proceso.py")
+
+    linea(MOTOR_VERANO.exists(), "herramientas/e_e3_2_motor.py (verano de AWS para v4.0, opción A)")
+    q = subprocess.run([sys.executable, "-c", "import sys; sys.argv=['x']; sys.path.insert(0, 'herramientas'); "
+                        "import e_e3_2_motor as m, pathlib; m.preparar(pathlib.Path('VERANO')); "
+                        "from incendios_sl import eventos; assert eventos.dirs_compuestos()[0] == pathlib.Path('VERANO')"],
+                       cwd=REPO, env=entorno(), capture_output=True, text=True, encoding="utf-8", errors="replace")
+    linea(q.returncode == 0, "v4.0 toma primero la carpeta de verano que se le da" + ("" if q.returncode == 0 else f" — {q.stderr.strip()[-300:]}"))
 
     print("Motores (importación en subprocesos separados):")
     for version, mod in (("v3.1", "incendios_sl.fuels.clasificacion"), ("v4.0", "simulador.corrida")):

@@ -7,7 +7,7 @@ Hecho por el frente A (el usuario, con Claude). Para revisar: la otra persona, c
 
 | Criterio de aceptación del plan (§3) | Estado |
 |---|---|
-| E-E3-2 evaluado | **pendiente de la otra persona** (D-E3-25). El guion está listo: `herramientas/e_e3_2.py --evaluador LisandroV2002`. Antes de correrlo hay que decidir el punto del §5.1 |
+| E-E3-2 evaluado | **pendiente de la otra persona** (D-E3-25). El guion está listo: `herramientas/e_e3_2.py --evaluador LisandroV2002` (§5.1 resuelto con la opción A) |
 | Sin red, el programa arranca con la caché o con un evento de ejemplo y lo rotula | hecho: las tomas guardadas se ofrecen con su fecha y antigüedad; los eventos con ficha van rotulados **EJEMPLO** en la pantalla y en `corrida.json` (`advertencias`). Las 94 pruebas de `test/app` pasan sin red (comprobado con la red cortada) |
 | Con red, pronóstico en menos de 10 s | hecho: **1,4 a 2,0 s** (16 puntos en paralelo). Con el cliente de v3.1 tal cual tardaba 12 s (§4) |
 | Verano 2026 generado | hecho: `NDVI_NDMI_2026_01`, `_02` y `_03` en `datos/inputSimulacion/sim_v4/dinamicos/indices/`, con su `.json` de procedencia |
@@ -84,12 +84,10 @@ diseño de (c), los dos eventos de Las Lagunas 2024 usan el mismo verano 2024, q
 `indices_mes_evento` (humedad viva y curado), y la fracción de celdas SB40 que cambian de clase va a dar 0 % por construcción.
 En la operación real, en cambio, el verano 2026 se hizo por AWS.
 
-Opciones:
-
-- **(A, recomendada)** generar por AWS enero a marzo de 2024 y que el evento "AWS" de (c) los use. Exige que el guion pueda
-  apuntar a otro juego de compuestos de verano sin tocar los del repositorio. El prerregistro dice "mapa de combustible de cada
-  motor … con unos y otros índices", así que entra en su texto. Hay que decidirlo **antes** de correr, y anotarlo.
-- (B) dejarlo como está y declarar el límite en el resultado.
+**Resuelto (D-E3-27, opción A):** el guion genera por AWS enero a marzo de 2024 y el lado AWS de v4.0 los usa, a través de
+`herramientas/e_e3_2_motor.py`, sin tocar los compuestos del repositorio. La procedencia del SB40 lo comprueba. Detalle en
+`prerregistros/E-E3-2_aclaracion_c.md`. Probado con datos de 2026 (no los de la evaluación): v4.0 tomó los compuestos de la
+carpeta indicada.
 
 ### 5.2 Denominador del criterio 2
 
@@ -98,7 +96,7 @@ sobre celdas combustibles (SB40 > 100). Lo eligió quien escribe, antes de ver r
 
 ## 6. Lo que queda
 
-- **E-E3-2**: decidir §5.1, y que LisandroV2002 corra `python herramientas/e_e3_2.py --evaluador LisandroV2002`. Con el
+- **E-E3-2**: que LisandroV2002 corra `python herramientas/e_e3_2.py --evaluador LisandroV2002`. Con el
   resultado, `AWS_EN_PRUEBA` pasa a `False` o GEE pasa a obligatorio (prerregistro).
 - Pantalla: probar en Chrome, Edge y Firefox el ciclo en vivo de un trabajo de datos, la subida de CSV y TIF y el borrado de un
   evento `RT-…` (se probó la carga de la página en Chromium sin ventana, sin errores en la consola).
