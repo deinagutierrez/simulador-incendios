@@ -1,0 +1,222 @@
+{
+ "prerregistro": "E-E3-4",
+ "escrito": "2026-11-13",
+ "escribe": "deinagutierrez",
+ "evalua": "LisandroV2002",
+ "evento": "SL-2024-LASLAGUNAS",
+ "hipotesis": 1,
+ "t_inicio_utc": "2024-09-18T15:00:00Z",
+ "ignicion": "puntos de la ficha (Las Lagunas y Potrerillos)",
+ "horas": 48,
+ "motores": [
+  "v4.0",
+  "v3.1-librev2",
+  "v3.1-libre"
+ ],
+ "crs": "EPSG:5345",
+ "como_se_eligieron": "Con una corrida de 24 h sin intervenciones de cada motor (solo la extensión de la huella a las 6, 8, 12 y 20 h, no ninguna comparación): el fuego avanza hacia el sur con viento del norte; a las 6 h el borde sur está en y = 6.387.915 (v4.0) y 6.385.965 (v3.1). La línea de 10 m va en y ≈ 6.384.500, delante del frente de los tres motores a las 6 h. La de 25 m (N-S, x = 3.541.000) cruza lo quemado a las 12 h en los tres. El viento manual a las 8 h (23:00 UTC) gira 90° el del pronóstico de esa hora (5,6 m/s ≈ 20 km/h desde 357°): 20 km/h desde 87°.",
+ "longitud_criterio_B": "la de la parte que queda después del recorte (D-E3-28, punto 14); la dibujada se informa aparte",
+ "corridas": [
+  {
+   "n": 1,
+   "descripcion": "un cortafuego de 10 m dibujado antes de iniciar",
+   "configuracion": {
+    "cortafuegos": [
+     {
+      "ancho_m": 10,
+      "suelo_mineral": false,
+      "xy_5345": [
+       [
+        3536000,
+        6384600
+       ],
+       [
+        3540000,
+        6384400
+       ],
+       [
+        3544500,
+        6384500
+       ]
+      ],
+      "longitud_dibujada_m": 8506.1
+     }
+    ]
+   },
+   "intervenciones": []
+  },
+  {
+   "n": 2,
+   "descripcion": "un cortafuego de 10 m agregado en pausa a las 6 h, delante del frente",
+   "configuracion": {},
+   "intervenciones": [
+    {
+     "t_sim_h": 6,
+     "tipo": "cortafuego",
+     "datos": {
+      "ancho_m": 10,
+      "suelo_mineral": false,
+      "xy_5345": [
+       [
+        3536000,
+        6384600
+       ],
+       [
+        3540000,
+        6384400
+       ],
+       [
+        3544500,
+        6384500
+       ]
+      ],
+      "longitud_dibujada_m": 8506.1
+     }
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "descripcion": "dos cortafuegos (6 m y 25 m) en pausas a las 6 h y a las 12 h; el de 25 m pasa en parte sobre celdas ya quemadas",
+   "configuracion": {},
+   "intervenciones": [
+    {
+     "t_sim_h": 6,
+     "tipo": "cortafuego",
+     "datos": {
+      "ancho_m": 6,
+      "suelo_mineral": false,
+      "xy_5345": [
+       [
+        3535000,
+        6383000
+       ],
+       [
+        3540000,
+        6382800
+       ],
+       [
+        3545000,
+        6383000
+       ]
+      ],
+      "longitud_dibujada_m": 10008.0
+     }
+    },
+    {
+     "t_sim_h": 12,
+     "tipo": "cortafuego",
+     "datos": {
+      "ancho_m": 25,
+      "suelo_mineral": false,
+      "xy_5345": [
+       [
+        3541000,
+        6388000
+       ],
+       [
+        3541000,
+        6384000
+       ],
+       [
+        3541000,
+        6381000
+       ]
+      ],
+      "longitud_dibujada_m": 7000.0
+     }
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "descripcion": "viento manual a las 8 h (giro de 90°) y vuelta al pronóstico a las 20 h",
+   "configuracion": {},
+   "intervenciones": [
+    {
+     "t_sim_h": 8,
+     "tipo": "viento_manual",
+     "datos": {
+      "vel_kmh": 20.0,
+      "dir_desde": 87.0
+     }
+    },
+    {
+     "t_sim_h": 20,
+     "tipo": "viento_manual",
+     "datos": {
+      "modo": "pronostico"
+     }
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "descripcion": "combinación de 3 y 4",
+   "configuracion": {},
+   "intervenciones": [
+    {
+     "t_sim_h": 6,
+     "tipo": "cortafuego",
+     "datos": {
+      "ancho_m": 6,
+      "suelo_mineral": false,
+      "xy_5345": [
+       [
+        3535000,
+        6383000
+       ],
+       [
+        3540000,
+        6382800
+       ],
+       [
+        3545000,
+        6383000
+       ]
+      ],
+      "longitud_dibujada_m": 10008.0
+     }
+    },
+    {
+     "t_sim_h": 8,
+     "tipo": "viento_manual",
+     "datos": {
+      "vel_kmh": 20.0,
+      "dir_desde": 87.0
+     }
+    },
+    {
+     "t_sim_h": 12,
+     "tipo": "cortafuego",
+     "datos": {
+      "ancho_m": 25,
+      "suelo_mineral": false,
+      "xy_5345": [
+       [
+        3541000,
+        6388000
+       ],
+       [
+        3541000,
+        6384000
+       ],
+       [
+        3541000,
+        6381000
+       ]
+      ],
+      "longitud_dibujada_m": 7000.0
+     }
+    },
+    {
+     "t_sim_h": 20,
+     "tipo": "viento_manual",
+     "datos": {
+      "modo": "pronostico"
+     }
+    }
+   ]
+  }
+ ]
+}
