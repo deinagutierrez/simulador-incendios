@@ -69,3 +69,12 @@ Siguen pendientes: protección de `main`, licencia del código, y quién evalúa
 | D-E3-22 | **La F3 (pantalla) la hace el mismo frente que la F1 y la F2**, por pedido del usuario. Cambia otra vez el reparto de D-E3-12. A diferencia de la F2, no tuvo pedido de aprobación previo: las decisiones de diseño están en `F3_informe.md` §5 y el contrato 1.3 queda **pendiente de aprobación de la otra persona** | decidida por el usuario; diseño a revisar |
 | D-E3-23 | **Leaflet 1.9.4 se copia dentro del repositorio** (`app/web/vendor/leaflet/`, licencia BSD de 2 cláusulas) para que la pantalla funcione sin internet. Es la biblioteca que nombra el plan (§2.1) | decidida por Claude, a revisar |
 
+## 2026-11-13 — Aprobaciones para empezar la F4
+
+El usuario aprobó `F4_pedido_de_aprobacion.md` completo, con los cambios del 12/11 (puntos 10b, 11 y 12 dentro de la fase).
+
+| Código | Decisión | Estado |
+|---|---|---|
+| D-E3-24 | **Alcance y decisiones técnicas de la F4**: puntos 1 a 26 de `F4_pedido_de_aprobacion.md`. Entre ellos: los insumos de una corrida en tiempo real viven en `escenarios/<versión>/eventos/RT-….yaml` y `datos/inputSimulacion/…/RT-…` (punto 13, la decisión que el plan dejó abierta en §2.2); la preparación con código de v3.1 corre en un proceso aparte (14); la vía AWS queda rotulada "en prueba" hasta que E-E3-2 se cumpla (21); verano 2026 al repositorio (17) | aprobada |
+| D-E3-25 | **E-E3-2: escribe el usuario (deinagutierrez) y evalúa la otra persona (LisandroV2002)**. Vuelve a la regla de D-E3-12. El prerregistro ya estaba etiquetado desde la F0 (`prerregistro-E-E3-2`, `2e4a4fd`) y su texto no cambió; la etiqueta no se mueve | aprobada |
+| D-E3-26 | **Entran en la F4 la carga manual de índices en TIF, Google Earth Engine como alternativa y el modo escenario con valores fijos** (puntos 10b, 11 y 12), porque son necesarios para la implementación final. Suman unos 3 días a los 8 del plan | decidida por el usuario el 2026-11-12 |
