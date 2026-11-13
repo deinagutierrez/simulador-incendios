@@ -6,6 +6,9 @@ Cada corrida vive en `resultados/app/<id>/`:
     eventos.jsonl     todos los avisos del proceso y los cambios de estado, numerados
     t_llegada_parcial.npy, salida/, proceso.log   los escribe el proceso motor
 
+`corrida.json` lleva además, desde el formato 1.2, el bloque `insumos` (procedencia de los datos de un evento generado
+`RT-…`, Anexo C del plan) y `advertencias` (sus rótulos y avisos, o "EJEMPLO" para un evento con ficha).
+
 Estados: creada → iniciando → corriendo ⇄ (pausando →) pausada → terminada | detenida | error | interrumpida.
 """
 from __future__ import annotations
@@ -20,7 +23,7 @@ import threading
 import time
 from pathlib import Path
 
-from . import VERSION
+from . import VERSION, datos
 
 REPO = Path(__file__).resolve().parents[2]
 MOTORES_REALES = ("v4.0", "v3.1-libre", "v3.1-librev2")
@@ -29,7 +32,7 @@ CORTO = {"v4.0": "v40", "v3.1-libre": "v31libre", "v3.1-librev2": "v31librev2", 
 ACTIVOS = {"iniciando", "corriendo", "pausando", "pausada", "deteniendo"}
 FINALES = {"terminada", "detenida", "error", "interrumpida"}
 LIMITE_ACTIVAS = 2
-FORMATO = "incendios_sl.corrida/1.1"
+FORMATO = "incendios_sl.corrida/1.2"
 
 
 class Rechazo(Exception):
@@ -191,6 +194,12 @@ class Gestor:
                 if pedido.get("ignicion_ficha") and not pedido.get("ignicion"):
                     definicion["ignicion"] = str(pedido["ignicion_ficha"])
             corrida |= {"base": {"definicion": definicion}, "configuracion": configuracion}
+            # Procedencia de los insumos (Anexo C del plan): la de un evento generado RT-…, o el rótulo EJEMPLO.
+            insumos, advertencias = datos.insumos_de_la_corrida(definicion.get("evento"))
+            if insumos is not None:
+                corrida["insumos"] = insumos
+            if advertencias:
+                corrida["advertencias"] = advertencias
         escribir_json(carpeta / "corrida.json", corrida)
         guardado = {k: v for k, v in pedido.items() if k not in ("iniciar",) and v is not None} | {"motor": motor}
         c = Corrida(id_, carpeta, motor, guardado, grupo)

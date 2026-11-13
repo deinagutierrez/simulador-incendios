@@ -243,7 +243,7 @@ def toma_escenario(desde_utc: str, horas: int, temp_c: float, hr_pct: float, vie
     t = pd.date_range(t0 - pd.Timedelta(days=dias_previos), t0 + pd.Timedelta(hours=int(horas) + 1), freq="1h")
     base = pd.DataFrame({"time_utc": t} | {k: v for k, v in valores.items()})
     _hora_a_hora(base)
-    id_ = f"M-{pd.Timestamp.now(tz='UTC'):%Y%m%dT%H%M%S}-escenario"
+    id_ = f"M-{pd.Timestamp.now(tz='UTC'):%Y%m%dT%H%M%S}-escenario-{__import__('secrets').token_hex(2)}"
     return _guardar_toma(id_, _completar(base), "escenario con valores fijos puestos a mano", "escenario manual",
                          {"valores": {"temp_c": float(temp_c), "hr_pct": float(hr_pct), "viento_kmh": float(viento_kmh),
                                       "viento_dir_deg": float(viento_dir_deg) % 360.0, "precip_mm": float(precip_mm)},

@@ -15,13 +15,108 @@
       <p>Las Lagunas – Potrerillos, San Luis</p>
     </header>
 
+    <section id="sec-datos">
+      <h2>Datos del tiempo y de la vegetación</h2>
+      <div id="datos-avisos"></div>
+
+      <div class="bloque-datos">
+        <h3>Pronóstico del tiempo</h3>
+        <dl id="datos-pronostico" class="ficha"></dl>
+        <div class="botones"><button id="b-pronostico" class="lanza">Actualizar pronóstico</button></div>
+      </div>
+
+      <div class="bloque-datos">
+        <h3>Índices de vegetación <span id="en-prueba" class="rotulo prueba" hidden title="La vía de AWS se habilita cuando se cumpla el prerregistro E-E3-2">en prueba</span></h3>
+        <dl id="datos-indices" class="ficha"></dl>
+        <div class="botones">
+          <button id="b-aws" class="lanza">Actualizar índices (AWS)</button>
+          <button id="b-gee" class="lanza">Actualizar índices (Earth Engine)</button>
+        </div>
+        <p class="nota" id="nota-gee" hidden></p>
+      </div>
+
+      <div id="trabajo" class="trabajo" hidden>
+        <div class="trabajo-titulo"><span id="trabajo-nombre"></span><span id="trabajo-estado" class="estado"></span></div>
+        <div class="avance"><div id="trabajo-barra"></div></div>
+        <p class="nota" id="trabajo-texto"></p>
+        <p class="error" id="trabajo-error" role="alert"></p>
+        <div id="trabajo-sin-red" hidden></div>
+      </div>
+      <p class="error" id="error-datos" role="alert"></p>
+
+      <div class="bloque-datos">
+        <h3>Armar un evento en tiempo real</h3>
+        <p class="nota">Junta una toma de meteorología y una de índices con el terreno del dominio. Después se elige en «Configurar».</p>
+        <label for="sel-meteo">Meteorología</label>
+        <select id="sel-meteo"></select>
+        <label for="sel-indices">Índices de vegetación</label>
+        <select id="sel-indices"></select>
+        <label for="nombre-rt">Nombre <span class="suave">(opcional)</span></label>
+        <input id="nombre-rt" maxlength="200" placeholder="Se arma solo con la fecha y las fuentes">
+        <button class="principal lanza" id="b-evento">Armar evento en tiempo real</button>
+      </div>
+
+      <details class="plegable">
+        <summary>Cargar datos a mano</summary>
+        <h3>Meteorología (CSV)</h3>
+        <p class="nota">Un CSV en el formato de v3.x o de v4.0 (hasta 20 MB). Pasa por el mismo control de calidad que el pronóstico.</p>
+        <input id="archivo-csv" type="file" accept=".csv,.txt,text/csv">
+        <div class="botones"><button id="b-csv" class="lanza">Cargar meteorología</button></div>
+
+        <h3>Índices (GeoTIFF)</h3>
+        <p class="nota">Dos TIF en la grilla exacta del dominio, en int16 × 10000, con nodata −32768 (hasta 60 MB cada uno).</p>
+        <label for="archivo-ndvi">NDVI</label>
+        <input id="archivo-ndvi" type="file" accept=".tif,.tiff,image/tiff">
+        <label for="archivo-ndmi">NDMI</label>
+        <input id="archivo-ndmi" type="file" accept=".tif,.tiff,image/tiff">
+        <div class="dos">
+          <div><label for="ventana-desde">Ventana: desde</label><input id="ventana-desde" type="date"></div>
+          <div><label for="ventana-hasta">hasta</label><input id="ventana-hasta" type="date"></div>
+        </div>
+        <label for="ndmi-nir">Banda del infrarrojo cercano del NDMI</label>
+        <select id="ndmi-nir">
+          <option value="B08">B08 (10 m): (B08 − B11) / (B08 + B11)</option>
+          <option value="B8A">B8A (20 m): (B8A − B11) / (B8A + B11)</option>
+        </select>
+        <label for="descripcion-tif">Descripción <span class="suave">(de dónde salen)</span></label>
+        <input id="descripcion-tif" maxlength="2000">
+        <div class="aviso"><b>La ventana y la fórmula las declarás vos.</b>El programa revisa la grilla, la escala y el rango, pero no puede comprobar de qué fechas son las imágenes ni con qué banda se calculó el NDMI. La corrida queda rotulada «índices cargados a mano».</div>
+        <div class="botones"><button id="b-tif" class="lanza">Cargar índices</button></div>
+      </details>
+
+      <details class="plegable">
+        <summary>Modo escenario (valores fijos)</summary>
+        <p class="nota">Viento, temperatura, humedad y lluvia constantes durante todo el período. No es un pronóstico: la toma queda rotulada «escenario manual». Después armá el evento eligiéndola.</p>
+        <div class="dos">
+          <div><label for="esc-fecha">Día de inicio</label><input id="esc-fecha" type="date"></div>
+          <div><label for="esc-hora">Hora <span class="suave">(Argentina)</span></label><input id="esc-hora" type="time" step="3600"></div>
+        </div>
+        <div class="dos">
+          <div><label for="esc-horas">Horas</label><input id="esc-horas" type="number" min="1" max="240" value="48"></div>
+          <div><label for="esc-temp">Temperatura (°C)</label><input id="esc-temp" type="number" min="-40" max="50" step="0.5" value="32"></div>
+        </div>
+        <div class="dos">
+          <div><label for="esc-hr">Humedad relativa (%)</label><input id="esc-hr" type="number" min="0" max="100" value="15"></div>
+          <div><label for="esc-lluvia">Lluvia (mm/h)</label><input id="esc-lluvia" type="number" min="0" max="200" step="0.1" value="0"></div>
+        </div>
+        <div class="dos">
+          <div><label for="esc-viento">Viento (km/h)</label><input id="esc-viento" type="number" min="0" max="216" value="40"></div>
+          <div><label for="esc-dir">Viene del (grados)</label><input id="esc-dir" type="number" min="0" max="360" value="330" title="0 = norte, 90 = este, 180 = sur, 270 = oeste"></div>
+        </div>
+        <div class="botones"><button id="b-escenario" class="lanza">Armar el escenario</button></div>
+      </details>
+    </section>
+
     <section id="sec-config">
       <h2>1. Configurar</h2>
       <label for="motor">Motor</label>
       <select id="motor"></select>
       <label for="evento">Datos del terreno y del tiempo</label>
       <select id="evento"></select>
+      <div id="rotulos-evento"></div>
       <p class="nota" id="nota-evento"></p>
+      <div id="avisos-evento"></div>
+      <button class="enlace" id="borrar-rt" hidden>Borrar este evento de tiempo real</button>
       <label>Punto de ignición <span class="suave">(clic en el mapa)</span></label>
       <div class="dos">
         <input id="lat" inputmode="decimal" aria-label="Latitud" placeholder="Latitud">
@@ -70,7 +165,7 @@
     </section>
 
     <footer>
-      <p><strong>Para leer bien el resultado.</strong> La simulación no incluye el combate del fuego. Los datos del tiempo y de la vegetación son los de un incendio histórico con ficha; todavía no se baja el pronóstico. Los dos motores dan resultados distintos: no se promedian.</p>
+      <p><strong>Para leer bien el resultado.</strong> La simulación no incluye el combate del fuego. Los eventos de tiempo real usan un pronóstico (de un modelo, no observaciones) y los índices de vegetación más recientes; los EJEMPLO usan los datos de un incendio histórico con ficha. Los dos motores dan resultados distintos: no se promedian.</p>
       <p id="version"></p>
     </footer>
   </aside>

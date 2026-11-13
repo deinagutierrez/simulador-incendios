@@ -150,7 +150,8 @@ def toma_manual(ruta_ndvi: Path, ruta_ndmi: Path, ventana: list[str], ndmi_nir: 
         raise ValueError("ventana: el último día es anterior al primero")
     ndvi = leer_tif_manual(ruta_ndvi, nombre_ndvi)
     ndmi = leer_tif_manual(ruta_ndmi, nombre_ndmi)
-    sha = hashlib.sha256(ndvi.tobytes() + ndmi.tobytes()).hexdigest()
+    # lo declarado entra en la clave: la misma carga con otra ventana o banda es otra toma, no pisa la anterior
+    sha = hashlib.sha256(ndvi.tobytes() + ndmi.tobytes() + f"{desde}{hasta}{ndmi_nir}".encode()).hexdigest()
     id_ = f"I-{hasta:%Y%m%d}-manual-{sha[:6]}"
     carpeta = dir_tomas() / id_
     shutil.rmtree(carpeta, ignore_errors=True)

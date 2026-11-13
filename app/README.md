@@ -5,9 +5,9 @@ El programa nuevo. Plan: `docs/etapa3/00_plan.md`.
 | Carpeta | Qué | Frente | Estado |
 |---|---|---|---|
 | `app/motores/` | un proceso por corrida que conduce a v3.1 o a v4.0 sin modificarlos; motor simulado para pruebas | A. Motores y datos | fase F1 hecha: corre, avisa, pausa y detiene; ignición en un punto y una hora elegidos |
-| `app/datos/` | pronóstico de Open-Meteo, índices de Sentinel-2 por AWS, caché con procedencia | A. Motores y datos | sin empezar |
+| `app/datos/` | pronóstico de Open-Meteo, índices de Sentinel-2 (AWS, Earth Engine o TIF a mano), CSV a mano, modo escenario, evento generado `RT-…`, caché con procedencia | A. Motores y datos | fase F4 hecha (ver `docs/etapa3/F4_informe.md`); E-E3-2 pendiente de evaluar |
 | `app/servidor/` | servidor local (solo `127.0.0.1`), gestor de corridas, avance en vivo, huella para el mapa | B. Servidor e interfaz | fase F2 hecha |
-| `app/web/` | interfaz en el navegador: mapa con capas, panel, línea de tiempo, gráfico, comparación entre motores | B. Servidor e interfaz | fase F3 hecha (primera versión); faltan cortafuegos y viento (F5) y la zona de datos (F4) |
+| `app/web/` | interfaz en el navegador: mapa con capas, panel, línea de tiempo, gráfico, comparación entre motores | B. Servidor e interfaz | fases F3 y F4 hechas; faltan cortafuegos y viento (F5) |
 
 Los dos frentes se encuentran en `docs/etapa3/contrato_servidor_motor.md`. Las pruebas están en `test/app/`.
 
@@ -66,6 +66,19 @@ quema, el motor lo corre a la combustible más cercana y lo informa en `desplaza
 | `motor_v40.py` | conduce a v4.0: mismos pasos que su `correr_escenario.py`, con una subclase de `Automata` como punto de control |
 | `motor_v31.py` | conduce a v3.1: mismos pasos que su `correr_escenario.py`, con una subclase de `Simulacion` como punto de control |
 
+## Archivos de `app/datos/`
+
+| Archivo | Qué hace |
+|---|---|
+| `proceso_datos.py` | proceso de datos: un trabajo por vez (pronóstico, CSV, escenario, índices AWS/GEE/manual, evento), con el camino de v3.1; avisa como los procesos motor |
+| `meteo.py` | pronóstico con las funciones de v3.1 (16 puntos en paralelo), CSV a mano, escenario con valores fijos |
+| `sentinel2.py` | catálogo Earth Search, lectura de los COG de Sentinel-2, máscara SCL, compuesto de ventana (v3.1) y mensual (SIM) |
+| `indices.py` | tomas de índices: AWS, Earth Engine (código de v3.1, opcional) y TIF cargados a mano |
+| `evento_rt.py` | arma un evento `RT-…` que los dos motores corren sin cambios; lo borra; barre los que quedaron a medio armar |
+| `comun.py` | rutas, grillas del dominio, escritura de rásteres, procedencia |
+
+Prueba con red, opcional: `python herramientas/probar_red.py` (pronóstico, índices, evento y 6 h con cada motor).
+
 ## Archivos de `app/servidor/`
 
 | Archivo | Qué hace |
@@ -74,7 +87,8 @@ quema, el motor lo corre a la combustible más cercana y lo informa en `desplaza
 | `app.py` | pedidos HTTP, canal de avance en vivo, control de que el pedido venga de la propia página |
 | `huella.py` | pasa la huella a la proyección de los mapas web y la pinta como PNG; contorno en GeoJSON; comparación entre dos huellas |
 | `capas.py` | capas de fondo: relieve, pendiente, cobertura, arribo, índices, combustible, cicatriz y vectores; con caché en `datos/procesados/app/capas/` |
-| `datos.py` | qué eventos tienen datos en el clon y cuál es el recuadro del dominio (lee los YAML, no carga motores) |
+| `datos.py` | qué eventos tienen datos en el clon (con ficha = EJEMPLO, o generados `RT-…`), recuadro del dominio, bloque `insumos` de `corrida.json` (no carga motores) |
+| `trabajos.py` | gestor de trabajos de datos: lanza `app/datos/proceso_datos.py`, uno a la vez, lee sus avisos, estado en disco |
 | `../servir.py` | arranque: busca un puerto libre, levanta el servidor y abre el navegador |
 
 ## Archivos de `app/web/`

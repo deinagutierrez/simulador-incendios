@@ -25,6 +25,7 @@ import datetime as dt
 import json
 import logging
 import os
+import signal
 import sys
 import time
 import traceback
@@ -36,7 +37,15 @@ sys.path.insert(0, str(REPO / "src" / "v3.1" / "src"))
 sys.path.insert(0, str(APP))
 
 
+def _cortado(_num, _marco) -> None:
+    """El servidor corta el trabajo con SIGTERM al cerrarse (en Linux y macOS). Se convierte en una excepción para que
+    `evento_rt.crear` borre lo que dejó a medio armar y el aviso de error salga igual."""
+    raise InterruptedError("el servidor cortó el trabajo de datos (se cerró)")
+
+
 def main() -> int:
+    if os.name != "nt":
+        signal.signal(signal.SIGTERM, _cortado)
     ap = argparse.ArgumentParser(description="Trabajo de datos del simulador (pronóstico, índices, evento generado)")
     ap.add_argument("--trabajo", required=True)
     a = ap.parse_args()

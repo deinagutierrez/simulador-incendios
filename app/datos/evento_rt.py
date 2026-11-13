@@ -175,6 +175,20 @@ def borrar(id_: str) -> None:
     shutil.rmtree(comun.REPO / "datos" / "procesados" / "v4.0" / id_, ignore_errors=True)
 
 
+def barrer_incompletos() -> list[str]:
+    """Borra los eventos generados que quedaron a medio armar (sin `insumos_RT-….json`), por ejemplo si se cortó el
+    proceso de datos. El servidor lo llama al arrancar, cuando no hay ningún trabajo de datos en marcha."""
+    E, D = comun.REPO / "escenarios", comun.ENTRADAS
+    candidatos = {p.stem for v in ("v3.1", "v4.0") for p in (E / v / "eventos").glob("RT-*.yaml")}
+    candidatos |= {p.name for k in ("eventos", "combustibles") for p in (D / k).glob("RT-*") if p.is_dir()}
+    borrados = []
+    for id_ in sorted(c for c in candidatos if es_rt(c)):
+        if not rutas(id_)["insumos"].exists():
+            borrar(id_)
+            borrados.append(id_)
+    return borrados
+
+
 def eventos() -> list[dict]:
     out = []
     for p in sorted((comun.ENTRADAS / "eventos").glob("RT-*/insumos_RT-*.json"), reverse=True):
