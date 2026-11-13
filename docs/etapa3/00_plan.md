@@ -146,7 +146,7 @@ escriben esos archivos (carpeta propia del simulador con las variables `INCENDIO
 
 **Configuraciones congeladas** (D-E3-01): v4.0 `modelo_v3` variante `barreras` (viento `serie`, regla 3.3b, `limite_viento`
 andrews_2013, `k_global` 1, pavesas y contención apagadas, sin parada en cicatriz); v3.1 `modelo_v2` librev2 (barreras de
-caminos activas, contención apagada) y `modelo_v1` libre. Son las de los lotes de comparación (E058, docs/v4.0/31 §7.2).
+caminos **apagadas**, como en `evaluar_v2.py`; corregido el 2026-11-13, D-E3-28; contención apagada) y `modelo_v1` libre. Son las de los lotes de comparación (E058, docs/v4.0/31 §7.2).
 
 **Cómo se elige.** Selector con tres opciones y un modo "ambos" que lanza los dos procesos y dibuja las dos huellas. No se
 promedian: el control v3.1 contra v4 dio R3, no concluyente (IoU mediana 0,483 contra 0,360, X-46), y en el evento no visto
@@ -212,8 +212,8 @@ reproducible; la longitud informada es la de la polilínea.
 | Intervención | v3.1 | v4.0 | Reproducción offline |
 |---|---|---|---|
 | Viento manual | cambia de golpe en la hora de la pausa (el motor usa un valor por hora) | gira en forma gradual durante la hora siguiente (el motor interpola entre valores horarios; se edita la serie desde la hora siguiente para no alterar lo ya simulado) | serie meteorológica editada por horas |
-| Cortafuego nuevo | activo desde la hora de la pausa; se recorta a celdas todavía no afectadas | ídem | el mismo trazo cargado desde el inicio: como el fuego no había tocado esas celdas, el resultado es igual (se verifica en E-E3-4) |
-| Más horas | extiende el horizonte si el pronóstico cubre | ídem | `horas` del escenario |
+| Cortafuego nuevo | activo desde la hora de la pausa; se quitan los enlaces que llegan a celdas ya afectadas | activo desde la hora de la pausa; se quitan las celdas ya afectadas y las intermedias de enlaces diagonales entre celdas afectadas (D-E3-28) | el mismo trazo cargado desde el inicio: como el fuego no había tocado esas celdas, el resultado es igual (se verifica en E-E3-4) |
+| Más horas | **no se ofrece** (D-E3-28): los motores fijan el horizonte al empezar; se reinicia la corrida | ídem | `horas` del escenario |
 | Cambiar motor, ignición o índices | no se admite en una corrida iniciada: exige Reiniciar | ídem | — |
 
 **Bitácora.** Cada intervención se registra como `{n, t_sim_min, t_vigor_min, tipo, datos, hash}`. El `hash` encadena cada
