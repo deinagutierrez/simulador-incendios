@@ -91,7 +91,7 @@ def main() -> int:
             raise ValueError(f"tarea desconocida: {tarea!r}")
     except Exception as e:
         traceback.print_exc()
-        avisar("error", mensaje=f"{e}", tipo=type(e).__name__, s=round(time.time() - t0, 1))
+        avisar("error", mensaje=f"{e}", clase=type(e).__name__, s=round(time.time() - t0, 1))
         return 1
     (carpeta / "resultado.json").write_text(json.dumps(r, indent=1, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     avisar("final", resultado=r, s=round(time.time() - t0, 1))

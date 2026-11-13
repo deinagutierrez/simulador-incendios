@@ -107,7 +107,7 @@ def pronostico(ahora: pd.Timestamp | None = None, modelo: str = MODELO, respaldo
     `dias_adelante`. Con `respaldo`, si el modelo principal falla o no pasa el control de calidad, prueba con ese."""
     from incendios_sl import config as cfgmod                     # v3.1 (proceso de datos)
     from incendios_sl.data import preparar_dominio as pdm
-    from incendios_sl.meteorology.openmeteo import ConfigMeteo, adquirir
+    from incendios_sl.meteorology.openmeteo import ConfigMeteo
 
     ahora = _hora(ahora if ahora is not None else pd.Timestamp.now(tz="UTC"))
     inicio = ahora - pd.Timedelta(days=dias_atras)
@@ -120,7 +120,7 @@ def pronostico(ahora: pd.Timestamp | None = None, modelo: str = MODELO, respaldo
         t0 = time.time()
         try:
             aviso(f"pidiendo el pronóstico {m} de 16 puntos a Open-Meteo")
-            r = adquirir(g, str(inicio), str(fin), ConfigMeteo(modelo=m, tipo="pronostico"), out_dir=cache, etiqueta="pronostico")
+            r = adquirir_en_paralelo(g, inicio, fin, ConfigMeteo(modelo=m, tipo="pronostico"), cache, "pronostico")
         except Exception as e:                   # sin red, servicio caído o control de calidad rechazado
             errores.append(f"{m}: {e}")
             continue
@@ -138,6 +138,50 @@ def pronostico(ahora: pd.Timestamp | None = None, modelo: str = MODELO, respaldo
         shutil.copy(r["json"], dir_tomas() / id_ / "openmeteo.json")
         return info
     raise RuntimeError("no se pudo bajar el pronóstico. " + " | ".join(errores))
+
+
+def adquirir_en_paralelo(grilla, inicio: pd.Timestamp, fin: pd.Timestamp, cfg, out_dir: Path, etiqueta: str,
+                         hilos: int = 8) -> dict:
+    """Lo mismo que `openmeteo.adquirir` de v3.1 (mismos 16 puntos, mismo pedido por punto, mismo control de calidad, misma
+    serie del dominio y mismos archivos), pero con los pedidos en paralelo: el original los hace de a uno con una pausa
+    de 0,2 s y tarda unos 12 s, por encima del criterio de 10 s del plan. Usa las funciones congeladas de v3.1."""
+    from concurrent.futures import ThreadPoolExecutor
+    from incendios_sl.meteorology.openmeteo import (URL_PRONOSTICO, VARIABLES_OBLIGATORIAS, _consultar, control_calidad,
+                                                    puntos_malla, serie_dominio)
+    pts = puntos_malla(grilla, cfg.n_puntos_lado)
+    with ThreadPoolExecutor(max_workers=hilos) as ex:
+        respuestas = list(ex.map(lambda p: _consultar(float(p.lat), float(p.lon), inicio, fin, cfg), [p for _, p in pts.iterrows()]))
+    filas, meta_puntos = [], []
+    for (_, p), d in zip(pts.iterrows(), respuestas):
+        sub = pd.DataFrame(d["hourly"])
+        sub["time_utc"] = pd.to_datetime(sub.pop("time"), utc=True)
+        sub.insert(0, "punto_id", p.punto_id)
+        filas.append(sub)
+        meta_puntos.append({"punto_id": p.punto_id, "lon_pedido": p.lon, "lat_pedido": p.lat, "lon_modelo": d.get("longitude"),
+                            "lat_modelo": d.get("latitude"), "elevacion_modelo_m": d.get("elevation"), "unidades": d.get("hourly_units")})
+    df = pd.concat(filas, ignore_index=True)
+    df = df[(df.time_utc >= inicio) & (df.time_utc <= fin)].copy()
+    qc = control_calidad(df, cfg.variables)
+    if qc["max_horas_consecutivas_faltantes_obligatorias"] > MAX_HUECO_H:
+        raise RuntimeError(f"meteorología incompleta: {qc['max_horas_consecutivas_faltantes_obligatorias']} h consecutivas sin "
+                           f"dato en variables obligatorias (modelo {cfg.modelo}); no se rellena")
+    falta = [v for v in VARIABLES_OBLIGATORIAS if df[v].isna().all()]
+    if falta:
+        raise RuntimeError(f"el modelo {cfg.modelo} no entregó {', '.join(falta)}")
+    base = out_dir / f"{etiqueta}_{cfg.modelo}_{inicio:%Y%m%dT%H}_{fin:%Y%m%dT%H}"
+    rutas = {"csv": base.with_suffix(".csv"), "parquet": base.with_suffix(".parquet"), "json": base.with_suffix(".json"),
+             "dominio_csv": base.with_name(base.name + "_dominio.csv")}
+    df.to_csv(rutas["csv"], index=False)
+    df.to_parquet(rutas["parquet"], index=False)
+    serie_dominio(df).to_csv(rutas["dominio_csv"], index=False)
+    meta = {"fuente": "Open-Meteo Forecast API", "url": URL_PRONOSTICO, "modelo": cfg.modelo, "licencia": "CC-BY 4.0",
+            "descargado_utc": comun.ahora_utc(), "periodo_utc": [str(inicio), str(fin)], "variables": cfg.variables,
+            "convencion_direccion_viento": "meteorológica: grados desde los que sopla (0 = N, 90 = E)",
+            "unidades": {"temperature_2m": "°C", "relative_humidity_2m": "%", "wind_speed_10m": "m/s", "precipitation": "mm/h"},
+            "puntos": meta_puntos, "control_calidad": qc,
+            "codigo": "app/datos/meteo.adquirir_en_paralelo con las funciones de openmeteo.py de v3.1"}
+    comun.escribir_json(rutas["json"], meta)
+    return rutas | {"desde_cache": False}
 
 
 # ------------------------------------------------------------------ CSV cargado a mano
