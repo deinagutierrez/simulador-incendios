@@ -143,12 +143,14 @@ def test_pausar_intervenir_y_reanudar(servidor):
     en_pausa = servidor.esperar(id_, "pausada")
     time.sleep(0.4)
     assert servidor.detalle(id_)["ultima_hora"]["h"] == en_pausa["ultima_hora"]["h"]         # en pausa no avanza
-    codigo, r = servidor.pedir(f"/api/corridas/{id_}/intervenciones", {"tipo": "cortafuego"})
-    assert codigo == 200 and r["aviso"] == "intervencion" and r["estado"] == "rechazada"       # llega con la fase F5
+    assert servidor.pedir(f"/api/corridas/{id_}/intervenciones", {"tipo": "cortafuego"})[0] == 422     # sin datos
+    codigo, r = servidor.pedir(f"/api/corridas/{id_}/intervenciones", {"tipo": "viento_manual",
+                                                                       "datos": {"vel_kmh": 30, "dir_desde": 270}})
+    assert codigo == 200 and r["aviso"] == "intervencion" and r["estado"] == "aceptada" and r["n"] == 2   # F5
     codigo, r = servidor.pedir(f"/api/corridas/{id_}/reanudar", {})
     assert codigo == 200 and r["estado"] == "corriendo"
     fin = servidor.esperar(id_, "terminada")
-    assert [b["tipo"] for b in fin["bitacora"]] == ["pausa", "reanudacion"]
+    assert [b["tipo"] for b in fin["bitacora"]] == ["pausa", "viento_manual", "reanudacion"]
     assert fin["bitacora"][0]["t_sim_min"] == en_pausa["ultima_hora"]["h"] * 60
     assert fin["ultima_hora"]["h"] == 60
 

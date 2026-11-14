@@ -14,7 +14,15 @@ Con `definicion` se puede agregar `configuracion`, lo que elige el usuario en la
 
     "configuracion": {"ignicion": [{"lon": -65.55, "lat": -32.64}], "t_inicio_utc": "2024-09-19T16:00:00Z", "horas": 24}
 
-El evento de `definicion` sigue aportando la meteorología, los índices y la cobertura.
+El evento de `definicion` sigue aportando la meteorología, los índices y la cobertura. `t_inicio_utc` tiene que caer en hora
+en punto (con minutos o segundos se rechaza). Desde la F5, `configuracion.cortafuegos` trae los trazos dibujados antes de
+iniciar (`[{"ancho_m": 10, "suelo_mineral": false, "xy_5345": [[x, y], ...]}]`): el proceso los valida y normaliza
+(`intervenciones.py`) y se los pasa al conductor en `configuracion["cortafuegos"]`.
+
+Bitácora (F5): cada pausa, reanudación, detención e intervención aceptada o recortada entra con un hash encadenado desde la
+raíz (la configuración inicial); se escribe en el acto en `bitacora.jsonl` y al final en `corrida.json` (`bitacora`,
+`bitacora_raiz`). Si `corrida.json` trae `reproduccion` = `{de, raiz, bitacora}`, el proceso aplica esa bitácora en su hora
+y deja en `resultados.reproduccion` si la cadena salió igual (`cadena_igual`).
 
 Salida estándar: solo avisos, una línea JSON cada uno (listo, hora, pausado, intervencion, final, error).
 Entrada estándar: órdenes, una línea JSON cada una (pausar, reanudar, detener, intervenir).
@@ -33,6 +41,7 @@ import traceback
 from pathlib import Path
 
 MOTORES = {"v4.0": ("v4.0", "barreras"), "v3.1-libre": ("v3.1", "libre"), "v3.1-librev2": ("v3.1", "libre_v2")}
+CLAVES_CONFIGURACION = ("ignicion", "t_inicio_utc", "horas", "cortafuegos")
 
 
 def main() -> int:
@@ -65,6 +74,7 @@ def main() -> int:
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     from control import Control, memoria_pico_mb
+    import intervenciones
     control = Control(carpeta, avisos, ordenes)
 
     try:
@@ -78,7 +88,12 @@ def main() -> int:
         if not (base.get("escenario") or base.get("definicion")):
             raise ValueError("corrida.json: falta `base.escenario` o `base.definicion`")
         configuracion = {k: v for k, v in (corrida.get("configuracion") or {}).items()
-                         if k in ("ignicion", "t_inicio_utc", "horas") and v not in (None, [], "")}
+                         if k in CLAVES_CONFIGURACION and v not in (None, [], "")}
+        intervenciones.revisar_t_inicio(configuracion.get("t_inicio_utc"))
+        if configuracion.get("cortafuegos"):
+            configuracion["cortafuegos"] = intervenciones.validar_cortafuegos(configuracion["cortafuegos"])
+            corrida["configuracion"]["cortafuegos"] = configuracion["cortafuegos"]
+        control.preparar(corrida)
         version, variante = MOTORES[motor]
         print(f"proceso motor {motor} · corrida {carpeta.name}", flush=True)
         if version == "v4.0":
@@ -96,9 +111,11 @@ def main() -> int:
     res["s_computo"] = control.segundos()
     res["memoria_pico_mb"] = memoria_pico_mb()
     res["horas_avisadas"] = control.horas_avisadas
-    corrida["bitacora"] = (corrida.get("bitacora") or []) + control.bitacora
+    reproduccion = control.cerrar(corrida)
     corrida["resultados"] = {**res, "km2_final": round(res["ha_final"] / 100.0, 4),
                              "t_simulado_h": round(res["t_simulado_min"] / 60.0, 3)}
+    if reproduccion is not None:
+        corrida["resultados"]["reproduccion"] = reproduccion
     tmp = ruta_json.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(corrida, indent=1, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
     os.replace(tmp, ruta_json)

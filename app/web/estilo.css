@@ -130,3 +130,41 @@ main { position: relative; min-width: 0; }
 input[type="file"] { padding: 4px; font-size: 12.5px; }
 .sin-red { margin-top: 8px; }
 .sin-red button { margin-top: 6px; }
+
+/* ------------------------------------------------------------ intervenciones (fase F5) */
+.herramienta { margin-top: 12px; padding-top: 4px; border-top: 1px dashed var(--borde); }
+.herramientas button[aria-pressed="true"] { background: #1c1b19; border-color: #1c1b19; color: #fff; }
+.casilla-sola { margin-top: 30px; }
+.lista-trazos { margin: 6px 0 0; padding: 0 0 0 20px; font-size: 12.5px; }
+.lista-trazos:empty { display: none; }
+.lista-trazos li { padding: 2px 0; }
+.lista-trazos li .fila { display: flex; gap: 6px; align-items: baseline; }
+.lista-trazos li .fila span { flex: 1; font-variant-numeric: tabular-nums; }
+.lista-trazos li button { padding: 0 6px; font-size: 12px; line-height: 1.5; }
+.lista-trazos li .error { margin: 1px 0 0; }
+#herr-cortafuegos button.principal { margin-top: 8px; }
+.pausa-en { margin-top: 2px; }
+.pausa-en input { max-width: 140px; }
+.intervenir { border: 1px solid var(--borde); border-radius: 8px; padding: 4px 12px 10px; margin-top: 10px; background: #fff; }
+.intervenir > h3 { margin-top: 8px; }
+.intervenir .herramienta { border-top: 0; margin-top: 0; padding-top: 0; }
+.bloque-viento { margin-top: 12px; padding-top: 4px; border-top: 1px dashed var(--borde); }
+.respuestas { margin: 8px 0 0; padding: 0; list-style: none; font-size: 12.5px; }
+.respuestas li { padding: 4px 0; border-top: 1px solid var(--grilla); }
+.respuestas .rechazada { color: var(--error); }
+.respuestas .recortada { color: #6b4a0e; }
+.bitacora { margin: 8px 0 0; padding: 6px 0 0; border-top: 1px solid var(--grilla); font-size: 12.5px; list-style: none; }
+.bitacora li { display: grid; grid-template-columns: 62px 1fr; gap: 6px; padding: 1px 0; }
+.bitacora .cuando { color: var(--suave); font-variant-numeric: tabular-nums; }
+.bitacora .que { font-variant-numeric: tabular-nums; }
+.bitacora .marca-cf { display: inline-block; width: 14px; height: 3px; background: #1c1b19; vertical-align: 3px; margin-right: 5px; }
+.bitacora .marca-cf.recortado { background: repeating-linear-gradient(90deg, #1c1b19 0 5px, #b5b1a7 5px 8px); }
+.bitacora .integra { color: var(--suave); }
+.bitacora .integra.mal { color: var(--error); font-weight: 600; }
+#mapa.dibujando, #mapa.dibujando .leaflet-interactive { cursor: crosshair; }
+#mapa.dibujando { touch-action: none; }
+#mapa.borrando .trazo-borrador { cursor: not-allowed; }
+#largo-trazo { position: absolute; z-index: 600; pointer-events: none; background: #1c1b19; color: #fff; font-size: 12px; padding: 3px 7px; border-radius: 5px; transform: translate(12px, -130%); white-space: nowrap; font-variant-numeric: tabular-nums; }
+#leyenda .linea-cf { width: 22px; height: 0; border-top: 3px solid #1c1b19; flex: none; }
+#leyenda .linea-cf.recortado { border-top: 3px dashed #8a877f; }
+#leyenda .linea-cf.borrador { border-top: 3px dashed #1d6fd6; }

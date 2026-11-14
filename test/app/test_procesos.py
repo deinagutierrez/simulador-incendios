@@ -23,6 +23,8 @@ import yaml
 
 REPO = Path(__file__).resolve().parents[2]
 PROCESO = REPO / "app" / "motores" / "proceso.py"
+sys.path.insert(0, str(REPO / "app" / "motores"))
+import intervenciones  # noqa: E402
 DEFINICION = {"evento": "SL-2024-LASLAGUNAS", "hipotesis": 1, "horas": 6, "validar": False, "figuras": False}
 HORAS = 6
 # motor: (carpeta del motor, lo que el proceso agrega por defecto a la definición, ráster de tiempo de llegada)
@@ -181,8 +183,13 @@ def test_pausar_y_reanudar_no_cambia_el_resultado(caso, tmp_path):
     propio = _raster_del_proceso(carpeta, motor)
     ref = caso["referencia"]
     assert int((~((propio == ref) | (np.isnan(propio) & np.isnan(ref)))).sum()) == 0
-    tipos = [b["tipo"] for b in json.loads((carpeta / "corrida.json").read_text(encoding="utf-8"))["bitacora"]]
-    assert tipos == ["pausa", "reanudacion"]
+    corrida = json.loads((carpeta / "corrida.json").read_text(encoding="utf-8"))
+    assert [b["tipo"] for b in corrida["bitacora"]] == ["pausa", "reanudacion"]
+    # bitácora encadenada (contrato 1.5): la raíz sale de la configuración inicial y la cadena verifica
+    assert corrida["bitacora_raiz"] == intervenciones.raiz(corrida)
+    assert intervenciones.verificar_cadena(corrida["bitacora_raiz"], corrida["bitacora"]) == (True, None)
+    en_disco = [json.loads(x) for x in (carpeta / "bitacora.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert en_disco == corrida["bitacora"]
 
 
 def test_detener_deja_salidas_validas(caso, tmp_path):
@@ -215,6 +222,7 @@ def test_detener_deja_salidas_validas(caso, tmp_path):
     corrida = json.loads((carpeta / "corrida.json").read_text(encoding="utf-8"))
     assert corrida["resultados"]["motivo_fin"] == "detenida"
     assert [b["tipo"] for b in corrida["bitacora"]] == ["pausa", "detencion"]
+    assert intervenciones.verificar_cadena(corrida["bitacora_raiz"], corrida["bitacora"]) == (True, None)
 
 
 # ---------------------------------------------------------------------------------------------------- ignición libre
