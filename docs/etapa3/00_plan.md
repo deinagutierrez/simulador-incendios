@@ -475,7 +475,7 @@ pasa la validación se rechaza con mensaje o se acepta con rótulo visible.
 
 | Nivel | Qué | Fuente de verdad |
 |---|---|---|
-| Entorno | las suites de los motores pasan en el entorno único. Línea base **[MEDIDO 10/11]**: v3.1, 69 pruebas; v4.0, 130 pasan, 12 se omiten y 5 se excluyen con motivo (`herramientas/pruebas_excluidas.txt`): 4 ya fallaban en la copia original (3 quedaron viejas tras D41 y D42, 1 pide resultados del banco) y 1 pide datos históricos. El README de v4.0 dice "140 en verde"; no es lo que se midió | las propias suites y la lista de exclusiones |
+| Entorno | las suites de los motores pasan en el entorno único. Línea base **[MEDIDO 10/11]**: v3.1, 69 pruebas; v4.0, 130 pasan, 12 se omiten (medido con resultados locales; en un clon limpio son 68 + 1 omitida y 129 + 13 omitidas, corregido el 2026-11-14, D-E3-30) y 5 se excluyen con motivo (`herramientas/pruebas_excluidas.txt`): 4 ya fallaban en la copia original (3 quedaron viejas tras D41 y D42, 1 pide resultados del banco) y 1 pide datos históricos. El README de v4.0 dice "140 en verde"; no es lo que se midió | las propias suites y la lista de exclusiones |
 | Procesos motor | corrida corta sintética; pausar y reanudar no cambia `t_llegada`; detener deja salidas válidas; matriz de barreras vacía en libre = barreras apagadas | corrida sin control |
 | Intervenciones | viento manual, cortafuego en pausa recortado a celdas no afectadas, reproducción desde bitácora, hash encadenado | pruebas nuevas |
 | Datos | control de calidad meteorológico; lectura y mosaico de teselas con archivos locales de muestra; alineación a la grilla; rechazo de archivos mal formados | pruebas nuevas |
@@ -514,7 +514,7 @@ de verano, y eso se declara junto a cada cifra.
 - **Qué valida esta etapa**: que conduce a v3.1 y v4.0 sin alterarlos. La capacidad predictiva es la de esas versiones, ya
   informada: sobre los 10 eventos vistos, IoU mediana 0,483 (v3.1 librev2) contra 0,360 (v4.0) y primeras detecciones a tiempo
   0,818 contra 0,329, con igniciones ajustadas a la cicatriz, que inflan el IoU (X-46); en el evento no visto Las Chacras
-  octubre 2023, v3.1 gana en las dos direcciones (0,45–0,46 contra 0,25–0,37) y v4.0 sin parada no se apaga tras 7,8 mm de
+  octubre 2023, v3.1 gana en las dos direcciones (puntaje = (IoU a igual superficie + fracción a tiempo)/2: 0,45–0,46 contra 0,25–0,37) y v4.0 sin parada no se apaga tras 7,8 mm de
   lluvia (docs/v4.0/31 §7.2). Esas cifras y sus límites van en la pantalla "Sobre el modelo".
 - **Modo histórico** (F6): se elige uno de los 15 eventos con ficha; el programa usa su meteorología real, sus índices previos
   y su ignición recomendada, muestra la cicatriz y los focos VIIRS y calcula IoU a igual superficie y fracción de primeras

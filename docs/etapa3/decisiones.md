@@ -93,3 +93,12 @@ El usuario aprobó `F5_pedido_de_aprobacion.md` completo.
 |---|---|---|
 | D-E3-28 | **Alcance y diseño de la F5**: puntos 1 a 30 del pedido. Entre ellos: la F5 completa (también la pantalla) la hace el frente A (1); el archivo de trazos y horas de E-E3-4 se etiqueta antes del código (3); las corridas empiezan en hora en punto (6); en v3.1 los trazos se codifican con la función real `preparar_barreras_enlaces`, envuelta (7), y las dos variantes arrancan con una matriz de barreras vacía (8); el recorte en v4.0 quita también las intermedias de enlaces diagonales entre celdas afectadas (13); se informa la longitud dibujada y la recortada, y el criterio B de E-E3-4 usa la recortada (14); "más horas" en caliente no se ofrece (15); bitácora encadenada con hash (17) y reproducción hecha por el proceso motor (19); contrato 1.5 (22) | aprobada |
 | D-E3-29 | **Corrección del plan §2.3** (punto 9): la variante librev2 de v3.1 es `modelo_v2` con las barreras de caminos **apagadas** (`evaluar_v2.py`), como se validó y como la corre el simulador desde la F1. El plan decía "barreras de caminos activas". No cambia ningún resultado | aprobada |
+
+## 2026-11-14 — Aprobaciones para empezar la F6
+
+El usuario aprobó `F6_pedido_de_aprobacion.md` completo, incluidas las tres decisiones pendientes de la F5.
+
+| Código | Decisión | Estado |
+|---|---|---|
+| D-E3-30 | **Alcance de la F6**: puntos 1 a 19 del pedido. Entre ellos: E-E3-3 lo escribe deinagutierrez y lo evalúa LisandroV2002 (2); la integración continua corre en todas las ramas (4); arreglos de Windows (5); sha256 de los rásteres de E-E3-1 y comparación entre computadoras sin tolerancia (6); la meta de v4.0 con 30.000 ha de E-E3-3 se informa como no evaluable con su diseño y se agrega aparte, rotulada "fuera del prerregistro", la corrida de Las Chacras v4.0 libre de 141 h (8); modo histórico con las métricas de v3.1 en un proceso aparte (10), ignición recomendada de la ficha de v3.1 (11), solo los 2 eventos con datos en el clon (12) y cifras de referencia versionadas con prueba lenta para las filas de v3.1 (14); correcciones del plan §6.1 y §6.4 (15, 18); informe `01_verificacion.md` (19) | aprobada |
+| D-E3-31 | **Decisiones pendientes de la F5**: un cortafuego dibujado antes de iniciar que resulta rechazado corta la corrida con error antes de simular (20); el viento manual de v4.0 con la biblioteca WindNinja se sigue aceptando, solo se rechaza con un campo de viento externo (21); el zip de exportación incluye los archivos para la corrida offline (22) | aprobada |

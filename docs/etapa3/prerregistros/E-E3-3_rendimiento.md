@@ -1,7 +1,8 @@
 # Prerregistro E-E3-3 — Tiempo de cómputo y memoria
 
 Escrito el 2026-11-10. Se congela con la etiqueta `prerregistro-E-E3-3`.
-Escribe: ____ · Evalúa (la otra persona): ____
+Escribe: deinagutierrez · Evalúa (la otra persona): LisandroV2002 (D-E3-30, 2026-11-14). El diseño y el criterio no cambian
+respecto de la etiqueta; solo se agregan los nombres.
 
 ## Pregunta
 ¿Cuánto tarda y cuánta memoria usa cada motor conducido por el simulador, y qué computadora hace falta?
