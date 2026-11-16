@@ -1,4 +1,4 @@
-"""Pedidos HTTP del servidor local (fases F2 a F5).
+"""Pedidos HTTP del servidor local (fases F2 a F6).
 
     GET  /api/estado                              versión, motores, eventos con datos, dominio, corridas en marcha
     POST /api/corridas                            crea una corrida (o dos con motor "ambos"); con "iniciar": true la lanza
@@ -20,11 +20,26 @@
                                                   con color=rrggbb, de un solo color (para comparar dos motores)
     GET  /api/corridas/<id>/perimetro.geojson?hora=N   contorno del área quemada hasta la hora N
     GET  /api/corridas/<id>/exportar              zip con corrida.json, los resultados del motor, los perímetros por hora,
-                                                  bitacora.jsonl y cortafuegos.geojson
+                                                  bitacora.jsonl, cortafuegos.geojson, metricas_v31.json y, si existen,
+                                                  los archivos para la corrida offline (intervenciones_v31/,
+                                                  cortafuegos_aplicados.geojson, modificador_aplicado.tif,
+                                                  meteo_editada.csv; D-E3-31)
     GET  /api/comparacion?a=<id>&b=<id>&hora=N    coincidencia entre dos huellas (superficies, envolvente, IoU)
     GET  /api/capas?evento=<id>                   capas de fondo disponibles, con su leyenda
     GET  /api/capas/<capa>.png?evento=<id>        capa ráster lista para superponer en un mapa web
     GET  /api/vectores/<capa>.geojson             caminos, viviendas, red de media tensión, cuarteles, borde del dominio
+
+  Modo histórico (fase F6, D-E3-30; detalle en historicos.py):
+    GET  /api/historicos                          los 15 eventos con ficha: si se pueden correr (y qué les falta), ignición
+                                                  recomendada (ficha de v3.1), instantes de evaluación, rol visto / no visto
+                                                  (X-49) con su advertencia, focos y cifras documentadas
+    POST /api/historicos/<evento>/corrida         {motores: [...], horas?, iniciar? (true)}: una corrida por motor con la
+                                                  ignición y la hipótesis recomendadas; 404 / 409 / 422 con el motivo
+    GET  /api/corridas/<id>/metricas_v31          métricas de v3.1 contra la cicatriz y los focos (se calculan solas al
+                                                  terminar la corrida, en un proceso aparte): 200 lista o error, 202 en
+                                                  curso, 404 si no corresponden
+    GET  /api/historicos/<evento>/focos.geojson   focos VIIRS (hotspots_v3.1) con su pasada; con ?corrida=<id>, la clase de
+                                                  cada foco y de cada pasada según las métricas de esa corrida
 
   Datos que cambian (fase F4). Cada pedido que baja o prepara datos lanza un trabajo de datos (un proceso aparte, uno a la
   vez: si ya hay uno en marcha contesta 409) y devuelve 201 con {"trabajo": {...}} para seguirlo:
@@ -72,7 +87,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response, StreamingRes
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
-from . import VERSION, capas, datos, huella, trazos
+from . import VERSION, capas, datos, historicos, huella, trazos
 from . import trabajos as mod_trabajos
 from .corridas import (ACTIVOS, ESPERA_INTERVENCION_S, FINALES, MOTORES_REALES, Gestor, Rechazo, escribir_json,
                        sha_congelado)
@@ -190,6 +205,19 @@ def entrada_de_intervencion(pedido: PedidoIntervencion) -> dict:
         return trazos.entrada(pedido.tipo, d)
     except ValueError as e:
         raise HTTPException(422, f"datos del {pedido.tipo.replace('_', ' ')}: {e}")
+
+
+class PedidoHistorico(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    motores: list[str] = Field(min_length=1, max_length=3)
+    horas: int | None = Field(default=None, ge=1)
+    iniciar: bool = True
+
+
+# Archivos que deja una corrida con intervenciones para repetirla offline (D-E3-31, punto 22): v3.1 en intervenciones_v31/,
+# v4.0 sueltos en la carpeta de la corrida.
+ARCHIVOS_OFFLINE = ("cortafuegos_aplicados.geojson", "modificador_aplicado.tif", "meteo_editada.csv")
+CARPETAS_OFFLINE = ("intervenciones_v31",)
 
 
 class PedidoMeteo(BaseModel):
@@ -366,6 +394,8 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
               guion_datos: Path | None = None) -> FastAPI:
     """`carpeta_trabajos` y `guion_datos` (el programa de los trabajos de datos) se cambian en las pruebas."""
     gestor = Gestor(carpeta_corridas, permitir_simulado=permitir_simulado)
+    metricas = historicos.Metricas(gestor)
+    metricas.arrancar()
 
     def al_terminar_trabajo(t) -> None:
         if t.tarea == "evento":
@@ -383,6 +413,7 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
     @asynccontextmanager
     async def vida(_: FastAPI):
         yield
+        await asyncio.to_thread(metricas.cerrar)
         await asyncio.to_thread(gestor_datos.cerrar)
         await asyncio.to_thread(gestor.cerrar)
 
@@ -390,6 +421,7 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
                   openapi_url=None)
     app.state.gestor = gestor
     app.state.gestor_datos = gestor_datos
+    app.state.metricas = metricas
 
     @app.middleware("http")
     async def solo_la_propia_pagina(request: Request, seguir):
@@ -540,13 +572,15 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
             raise HTTPException(409, "la corrida todavía está en marcha; se exporta cuando termina")
         memoria = io.BytesIO()
         with zipfile.ZipFile(memoria, "w", zipfile.ZIP_DEFLATED) as z:
-            for nombre in ("corrida.json", "estado.json", "eventos.jsonl", "bitacora.jsonl", "escenario_base.yaml"):
-                if (c.carpeta / nombre).exists():
+            for nombre in ("corrida.json", "estado.json", "eventos.jsonl", "bitacora.jsonl", "escenario_base.yaml",
+                           historicos.ARCHIVO) + ARCHIVOS_OFFLINE:
+                if (c.carpeta / nombre).is_file():
                     z.write(c.carpeta / nombre, f"{id_}/{nombre}")
-            salida = c.carpeta / "salida"
-            if salida.is_dir():
-                for ruta in sorted(q for q in salida.rglob("*") if q.is_file()):
-                    z.write(ruta, f"{id_}/salida/{ruta.relative_to(salida).as_posix()}")
+            for sub in ("salida",) + CARPETAS_OFFLINE:
+                carpeta = c.carpeta / sub
+                if carpeta.is_dir():
+                    for ruta in sorted(q for q in carpeta.rglob("*") if q.is_file()):
+                        z.write(ruta, f"{id_}/{sub}/{ruta.relative_to(carpeta).as_posix()}")
             if c.listo and c.ultima_hora:
                 figuras = []
                 for h in range(int(c.ultima_hora["h"]) + 1):
@@ -565,6 +599,75 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
         if r is None:
             raise HTTPException(409, "las dos corridas tienen que tener huella y la misma grilla")
         return r | {"a": {"id": a, "motor": ca.motor}, "b": {"id": b, "motor": cb.motor}}
+
+    # ------------------------------------------------------------------ modo histórico (fase F6)
+    @app.get("/api/historicos")
+    def lista_de_historicos():
+        ref = historicos.referencia()
+        return {"eventos": historicos.lista(),
+                "referencia": {"archivo": historicos.REFERENCIA.relative_to(historicos.REPO).as_posix(),
+                               "fuente": ref.get("fuente"), "evento": ref.get("evento"),
+                               "configuracion_por_defecto_del_simulador": ref.get("configuracion_por_defecto_del_simulador"),
+                               "notas": ref.get("notas") or []}}
+
+    @app.post("/api/historicos/{evento}/corrida", status_code=201)
+    def corrida_historica(evento: str, pedido: PedidoHistorico):
+        try:
+            pedidos = historicos.armar(evento, list(pedido.motores), pedido.horas)
+        except historicos.NoSePuede as e:
+            raise HTTPException(e.codigo, str(e))
+        for p in pedidos:
+            try:
+                trazos.iv.revisar_t_inicio(p.get("t_inicio_utc"))
+                datos.revisar_pedido(p)
+            except ValueError as e:
+                raise HTTPException(422, f"{p['motor']}: {e}")
+        if pedido.iniciar and gestor.activas() + len(pedidos) > gestor.limite_activas:
+            raise HTTPException(409, f"hay {gestor.activas()} corridas en marcha y el máximo es {gestor.limite_activas}: "
+                                     f"no entran {len(pedidos)} más; esperá a que termine alguna o pedí menos motores")
+        creadas = []
+        for p in pedidos:
+            c = gestor.crear(p)[0]
+            cj = c.corrida_json() or {}
+            cj["historico"] = p["historico"]
+            cj["advertencias"] = list(dict.fromkeys(list(cj.get("advertencias") or []) + p["historico"]["declaracion"]))
+            escribir_json(c.carpeta / "corrida.json", cj)
+            creadas.append(c)
+        if pedido.iniciar:
+            for c in creadas:
+                gestor.iniciar(c.id)
+        return {"corridas": [c.resumen() for c in creadas], "historico": historicos.resumen(evento)}
+
+    @app.get("/api/corridas/{id_}/metricas_v31")
+    def metricas_v31(id_: str):
+        c = gestor.obtener(id_)
+        estado_m, motivo = metricas.estado(c)
+        if estado_m == "no_aplica":
+            raise HTTPException(404, f"sin métricas de v3.1 para esta corrida: {motivo}")
+        listo = estado_m in ("lista", "error")
+        return JSONResponse({"corrida": id_, "estado": estado_m, "motivo": motivo,
+                             "metricas_v31": historicos.leer(c) if listo else None},
+                            status_code=200 if listo else 202, headers={"Cache-Control": "no-store"})
+
+    @app.get("/api/historicos/{evento}/focos.geojson")
+    def focos_del_evento(evento: str, corrida: str | None = None):
+        if evento not in historicos.ids():
+            raise HTTPException(404, f"{evento} no es un evento con ficha")
+        if not historicos.ruta_focos(evento).exists():
+            raise HTTPException(404, f"faltan los focos de {evento} en este clon "
+                                     f"({historicos.ruta_focos(evento).relative_to(historicos.REPO).as_posix()})")
+        met = None
+        if corrida:
+            c = gestor.obtener(corrida)
+            if historicos.evento_de(c.corrida_json()) != evento:
+                raise HTTPException(422, f"la corrida {corrida} no es del evento {evento}")
+            estado_m, motivo = metricas.estado(c)
+            if estado_m != "lista":
+                raise HTTPException(409, f"las métricas de la corrida {corrida} no están listas ({estado_m}"
+                                         + (f": {motivo}" if motivo else "") + ")")
+            met = historicos.leer(c)
+        return JSONResponse(historicos.focos_geojson(evento, met), media_type="application/geo+json",
+                            headers={"Cache-Control": "no-store"})
 
     # ------------------------------------------------------------------ capas de fondo
     @app.get("/api/capas")

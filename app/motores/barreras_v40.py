@@ -45,7 +45,6 @@ from __future__ import annotations
 
 import datetime as dt
 import json
-import os
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -53,6 +52,7 @@ from types import SimpleNamespace
 import numpy as np
 
 import intervenciones as iv
+from control import reemplazar
 
 MARGEN_M = 0.01                     # margen de los cuadrados que se restan a la polilínea recortada
 HUSO_CSV = dt.timezone(dt.timedelta(hours=-3))      # las series de v4.0 se escriben con -03:00
@@ -216,7 +216,7 @@ def _reemplazar(ruta: Path, escribir) -> None:
     tmp = ruta.with_name(ruta.name + ".tmp")
     try:
         escribir(tmp)
-        os.replace(tmp, ruta)
+        reemplazar(tmp, ruta)                   # reintenta si otro proceso lo tiene abierto (Windows)
     finally:
         if tmp.exists():
             tmp.unlink()
@@ -530,10 +530,15 @@ class Intervenciones:
             except Exception as e:                  # no se pierde la corrida por los archivos de la comparación offline
                 out["archivos_offline_error"] = f"{type(e).__name__}: {e}"
         if self.iniciales:
-            out["cortafuegos_iniciales"] = [self._informe_inicial(c) for c in self.iniciales]
+            out["cortafuegos_iniciales"] = self.informe_iniciales()
         if self.archivos_offline:
             out["archivos_offline"] = dict(sorted(self.archivos_offline.items()))
         return out
+
+    def informe_iniciales(self) -> list[dict]:
+        """Un informe por trazo de `configuracion.cortafuegos` (estado, motivo y lo que toca en la grilla de la simulación).
+        Con el autómata ya creado; `motor_v40.py` lo usa también antes del primer paso para cortar si hay uno rechazado."""
+        return [self._informe_inicial(c) for c in self.iniciales]
 
     def _informe_inicial(self, c: dict) -> dict:
         r = {"estado": "aceptada", "motivo": "aplicado antes de iniciar", **c}

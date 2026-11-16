@@ -1,4 +1,4 @@
-/* Pantalla del simulador (fases F3 a F5). Habla con el servidor local por los pedidos de docs/etapa3/contrato_servidor_motor.md §4.
+/* Pantalla del simulador (fases F3 a F6). Habla con el servidor local por los pedidos de docs/etapa3/contrato_servidor_motor.md §4.
    Sin bibliotecas salvo Leaflet (app/web/vendor/leaflet). */
 "use strict";
 
@@ -92,6 +92,7 @@ async function arrancar() {
   $("tarjetas").addEventListener("click", e => { const b = e.target.closest("[data-reproducir]"); if (b) reproducirCorrida(b.dataset.reproducir, b); });
   prepararTrazos();
   prepararViento();
+  prepararHistorico();
 
   proponerEvento();
   cargarDatos();                                     // no se espera: la zona de datos no frena el mapa
@@ -273,6 +274,7 @@ function dibujarLeyenda() {
       bloques.push(`<h3>${c.titulo}</h3><div class="rampa" style="background:linear-gradient(90deg,${grad})"></div><div class="extremos"><span>${num(a, 1)}</span><span>${num(b, 1)} ${l.unidad || ""}</span></div>`);
     }
   }
+  bloques.push(...bloquesLeyendaHistorico());
   $("leyenda").hidden = !bloques.length;
   $("leyenda").innerHTML = bloques.map(b => `<div class="bloque">${b}</div>`).join("");
 }
@@ -312,18 +314,22 @@ function seguir(resumenes, pedido) {
                                          pedido: r.pedido || pedido, t0: null, limites: null, capa: null, cargando: false, pendiente: null, detalle: null, error: null,
                                          grupo: r.grupo || null, reproduccionDe: r.reproduccion_de || null, pausaT: r.pausa_t_sim_min ?? null, pausaEn: r.pausa_en_t_sim_min ?? null,
                                          bitacora: [], integra: null, cortafuegos: [], capaCf: null, mascaras: {}}));
+  const otros = ["#159e8a", "#7c3aed"];                    // v3.1 libre y librev2 comparten color: si van juntas, otro
+  S.corridas.forEach((c, i) => { if (S.corridas.slice(0, i).some(x => x.color === c.color)) c.color = otros.shift() || c.color; });
   if (S.marcador) S.marcador.dragging.disable();
   vaciarBorradores(); ponerHerramienta("pausa");
   $("respuestas").innerHTML = ""; $("error-intervenir").textContent = ""; $("pausar-en").value = "";
   $("sec-config").hidden = true; $("sec-control").hidden = false; $("sec-grafico").hidden = false; $("tiempo").hidden = false;
   const p = S.corridas[0].pedido, ign = (p.ignicion || [])[0];
-  $("resumen-config").innerHTML = `<b>${MOTORES[pedido.motor || p.motor]?.largo || p.motor}</b><br>` +
+  const hist = p.historico;
+  $("resumen-config").innerHTML = `<b>${MOTORES[pedido.motor || p.motor]?.largo || S.corridas.map(c => MOTORES[c.motor]?.nombre || c.motor).join(" · ")}</b><br>` +
     `${(S.estado.eventos_base.find(e => e.id === p.evento) || {}).nombre || p.evento || "sin evento"}<br>` +
+    (hist ? `Modo histórico: ignición ${esc(hist.ignicion)}, hipótesis ${esc(hist.hipotesis)}${esX49({rol: hist.rol}) ? " · <b>evento no visto (X-49): solo para mostrar</b>" : ""}<br>` : "") +
     (ign ? `Ignición en ${num(ign.lat, 4)}, ${num(ign.lon, 4)}<br>` : "") +
-    (p.t_inicio_utc ? `Inicio: ${aLocal(p.t_inicio_utc).texto} (hora argentina)<br>` : "") + `Duración pedida: ${p.horas} h` +
+    ((p.t_inicio_utc || hist?.t_inicio_utc) ? `Inicio: ${aLocal(p.t_inicio_utc || hist.t_inicio_utc).texto} (hora argentina)<br>` : "") + `Duración pedida: ${num(horasDe(p))} h` +
     ((p.cortafuegos || []).length ? `<br>Cortafuegos desde el inicio: ${p.cortafuegos.length}` : "") +
     (S.corridas[0].reproduccionDe ? `<br><b>Reproducción</b> de la corrida ${esc(S.corridas[0].reproduccionDe)}: aplica su bitácora, sin intervenciones nuevas` : "");
-  for (const c of S.corridas) escuchar(c);
+  for (const c of S.corridas) { escuchar(c); vigilarMetricas(c); }
   pintarTodo();
 }
 
@@ -402,12 +408,15 @@ function nuevaSimulacion() {
   $("sec-config").hidden = false; $("sec-control").hidden = true; $("sec-grafico").hidden = true; $("tiempo").hidden = true;
   vaciarBorradores(); ponerHerramienta("config");
   $("anteriores").value = "";
+  if (H.focosDe) { H.focosDe = null; pintarFocos(); }
+  pintarResultadosHistoricos();
   dibujarLeyenda();
 }
 
 // ---------------------------------------------------------------- huella y línea de tiempo
 const horaMaxima = c => c ? c.horas.length - 1 : Math.max(0, ...S.corridas.map(x => x.horas.length - 1));
-const horasPedidas = () => Math.max(1, ...S.corridas.map(c => Number(c.pedido?.horas) || 0), horaMaxima());
+const horasDe = p => p?.horas ?? p?.definicion?.horas ?? p?.historico?.horas ?? p?.historico?.horas_hasta_fin ?? null;   // la histórica sin horas va hasta el fin de la ficha
+const horasPedidas = () => Math.max(1, ...S.corridas.map(c => Number(horasDe(c.pedido)) || 0), horaMaxima());
 
 function actualizarHuella(c) {
   if (!c.limites || !c.horas.length) return;
@@ -453,7 +462,7 @@ function pintarTiempo() {
 }
 
 // ---------------------------------------------------------------- panel de la simulación
-function pintarTodo() { pintarBotones(); pintarIntervenir(); pintarTarjetas(); pintarComparacion(); pintarTiempo(); pintarGrafico(); }
+function pintarTodo() { pintarBotones(); pintarIntervenir(); pintarTarjetas(); pintarComparacion(); pintarTiempo(); pintarGrafico(); pintarResultadosHistoricos(); }
 
 function pintarBotones() {
   const e = S.corridas.map(c => c.estado);
@@ -476,7 +485,7 @@ function motivo(c) {
   if (c.estado === "error" || c.estado === "interrumpida") return c.error || "La corrida no terminó bien.";
   if (!r) return "";
   if (c.estado === "detenida") return "Detenida por el usuario.";
-  if (r.completa && r.t_simulado_h >= (Number(c.pedido?.horas) || 0) - 1e-6) return "Se cumplieron las horas pedidas.";
+  if (r.completa && r.t_simulado_h >= (Number(horasDe(c.pedido)) || 0) - 1e-6) return "Se cumplieron las horas pedidas.";
   return `El motor cortó antes de las horas pedidas: ${r.motivo_fin_texto || r.motivo_fin}.`;
 }
 
@@ -1344,6 +1353,446 @@ function armarEscenario() {
   const cuerpo = {desde_utc: aUTC($("esc-fecha").value, $("esc-hora").value), horas: Math.round(v("esc-horas")), temp_c: v("esc-temp"),
                   hr_pct: v("esc-hr"), viento_kmh: v("esc-viento"), viento_dir_deg: v("esc-dir"), precip_mm: v("esc-lluvia")};
   lanzar(() => pedir("/api/datos/meteo/escenario", cuerpo));
+}
+
+
+// ---------------------------------------------------------------- modo histórico (fase F6, D-E3-30 punto 13)
+// GET /api/historicos (eventos con ficha, disponibilidad, ignición recomendada, cifras documentadas), POST
+// /api/historicos/<evento>/corrida (una corrida por motor), GET /api/corridas/<id>/metricas_v31 (evaluador de v3.1 sin cambios)
+// y GET /api/historicos/<evento>/focos.geojson[?corrida=<id>] (focos VIIRS con su pasada y, con la corrida, su clase).
+const MOTORES_HISTORICO = ["v3.1-librev2", "v3.1-libre", "v4.0"];
+const CLASES = {
+  a_tiempo: {nombre: "a tiempo", color: "#15803d"},
+  adelantado: {nombre: "adelantado (el modelo llega antes)", corto: "adelantado", color: "#0891b2"},
+  atrasado: {nombre: "atrasado (el modelo llega después)", corto: "atrasado", color: "#c026d3"},
+  no_alcanzado: {nombre: "no alcanzado", color: "#1c1b19"},
+};
+const COLOR_SIN_CLASE = "#fff";
+const H = {eventos: [], referencia: null, elegido: null, metricas: {}, sondeos: {}, cicatriz: null, focos: null, focosClave: null,
+           focosDe: null, focosLeyenda: null, turnoFocos: 0, firma: null};
+const nombreCorto = e => String(e?.nombre || e?.id || "").split(" (")[0];
+const esX49 = e => /^no visto/i.test(e?.rol || "");
+const hev = id => H.eventos.find(e => e.id === id);
+const frac = v => v == null ? "—" : num(v, 2);
+const horasConSigno = v => v == null ? "—" : `${v > 0 ? "+" : v < 0 ? "−" : ""}${num(Math.abs(v), 1)} h`;
+
+function prepararHistorico() {
+  for (const [nombre, z] of [["cicatriz", 390], ["focos", 425]]) S.mapa.createPane(nombre).style.zIndex = z;   // sobre la huella simulada
+  $("h-lista").addEventListener("click", e => { const b = e.target.closest("[data-evento]"); if (b) elegirHistorico(b.dataset.evento); });
+  $("h-ver-cicatriz").onchange = () => verCicatriz($("h-ver-cicatriz").checked);
+  $("h-ver-focos").onchange = () => pintarFocos();
+  $("h-iniciar").onclick = correrHistorico;
+  $("h-doc-tabla").addEventListener("click", e => { const b = e.target.closest("[data-fila]"); if (b) correrFila(Number(b.dataset.fila), b); });
+  $("h-resultados").addEventListener("change", e => { if (e.target.id === "h-focos-corrida") { H.focosDe = e.target.value || null; pintarFocos(); } });
+  cargarHistoricos();
+}
+
+async function cargarHistoricos() {
+  try {
+    const r = await pedir("/api/historicos");
+    H.eventos = r.eventos || []; H.referencia = r.referencia || null;
+  } catch (e) { $("h-error-lista").textContent = "No se pudo leer la lista de eventos históricos: " + e.message; return; }
+  $("h-error-lista").textContent = "";
+  pintarListaHistoricos();
+  const corriendo = S.corridas.map(c => eventoDe(c)).find(id => hev(id));
+  if (!H.elegido) elegirHistorico(corriendo || (H.eventos.find(e => e.se_puede_correr && esX49(e)) || H.eventos.find(e => e.se_puede_correr) || H.eventos[0])?.id, true);
+  for (const c of S.corridas) vigilarMetricas(c);
+}
+
+function estadoCorto(e) {
+  if (e.se_puede_correr) return {clase: "si", texto: e.faltan_v40?.length ? "se puede correr (a v4.0 le faltan datos)" : "se puede correr"};
+  if (esX49(e) && !e.recomendada) return {clase: "no", texto: "X-49 sin ignición recomendada: no se corre"};
+  if ((e.faltan || []).length) return {clase: "no", texto: `faltan ${e.faltan.length} archivos (llegan en F7)`};
+  return {clase: "no", texto: e.motivo || "no se puede correr"};
+}
+
+function pintarListaHistoricos() {
+  const orden = [...H.eventos].sort((a, b) => (b.se_puede_correr - a.se_puede_correr) || String(a.id).localeCompare(String(b.id)));
+  $("h-lista").innerHTML = orden.map(e => {
+    const s = estadoCorto(e);
+    return `<li><button data-evento="${esc(e.id)}" aria-pressed="${e.id === H.elegido}" class="${e.se_puede_correr ? "" : "apagado"}">` +
+      `<span class="h-nombre">${esc(nombreCorto(e))}${esX49(e) ? ' <span class="rotulo ejemplo">X-49</span>' : ""}</span>` +
+      `<span class="h-estado ${s.clase}">${esc(s.texto)}</span></button></li>`;
+  }).join("");
+}
+
+async function elegirHistorico(id, inicial) {
+  const e = hev(id);
+  if (!e) return;
+  const cambio = H.elegido !== id;
+  H.elegido = id;
+  pintarListaHistoricos();
+  pintarDetalleHistorico();
+  if (cambio) {
+    if (H.focosDe && eventoDe(S.corridas.find(c => c.id === H.focosDe)) !== id) H.focosDe = null;
+    $("h-ver-cicatriz").checked = e.disponible && !inicial;
+    $("h-ver-focos").checked = e.n_focos > 0 && !inicial;
+    await verCicatriz($("h-ver-cicatriz").checked);
+    await pintarFocos();
+  }
+  pintarResultadosHistoricos(true);
+}
+
+function pintarDetalleHistorico() {
+  const e = hev(H.elegido);
+  $("h-detalle").hidden = !e;
+  if (!e) return;
+  const x49 = esX49(e), r = e.recomendada;
+  $("h-titulo").textContent = e.nombre || e.id;
+  $("h-rotulos").innerHTML = `<span class="rotulo">${esc(e.id)}</span>` +
+    (x49 ? '<span class="rotulo ejemplo" title="Lote X-49: eventos que no se usaron para ajustar ningún parámetro">evento no visto (X-49): solo para mostrar</span>'
+         : '<span class="rotulo">visto</span>');
+  const avisos = [];
+  if (e.advertencia) avisos.push(`<div class="aviso${x49 ? "" : " suave"}">${x49 ? "<b>Evento no visto (X-49): solo para mostrar.</b>" : ""}${esc(e.advertencia)}</div>`);
+  if (!e.se_puede_correr && e.motivo) avisos.push(`<div class="aviso"><b>No se puede correr en este clon.</b>${esc(e.motivo.split(":")[0])}.` +
+    ((e.faltan || []).length ? `<details class="h-faltan"><summary>Qué falta (${e.faltan.length})</summary><ul>${e.faltan.map(f => `<li><code>${esc(f)}</code></li>`).join("")}</ul></details>` : "") + "</div>");
+  if (e.se_puede_correr && (e.faltan_v40 || []).length) avisos.push(`<div class="aviso"><b>A v4.0 le faltan los compuestos de verano.</b>Sin ellos el resultado de v4.0 cambia: ${e.faltan_v40.map(esc).join(", ")}.</div>`);
+  if (r && /libre/.test(r.v40 || "")) avisos.push(`<div class="aviso"><b>v4.0 con ignición libre.</b>${esc(r.v40)}.</div>`);
+  $("h-avisos").innerHTML = avisos.join("");
+  const eval_ = (e.evaluacion_utc || []).map(t => aLocal(t).texto.slice(0, 10)).join(" · ");
+  let ficha = `<dt>Cicatriz observada</dt><dd>${e.superficie_ha != null ? num(e.superficie_ha) + " ha" : "—"}</dd>` +
+    `<dt>Focos VIIRS</dt><dd>${num(e.n_focos)} en ${num(e.n_pasadas)} pasadas</dd>`;
+  if (r) {
+    ficha += `<dt>Ignición recomendada</dt><dd>${esc(r.ignicion)}, hipótesis ${esc(r.hipotesis)}</dd>` +
+      `<dt>Inicio</dt><dd>${aLocal(r.t_inicio_utc).texto} (hora argentina)</dd>` +
+      (r.puntos || []).map((p, i) => `<dt>${(r.puntos.length > 1 ? `Foco ${i + 1}` : "Punto")}</dt><dd title="${esc(p.nombre)}">${num(p.lat, 4)}, ${num(p.lon, 4)}</dd>`).join("") +
+      `<dt>Hasta el fin de la ficha</dt><dd>${num(r.horas_hasta_fin)} h</dd>`;
+  }
+  if (eval_) ficha += `<dt>Evaluación (00 h)</dt><dd>${eval_}</dd>`;
+  if (e.fin_simulacion_utc) ficha += `<dt>Fin de la ficha</dt><dd>${aLocal(e.fin_simulacion_utc).texto}</dd>`;
+  if (e.x49) ficha += `<dt>Fijado (X-49)</dt><dd title="ficha ${esc(e.x49.sha256_ficha)} · cicatriz ${esc(e.x49.sha256_cicatriz)}">${esc(e.x49.fijado)} · ficha ${esc(String(e.x49.sha256_ficha).slice(0, 8))}…</dd>`;
+  $("h-ficha").innerHTML = ficha;
+  $("h-ver-cicatriz").disabled = !e.disponible;
+  $("h-ver-focos").disabled = !(e.n_focos > 0);
+
+  $("h-correr").hidden = !e.se_puede_correr;
+  if (e.se_puede_correr) {
+    const hay = new Set(S.estado.motores.map(m => m.id));
+    const antes = new Set([...$("h-motores").querySelectorAll("input:checked")].map(i => i.value));
+    const motores = MOTORES_HISTORICO.filter(m => hay.has(m));
+    $("h-motores").innerHTML = motores.map(m => `<label class="casilla"><input type="checkbox" value="${m}"${(antes.size ? antes.has(m) : m !== "v4.0") ? " checked" : ""}>` +
+      `<span><i class="marca" style="background:${MOTORES[m].color}"></i>${esc(MOTORES[m].largo)}${m === "v4.0" ? ' <span class="suave">(variante barreras)</span>' : ""}</span></label>`).join("");
+    const h = $("h-horas");
+    h.max = r.horas_hasta_fin;
+    if (!h.value || Number(h.value) > r.horas_hasta_fin || h.dataset.evento !== e.id) h.value = r.horas_hasta_fin;
+    h.dataset.evento = e.id;
+    $("h-horas-nota").textContent = `(hasta ${num(r.horas_hasta_fin)}: el fin de la ficha)`;
+  }
+
+  const filas = e.cifras_documentadas || [];
+  $("h-documentadas").hidden = !filas.length;
+  if (filas.length) {
+    $("h-doc-n").textContent = `(${filas.length} filas)`;
+    const ref = H.referencia && H.referencia.evento === e.id ? H.referencia : null;
+    $("h-doc-tabla").innerHTML = `<p class="nota">Fuente: ${esc(ref?.fuente || "docs/v4.0/31 §7.2")}. Se pueden volver a correr con el pedido de cada fila.</p>` +
+      `<div class="tabla-ancha"><table class="h-tabla"><thead><tr><th>#</th><th>Motor</th><th>Ignición</th><th>Hip.</th><th>Inicio</th>` +
+      `<th title="IoU a igual superficie">IoU</th><th title="Horas hasta alcanzar la superficie de la cicatriz">h</th><th>A tiempo</th><th>Adel.</th><th>Atras.</th>` +
+      `<th title="Error mediano de las primeras detecciones">Error</th><th>Puntaje</th><th>ha</th><th></th></tr></thead><tbody>` +
+      filas.map(f => {
+        const c = f.cifras || {};
+        return `<tr title="${esc(`${f.variante} · ${f.horas} h · ${f.parada}${f.verificada ? " · verificada " + f.verificada : ""}`)}">` +
+          `<td>${f.fila}</td><td class="izq">${esc(MOTORES[f.motor]?.nombre || f.motor)} <span class="suave">${esc(String(f.variante || "").split(" ")[0])}</span></td>` +
+          `<td class="izq" title="${esc(f.ignicion_texto)}">${esc(f.ignicion)}</td><td>${esc(f.hipotesis)}</td><td>${aLocal(f.hora_utc).hora}</td>` +
+          `<td>${frac(c.iou_igual_sup)}</td><td>${num(c.horas_hasta_sup, 1)}</td><td>${frac(c.frac_a_tiempo)}</td><td>${frac(c.frac_adelantado)}</td><td>${frac(c.frac_atrasado)}</td>` +
+          `<td>${horasConSigno(c.error_mediano_h)}</td><td><b>${num(c.puntaje, 3)}</b></td><td>${num(c.ha_final)}</td>` +
+          `<td>${f.regenerar?.cuerpo && e.se_puede_correr ? `<button class="chico" data-fila="${f.fila}" title="${esc(f.regenerar.pedido + " " + JSON.stringify(f.regenerar.cuerpo))}">Correr</button>` : ""}</td></tr>`;
+      }).join("") + "</tbody></table></div>" +
+      `<p class="nota">Inicio en hora argentina. Puntaje = (IoU a igual superficie + fracción a tiempo) / 2.</p>` +
+      (ref?.configuracion_por_defecto_del_simulador ? `<div class="aviso"><b>La v4.0 del simulador no es la de la tabla.</b>${esc(ref.configuracion_por_defecto_del_simulador)}</div>` : "") +
+      ((ref?.notas || []).length ? `<ul class="h-notas">${ref.notas.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : "");
+  }
+}
+
+// ---- capas: cicatriz y focos
+async function verCicatriz(si) {
+  if (H.cicatriz) { H.cicatriz.remove(); H.cicatriz = null; }
+  const id = H.elegido, e = hev(id);
+  if (si && e?.disponible) {
+    try {
+      const {capas} = await pedir(`/api/capas?evento=${encodeURIComponent(id)}`);
+      const c = capas.find(x => x.id === "cicatriz");
+      const url = c ? await contornoDe(c.url) : null;
+      if (url && H.elegido === id && $("h-ver-cicatriz").checked && !H.cicatriz)
+        H.cicatriz = L.imageOverlay(url, c.limites, {pane: "cicatriz", className: "cicatriz"}).addTo(S.mapa);
+    } catch (x) { $("h-error").textContent = "No se pudo cargar la cicatriz: " + x.message; }
+  }
+  dibujarLeyenda();
+}
+
+// La cicatriz va encima de la huella simulada: se dibuja su borde (y un relleno tenue) para que se vean las dos.
+const COLOR_CICATRIZ = [30, 58, 138];
+async function contornoDe(url) {
+  const img = new Image();
+  img.src = url;
+  await img.decode();
+  const w = img.naturalWidth, h = img.naturalHeight, lienzo = document.createElement("canvas");
+  lienzo.width = w; lienzo.height = h;
+  const cx = lienzo.getContext("2d");
+  cx.drawImage(img, 0, 0);
+  const a = cx.getImageData(0, 0, w, h), d = a.data, out = cx.createImageData(w, h), o = out.data;
+  const dentro = (x, y) => x >= 0 && y >= 0 && x < w && y < h && d[(y * w + x) * 4 + 3] > 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (!dentro(x, y)) continue;
+    const borde = !dentro(x - 1, y) || !dentro(x + 1, y) || !dentro(x, y - 1) || !dentro(x, y + 1);
+    const i = (y * w + x) * 4;
+    [o[i], o[i + 1], o[i + 2]] = COLOR_CICATRIZ; o[i + 3] = borde ? 255 : 55;
+  }
+  cx.putImageData(out, 0, 0);
+  return lienzo.toDataURL("image/png");
+}
+
+async function pintarFocos() {
+  const id = H.elegido, e = hev(id), si = $("h-ver-focos").checked && e?.n_focos > 0;
+  const de = H.focosDe && H.metricas[H.focosDe]?.estado === "lista" ? H.focosDe : null;
+  const clave = si ? `${id}|${de || ""}` : null;
+  if (clave === H.focosClave) return;
+  const turno = ++H.turnoFocos;
+  if (H.focos) { H.focos.remove(); H.focos = null; }
+  H.focosClave = null; H.focosLeyenda = null;
+  $("h-focos-de").textContent = "";
+  if (!si) return void dibujarLeyenda();
+  let fc;
+  try { fc = await pedir(`/api/historicos/${encodeURIComponent(id)}/focos.geojson${de ? `?corrida=${encodeURIComponent(de)}` : ""}`); }
+  catch (x) { $("h-error").textContent = "No se pudieron cargar los focos: " + x.message; return; }
+  if (turno !== H.turnoFocos) return;
+  const conClase = !!fc.clase_por_foco, n = fc.n_pasadas;
+  H.focos = L.geoJSON(fc, {
+    pane: "focos",
+    pointToLayer: (f, ll) => {
+      const p = f.properties, cl = conClase ? CLASES[p.clase_pasada] : null;
+      return L.circleMarker(ll, {pane: "focos", radius: p.primera ? 5.5 : 3.5, color: cl ? "#fff" : "#1c1b19", weight: p.primera ? 2 : 1,
+                                 fillColor: cl ? cl.color : COLOR_SIN_CLASE, fillOpacity: 0.95});
+    },
+    onEachFeature: (f, capa) => {
+      const p = f.properties;
+      let t = `<b>Foco VIIRS</b> · pasada ${p.pasada} de ${n}<br>${aLocal(p.t_det_utc).texto} (hora argentina) · ${esc(p.sat)} · ${num(p.frp, 1)} MW` +
+        (p.daynight === "0" || p.daynight === "N" ? " · de noche" : "");
+      if (conClase) {
+        if (p.clase_pasada) t += `<br>Pasada: <b>${CLASES[p.clase_pasada].corto || CLASES[p.clase_pasada].nombre}</b>` +
+          (p.pasada_cuenta ? ` (${num(p.pasada_cuenta.a_tiempo)} a tiempo de ${num(p.pasada_cuenta.n_primeras)} primeras)` : "");
+        else t += "<br>Pasada sin primeras detecciones";
+        if (p.primera) t += `<br>Primera detección: ${CLASES[p.clase]?.corto || CLASES[p.clase]?.nombre || "—"}` +
+          (p.error_h != null && p.clase !== "a_tiempo" ? `, error ${horasConSigno(p.error_h)}` : "") +
+          (p.t_sim_h != null ? ` · el fuego simulado llega a la hora ${num(p.t_sim_h, 1)}` : "");
+      }
+      capa.bindTooltip(t, {sticky: true});
+    },
+  }).addTo(S.mapa);
+  H.focosClave = clave;
+  const c = de && S.corridas.find(x => x.id === de);
+  H.focosLeyenda = {conClase, corrida: de ? (MOTORES[c?.motor]?.nombre || de) : null};
+  $("h-focos-de").textContent = de ? `(clasificados con ${H.focosLeyenda.corrida})` : "(sin clasificar)";
+  dibujarLeyenda();
+}
+
+function bloquesLeyendaHistorico() {
+  const b = [];
+  if (H.cicatriz) b.push(`<h3>Modo histórico</h3><div class="item"><i style="background:rgba(${COLOR_CICATRIZ},.22);border:2px solid rgb(${COLOR_CICATRIZ})"></i>Cicatriz observada</div>`);
+  if (H.focos && H.focosLeyenda) {
+    const l = H.focosLeyenda;
+    let h = `<h3>Focos VIIRS${l.conClase ? ` por pasada · ${esc(l.corrida)}` : ""}</h3>`;
+    if (l.conClase) {
+      h += Object.values(CLASES).map(c => `<div class="item"><i class="punto" style="background:${c.color}"></i>${c.nombre}</div>`).join("") +
+        `<div class="item"><i class="punto" style="background:${COLOR_SIN_CLASE};border-color:#1c1b19"></i>pasada sin primeras detecciones</div>` +
+        '<div class="item suave">Punto grande: primera detección del lugar</div>';
+    } else h += `<div class="item"><i class="punto" style="background:${COLOR_SIN_CLASE};border-color:#1c1b19"></i>foco (sin clasificar: falta una corrida con métricas)</div>`;
+    b.push(h);
+  }
+  return b;
+}
+
+// ---- lanzar
+async function correrHistorico() {
+  $("h-error").textContent = "";
+  const e = hev(H.elegido);
+  if (!e?.se_puede_correr) return;
+  const motores = [...$("h-motores").querySelectorAll("input:checked")].map(i => i.value);
+  const horas = Number($("h-horas").value), max = e.recomendada.horas_hasta_fin;
+  if (!motores.length || motores.length > 3) return void ($("h-error").textContent = "Elegí de uno a tres motores.");
+  if (!(Number.isInteger(horas) && horas >= 1 && horas <= max)) return void ($("h-error").textContent = `Las horas van de 1 a ${num(max)} (el fin de la ficha).`);
+  if (!puedeLanzarOtra()) return;
+  const cuerpo = {motores, iniciar: true};
+  if (horas !== max) cuerpo.horas = horas;
+  $("h-iniciar").disabled = true;
+  try {
+    const r = await pedir(`/api/historicos/${encodeURIComponent(e.id)}/corrida`, cuerpo);
+    if (r.historico) H.eventos = H.eventos.map(x => x.id === r.historico.id ? r.historico : x);
+    await mostrarCorridaHistorica(r.corridas, e);
+  } catch (x) { $("h-error").textContent = x.message; }
+  $("h-iniciar").disabled = false;
+}
+
+async function correrFila(n, boton) {
+  $("h-error").textContent = "";
+  const e = hev(H.elegido), f = (e?.cifras_documentadas || []).find(x => x.fila === n);
+  if (!f?.regenerar?.cuerpo || !puedeLanzarOtra()) return;
+  if (f.horas > 72 && f.motor === "v4.0" && !confirm(`La fila ${n} es v4.0 ${f.variante} a ${f.horas} h: puede tardar bastante. ¿Correrla?`)) return;
+  boton.disabled = true;
+  const ruta = String(f.regenerar.pedido || "").replace(/^POST\s+/, "").replace("<evento>", encodeURIComponent(e.id)) || "/api/corridas";
+  try {
+    const r = await pedir(ruta.startsWith("/api/") ? ruta : "/api/corridas", f.regenerar.cuerpo);
+    if (r.historico) H.eventos = H.eventos.map(x => x.id === r.historico.id ? r.historico : x);
+    await mostrarCorridaHistorica(r.corridas, e);
+  } catch (x) { $("h-error").textContent = `Fila ${n}: ${x.message}`; }
+  boton.disabled = false;
+}
+
+function puedeLanzarOtra() {
+  if (S.corridas.some(c => !FINALES.includes(c.estado))) {
+    $("h-error").textContent = "Hay una simulación en marcha en la pantalla: esperá a que termine o detenela.";
+    return false;
+  }
+  return descartarBorradores("correr el evento histórico");
+}
+
+async function mostrarCorridaHistorica(corridas, e) {
+  if (S.estado.eventos_base.some(x => x.id === e.id) && $("evento").value !== e.id) {
+    $("evento").value = e.id;
+    proponerEvento();
+    await cargarCapas();
+  }
+  const p = (e.recomendada?.puntos || [])[0];
+  if (p) ponerPunto(p.lat, p.lon, true);
+  seguir(corridas, {motor: corridas.length === 1 ? corridas[0].motor : "historico"});
+  $("sec-historico").scrollIntoView({block: "start", behavior: "smooth"});
+}
+
+// ---- métricas de v3.1 por corrida
+const eventoDe = c => c?.pedido?.historico?.evento || c?.pedido?.evento || c?.pedido?.definicion?.evento || null;
+
+function vigilarMetricas(c) {
+  const e = hev(eventoDe(c));
+  if (!e || !e.disponible || c.motor === "simulado" || H.sondeos[c.id]) return;
+  const m = H.metricas[c.id];
+  if (m && ["lista", "error", "no_aplica"].includes(m.estado)) return;
+  H.sondeos[c.id] = true;
+  const vuelta = async () => {
+    if (!S.corridas.some(x => x.id === c.id)) return void delete H.sondeos[c.id];
+    let espera = 2000;
+    try {
+      const r = await fetch(`/api/corridas/${encodeURIComponent(c.id)}/metricas_v31`, {cache: "no-store"});
+      const d = await r.json().catch(() => ({}));
+      if (r.status === 404) H.metricas[c.id] = {estado: "no_aplica", motivo: typeof d.detail === "string" ? d.detail : "sin métricas"};
+      else if (r.ok) H.metricas[c.id] = {estado: d.estado, motivo: d.motivo, datos: d.metricas_v31};
+      else { H.metricas[c.id] = {estado: "fallo", motivo: d.detail || `error ${r.status}`}; espera = 5000; }
+    } catch (x) { espera = 5000; }
+    const m2 = H.metricas[c.id];
+    if (m2?.estado === "lista" && !H.focosDe && eventoDe(c) === H.elegido) { H.focosDe = c.id; $("h-ver-focos").checked = true; pintarFocos(); }
+    pintarResultadosHistoricos();
+    if (m2 && ["lista", "error", "no_aplica"].includes(m2.estado)) return void delete H.sondeos[c.id];
+    if (!m2 || m2.estado === "esperando_fin") espera = FINALES.includes(c.estado) ? 1500 : 4000;
+    setTimeout(vuelta, espera);
+  };
+  vuelta();
+}
+
+function filaDocumentada(c, met) {
+  const e = hev(met?.evento || eventoDe(c)), ig = met?.ignicion || {};
+  const filas = (e?.cifras_documentadas || []).filter(f => f.motor === c.motor && f.ignicion === ig.ignicion && Number(f.hipotesis) === Number(ig.hipotesis) &&
+    (!met?.t_inicio_utc || new Date(normalizarUTC(f.hora_utc)).getTime() === new Date(normalizarUTC(met.t_inicio_utc)).getTime()));
+  if (!filas.length) return null;
+  const def = JSON.stringify(c.pedido?.definicion || null);
+  const igual = filas.find(f => JSON.stringify(f.regenerar?.cuerpo?.definicion || null) === def);
+  return {fila: igual || filas[0], misma: !!igual};
+}
+
+const FILAS_METRICAS = [
+  ["iou_igual_sup", "IoU a igual superficie", v => num(v, 3)],
+  ["horas_hasta_sup", "Horas hasta la superficie", v => v == null ? "—" : num(v, 1) + " h"],
+  ["frac_a_tiempo", "A tiempo", frac],
+  ["frac_adelantado", "Adelantado", frac],
+  ["frac_atrasado", "Atrasado", frac],
+  ["frac_no_alcanzado", "No alcanzado", frac],
+  ["error_mediano_h", "Error mediano", horasConSigno],
+  ["puntaje", "Puntaje", v => v == null ? "—" : `<b>${num(v, 3)}</b>`],
+  ["ha_final", "Superficie al final", v => v == null ? "—" : num(v) + " ha"],
+];
+
+function htmlMetricas(c) {
+  const m = H.metricas[c.id], nombre = MOTORES[c.motor]?.nombre || c.motor;
+  let h = `<div class="tarjeta h-metricas"><header><span class="marca" style="background:${c.color}"></span><span class="nombre">${esc(nombre)}</span>` +
+    `<span class="estado">${esc(estadoMetricas(c, m))}</span></header>`;
+  if (!m || !["lista", "error"].includes(m.estado)) {
+    if (m?.estado === "no_aplica" || m?.estado === "fallo") h += `<p class="linea">${esc(m.motivo)}</p>`;
+    return h + "</div>";
+  }
+  if (m.estado === "error" || !m.datos || m.datos.error) return h + `<p class="error">${esc(m.datos?.error || m.motivo || "El evaluador dio error.")}</p></div>`;
+  const d = m.datos, x = d.metricas || {}, ig = d.ignicion || {}, doc = filaDocumentada(c, d), fd = doc?.fila, cd = fd?.cifras || {};
+  h += `<p class="linea">${esc(ig.ignicion || "")}${ig.hipotesis != null ? `, hipótesis ${esc(ig.hipotesis)}` : ""} · inicio ${aLocal(normalizarUTC(d.t_inicio_utc)).texto}` +
+    ` · ${num((d.t_simulado_min || 0) / 60, 1)} h simuladas</p>`;
+  h += `<div class="tabla-ancha"><table class="h-tabla h-comparada"><thead><tr><th class="izq">Métrica</th><th>Esta corrida</th>` +
+    (fd ? `<th title="${esc(`${fd.variante} · ${fd.horas} h · ${fd.parada}`)}">Documentada<br><span class="suave">fila ${fd.fila}${doc.misma ? "" : " · otra config."}</span></th>` : "") +
+    `</tr></thead><tbody>`;
+  for (const [k, titulo, f] of FILAS_METRICAS) {
+    if (k === "frac_no_alcanzado" && !x[k] && !cd[k]) continue;
+    const marca = k === "iou_igual_sup" && x.alcanza_sup === false ? ' <span class="marca-aviso" title="No alcanza la superficie de la cicatriz">*</span>' : "";
+    h += `<tr><td class="izq">${titulo}</td><td>${f(x[k])}${marca}</td>${fd ? `<td>${k in cd ? f(cd[k]) : "—"}</td>` : ""}</tr>`;
+  }
+  h += "</tbody></table></div>";
+  h += `<p class="nota">${num(x.n_primeras)} primeras detecciones${d.error_absoluto_medio_h != null ? ` · error absoluto medio ${num(d.error_absoluto_medio_h, 1)} h` : ""}.</p>`;
+  if (x.alcanza_sup === false) h += `<div class="aviso"><b>* No alcanza la superficie de la cicatriz.</b>La simulación quemó menos que lo observado (${num(x.ha_final)} ha contra ${num(d.referencia?.ha_ref_valida)} ha): la IoU es con la huella final, no a igual superficie, y las horas son las del final.</div>`;
+  if (fd && !doc.misma) h += `<div class="aviso"><b>La fila ${fd.fila} es otra configuración.</b>${esc(fd.variante)}, ${esc(fd.horas)} h, ${esc(fd.parada)}. Esta corrida usa ${c.pedido?.definicion ? esc(JSON.stringify(c.pedido.definicion)) : "la configuración de la app"}: no se espera que coincidan.</div>`;
+  else if (fd) {
+    const tol = k => k === "ha_final" ? 1 : k.endsWith("_h") || k === "horas_hasta_sup" ? 0.051 : 0.0051;
+    const distintas = FILAS_METRICAS.filter(([k]) => k in cd && x[k] != null && !(Math.abs(Number(x[k]) - Number(cd[k])) <= tol(k)));
+    const hSim = (d.t_simulado_min || 0) / 60, masCorta = hSim < Number(fd.horas) - 1e-6;
+    h += !distintas.length ? `<p class="linea bien">Coincide con la fila ${fd.fila} documentada (con su redondeo).</p>`
+      : distintas.length === 1 && distintas[0][0] === "ha_final" && masCorta
+        ? `<p class="linea bien">Coincide con la fila ${fd.fila} salvo la superficie final: esta corrida simuló ${num(hSim, 1)} h y la fila, ${num(fd.horas)} h.</p>`
+        : `<p class="linea">Difiere de la fila ${fd.fila} documentada en: ${distintas.map(([, t]) => t.toLowerCase()).join(", ")}${masCorta ? ` (esta corrida simuló ${num(hSim, 1)} h; la fila, ${num(fd.horas)} h)` : ""}.</p>`;
+  }
+  const inst = d.por_instante || [];
+  if (inst.length) {
+    h += `<h4>IoU en cada instante de evaluación</h4><div class="tabla-ancha"><table class="h-tabla"><thead><tr><th class="izq">Instante</th><th>h</th><th>IoU</th><th>ha sim.</th><th>ha obs.</th></tr></thead><tbody>` +
+      inst.map(i => `<tr class="${i.despues_del_fin ? "despues" : ""}${i.antes_de_la_ignicion ? " antes" : ""}"><td class="izq">${aLocal(normalizarUTC(i.t_eval_utc)).texto.slice(0, 10)}` +
+        `${i.despues_del_fin ? '<br><span class="rotulo prueba" title="Posterior al fin de la corrida: la huella ya no cambia">después del fin</span>' : ""}` +
+        `${i.antes_de_la_ignicion ? '<br><span class="rotulo">antes de la ignición</span>' : ""}</td>` +
+        `<td>${num(i.horas_desde_ignicion, 0)}</td><td>${num(i.iou, 3)}</td><td>${num(i.ha_sim)}</td><td>${num(i.ha_ref)}</td></tr>`).join("") + "</tbody></table></div>";
+    if (inst.some(i => i.despues_del_fin)) h += `<p class="nota">«Después del fin»: el instante cae después de la última hora simulada (${num((d.t_simulado_min || 0) / 60, 1)} h); se compara la huella congelada del final.</p>`;
+  }
+  const pp = d.por_pasada || [];
+  if (pp.length) {
+    h += `<details class="h-pasadas"><summary>Primeras detecciones por pasada (${pp.length})</summary><div class="tabla-ancha"><table class="h-tabla"><thead><tr><th class="izq">Pasada</th><th>n</th>` +
+      `<th title="a tiempo"><i class="punto" style="background:${CLASES.a_tiempo.color}"></i></th><th title="adelantado"><i class="punto" style="background:${CLASES.adelantado.color}"></i></th>` +
+      `<th title="atrasado"><i class="punto" style="background:${CLASES.atrasado.color}"></i></th><th title="no alcanzado"><i class="punto" style="background:${CLASES.no_alcanzado.color}"></i></th><th>Error</th></tr></thead><tbody>` +
+      pp.map(p => `<tr><td class="izq">${aLocal(normalizarUTC(p.t_det_utc)).texto}</td><td>${num(p.n)}</td><td>${num(p.a_tiempo)}</td><td>${num(p.adelantado)}</td><td>${num(p.atrasado)}</td><td>${num(p.no_alcanzado)}</td><td>${horasConSigno(p.error_mediano_h)}</td></tr>`).join("") +
+      "</tbody></table></div></details>";
+  }
+  for (const a of d.avisos || []) h += `<p class="nota">${esc(a)}</p>`;
+  const cod = Object.values(d.evaluador?.codigo || {}), intacto = cod.length && cod.every(v => v.igual_al_congelado);
+  h += `<p class="nota evaluador" title="${esc(Object.entries(d.evaluador?.codigo || {}).map(([k, v]) => `${k}: ${v.sha256}`).join("\n"))}">${esc(d.evaluador?.rotulo || "")}` +
+    `${cod.length ? (intacto ? " · código igual al congelado" : ' · <b class="mal">el código del evaluador no es el congelado</b>') : ""}</p>`;
+  return h + "</div>";
+}
+
+function estadoMetricas(c, m) {
+  if (!m) return FINALES.includes(c.estado) ? "pidiendo las métricas…" : "las métricas se calculan al terminar";
+  return {lista: "métricas listas", error: "el evaluador dio error", esperando_fin: "las métricas se calculan al terminar", pendiente: "métricas en espera…",
+          calculando: "calculando las métricas…", no_aplica: "sin métricas", fallo: "no se pudieron pedir"}[m.estado] || m.estado;
+}
+
+function pintarResultadosHistoricos(forzar) {
+  const cs = S.corridas.filter(c => hev(eventoDe(c)) && c.motor !== "simulado");
+  const firma = JSON.stringify([H.elegido, H.focosDe, cs.map(c => [c.id, c.estado === "terminada" || FINALES.includes(c.estado), H.metricas[c.id]?.estado])]);
+  if (!forzar && firma === H.firma) return;
+  H.firma = firma;
+  const caja = $("h-resultados");
+  caja.hidden = !cs.length;
+  if (!cs.length) return;
+  const e = hev(eventoDe(cs[0])), x49 = cs.some(c => esX49(hev(eventoDe(c))));
+  const listas = cs.filter(c => H.metricas[c.id]?.estado === "lista");
+  let h = `<h3>Métricas contra lo observado</h3>`;
+  if (x49) h += '<p><span class="rotulo ejemplo">evento no visto (X-49): solo para mostrar</span></p>';
+  if (e && e.id !== H.elegido) h += `<p class="nota">Corridas de ${esc(nombreCorto(e))}. <button class="enlace" data-evento-ver="${esc(e.id)}">Ver ese evento</button></p>`;
+  h += `<p class="nota"><b>Puntaje = (IoU a igual superficie + fracción a tiempo) / 2.</b> La IoU se mide cuando la simulación llega a la superficie de la cicatriz. ` +
+    `Un foco está a tiempo si el fuego simulado llega a menos de ${num(listas[0] ? H.metricas[listas[0].id].datos.referencia?.tolerancia_m ?? 375 : 375)} m ` +
+    `entre ${num(listas[0] ? H.metricas[listas[0].id].datos.referencia?.ventana_h ?? 13 : 13)} h antes y 1 h después de su primera detección; adelantado si llega antes, atrasado si llega después. Error negativo: el modelo llega antes.</p>`;
+  if (listas.length) h += `<label for="h-focos-corrida">Colorear los focos según</label><select id="h-focos-corrida">` +
+    listas.map(c => `<option value="${esc(c.id)}"${c.id === H.focosDe ? " selected" : ""}>${esc(MOTORES[c.motor]?.nombre || c.motor)}</option>`).join("") + "</select>";
+  h += cs.map(htmlMetricas).join("");
+  caja.innerHTML = h;
+  const b = caja.querySelector("[data-evento-ver]");
+  if (b) b.onclick = () => elegirHistorico(b.dataset.eventoVer);
 }
 
 arrancar().catch(e => { $("error").textContent = "No se pudo hablar con el servidor: " + e.message; });

@@ -73,7 +73,7 @@ def main() -> int:
         faulthandler.dump_traceback_later(float(os.environ["SIMULADOR_DIAGNOSTICO_S"]), repeat=True, file=registro)
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from control import Control, memoria_pico_mb
+    from control import Control, memoria_pico_mb, reemplazar
     import intervenciones
     control = Control(carpeta, avisos, ordenes)
 
@@ -118,7 +118,7 @@ def main() -> int:
         corrida["resultados"]["reproduccion"] = reproduccion
     tmp = ruta_json.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(corrida, indent=1, ensure_ascii=False, default=str) + "\n", encoding="utf-8")
-    os.replace(tmp, ruta_json)
+    reemplazar(tmp, ruta_json)                 # el servidor puede estar leyéndolo (Windows)
     control.aviso("final", motivo=res["motivo_fin"], texto=res["motivo_fin_texto"], ha=res["ha_final"],
                   t_sim_min=res["t_simulado_min"], s_computo=res["s_computo"], memoria_pico_mb=res["memoria_pico_mb"],
                   completa=res["completa"], salida=res["salida"])
