@@ -5,6 +5,12 @@ Fecha: 2026-11-16 · Rama `f6-verificacion` (desde `f5-intervenciones`; `main` s
 Rótulos: **(dato)** medido, con su archivo · **(inferencia)** · **(sin verificar)** · **PENDIENTE**: depende de la evaluación
 de la otra persona (LisandroV2002) o de una corrida sobre un commit limpio, y se completa cuando llegue.
 
+**Actualización del 2026-11-16 (evaluación de LisandroV2002, con Claude).** E-E3-2, E-E3-3 y E-E3-4 se corrieron sobre el
+commit limpio `d4118d8` (rama `f7-entrega`, 0 archivos sin registrar) en Windows 11 (AMD Ryzen 5 8600G, 12 hilos, 31,7 GB,
+Python 3.14.2), en un clon instalado con `instalar.bat`. Resultado: **E-E3-4 se cumple; E-E3-3 se cumple en lo evaluable;
+E-E3-2 no se cumple** (falla v4.0). Los párrafos que cambiaron por esta evaluación llevan la marca "(act. 16/11)"; el resto
+del informe es el original. Lo que sigue rotulado PENDIENTE no se tocó en esta evaluación.
+
 Este informe junta lo que ya está escrito en los informes de fase y en los prerregistros; no trae cifras nuevas salvo las
 de §2 (pruebas de hoy). Cada cifra lleva su fuente.
 
@@ -19,7 +25,7 @@ de §2 (pruebas de hoy). Cada cifra lleva su fuente.
   la cicatriz que inflan el IoU; en el evento no visto Las Chacras octubre 2023, puntaje (IoU a igual superficie + fracción a
   tiempo) / 2 de 0,45–0,46 (v3.1) contra 0,25–0,37 (v4.0). El modo histórico (§6) muestra esas cifras regeneradas por el
   simulador; **no** es una validación nueva ni sirve para calibrar.
-- Tampoco verifica la cadena de datos en tiempo real contra la realidad: la de índices la mide E-E3-2 (PENDIENTE); la de
+- Tampoco verifica la cadena de datos en tiempo real contra la realidad: la de índices la mide E-E3-2 (no se cumple, §4.3; act. 16/11); la de
   meteorología (pronóstico IFS 0,25° en lugar del archivo de 9 km) no tiene prueba (mejora M4 del plan).
 
 ## 2. Pruebas automáticas (plan §6.1)
@@ -28,6 +34,12 @@ de §2 (pruebas de hoy). Cada cifra lleva su fuente.
 rama `f6-verificacion` **con los cambios de la F6 sin commit**, 2026-11-16. Resumen literal en §2.1. La integración continua
 (`.github/workflows/pruebas.yml`, Windows y Linux, desde la F6 en todas las ramas) corre lo mismo: **PENDIENTE** el primer
 empuje de `f6-verificacion`, que es la primera vez que el código de F4, F5 y F6 pasa por Windows en máquinas limpias.
+
+**(act. 16/11) (dato)** El empuje se hizo: el flujo `pruebas` terminó bien en `windows-latest` y en `ubuntu-latest` sobre
+`f6-verificacion` (`114f488`) y sobre `f7-entrega` (`d4118d8`). Además `herramientas/probar.py` pasó completo en un clon
+recién instalado en Windows 11 (la máquina de la evaluación, `d4118d8`): congelado intacto, v3.1 68 + 1 omitida, v4.0
+129 + 13 omitidas y 5 excluidas, las dos corridas de 6 h y `test/app` 207 + 2 omitidas en 6 min 24 s. Con esto dejan de
+estar pendientes las menciones a la integración continua de la tabla que sigue y de §7.
 
 | Nivel (§6.1) | Qué hay | Estado | Número | Tiempo | Huecos |
 |---|---|---|---|---|---|
@@ -84,9 +96,9 @@ código que evalúan. Regla del plan (Anexo B): uno escribe y el otro evalúa.
 | Código | Pregunta | Escribe | Evalúa | Etiqueta | Resultado | Desvíos y anexos declarados |
 |---|---|---|---|---|---|---|
 | E-E3-1 | ¿Conduce a los motores sin alterarlos? | el usuario (deinagutierrez), con Claude | **el mismo frente** (D-E3-13) | `prerregistro-E-E3-1` | **se cumple**: 0 celdas distintas en los 7 pares, con y sin pausa (`E-E3-1_resultado.md`, 2026-11-11, Windows, commit `7cbe5b4`) | D-E3-13: evaluó quien escribió el código (la otra persona no pudo); compensado con criterio binario etiquetado antes, guion sin pasos manuales y repetible. Las Chacras se corrió con los datos aún fuera de git; luego se subieron sin cambios (D-E3-15, mismo sha256 del conjunto `52d145b3c3df…`). v3.1 en Las Chacras cortó sola a las 45–46 h (motivo 3), igual offline y en el proceso |
-| E-E3-2 | ¿Los índices por AWS equivalen a los de GEE? | deinagutierrez, con Claude | LisandroV2002 (D-E3-25) | `prerregistro-E-E3-2` (los nombres se agregaron después sin cambiar diseño ni criterio) | **PENDIENTE** (`herramientas/e_e3_2.py --evaluador LisandroV2002`) | dos anexos escritos antes de evaluar y sin ver cifras de (b) ni (c): `E-E3-2_escala.md` (escala de reflectancia DN/10000, elegida contra (a) como pide el diseño) y `E-E3-2_aclaracion_c.md` (D-E3-27: en (c) el lado AWS de v4.0 usa también el verano hecho por AWS; sin eso el cambio de clase SB40 daba 0 % por construcción). Mientras tanto la vía AWS va rotulada "en prueba" |
-| E-E3-3 | ¿Cuánto tarda y cuánta memoria usa? | deinagutierrez, con Claude | LisandroV2002 (D-E3-30) | `prerregistro-E-E3-3` (nombres agregados después) | **PENDIENTE** (`herramientas/e_e3_3.py --evaluador LisandroV2002`; `--solo-revisar`: "todo listo") | la meta de v4.0 "≤ 3 s/h con unas 30.000 ha" **no se puede evaluar con el diseño** (ningún escenario de E-E3-1 pasa de 12.839 ha con v4.0); se informa así y se agrega aparte, rotulada "fuera del prerregistro", Las Chacras v4.0 libre 141 h (D-E3-30, punto 8). La memoria pico de Windows (`peak_wset`) y la de Linux (`ru_maxrss`) no son la misma métrica |
-| E-E3-4 | ¿Las intervenciones son reproducibles? | deinagutierrez, con Claude | LisandroV2002 | `prerregistro-E-E3-4` y `prerregistro-E-E3-4-trazos` (`9fabd7c`, trazos y horas fijados antes del código de intervenciones) | **PENDIENTE** (`herramientas/e_e3_4.py --evaluador LisandroV2002`; `--solo-revisar`: "todo listo"; en las pruebas de humo de 3 h, A y B se cumplieron) | el guion usa la ignición de la ficha (hipótesis 1), no `configuracion.ignicion`; "misma longitud" se mide con la geometría en v4.0 y con la identidad de celdas o enlaces cuando hay recorte (F5_informe §3, 5): conviene que quien evalúa lo acepte antes de correr |
+| E-E3-2 | ¿Los índices por AWS equivalen a los de GEE? | deinagutierrez, con Claude | LisandroV2002 (D-E3-25) | `prerregistro-E-E3-2` (los nombres se agregaron después sin cambiar diseño ni criterio) | **no se cumple** (act. 16/11; `E-E3-2_resultado.md`, Windows, commit `d4118d8`): criterio 1 se cumple (diferencia absoluta mediana 0,0007 a 0,0062); criterios 2 y 3 fallan en v4.0 (11,9 % de celdas cambian de clase; IoU a 48 h 0,895) y se cumplen en v3.1 librev2 (0,19 %; 0,997) | dos anexos escritos antes de evaluar y sin ver cifras de (b) ni (c): `E-E3-2_escala.md` (escala de reflectancia DN/10000, elegida contra (a) como pide el diseño) y `E-E3-2_aclaracion_c.md` (D-E3-27: en (c) el lado AWS de v4.0 usa también el verano hecho por AWS; sin eso el cambio de clase SB40 daba 0 % por construcción). Como no se cumple, la vía AWS sigue rotulada "en prueba" (`indices.AWS_EN_PRUEBA` sin cambiar) |
+| E-E3-3 | ¿Cuánto tarda y cuánta memoria usa? | deinagutierrez, con Claude | LisandroV2002 (D-E3-30) | `prerregistro-E-E3-3` (nombres agregados después) | **medición completa** (act. 16/11; `E-E3-3_resultado.md`, Windows, commit `d4118d8`): v3.1 ≤ 0,5 s/h **se cumple** (medianas 0,297 a 0,316); modo "ambos" dentro de 16 GB **se cumple** (máximo muestreado 1.364 MB); v4.0 con unas 30.000 ha **no evaluable con el diseño** | la meta de v4.0 "≤ 3 s/h con unas 30.000 ha" **no se puede evaluar con el diseño** (ningún escenario de E-E3-1 pasa de 12.839 ha con v4.0); se informa así y se agrega aparte, rotulada "fuera del prerregistro", Las Chacras v4.0 libre 141 h (D-E3-30, punto 8). La memoria pico de Windows (`peak_wset`) y la de Linux (`ru_maxrss`) no son la misma métrica |
+| E-E3-4 | ¿Las intervenciones son reproducibles? | deinagutierrez, con Claude | LisandroV2002 | `prerregistro-E-E3-4` y `prerregistro-E-E3-4-trazos` (`9fabd7c`, trazos y horas fijados antes del código de intervenciones) | **se cumple** (act. 16/11; `E-E3-4_resultado.md`, Windows, commit `d4118d8`): en las 5 corridas y los 3 motores, A con 0 celdas distintas y la misma cadena de hash; B con IoU 1,000000 y la misma longitud aplicada | el guion usa la ignición de la ficha (hipótesis 1), no `configuracion.ignicion`; "misma longitud" se mide con la geometría en v4.0 y con la identidad de celdas o enlaces cuando hay recorte (F5_informe §3, 5): conviene que quien evalúa lo acepte antes de correr. (act. 16/11) El guion se corrió tal como estaba, sin cambios; la aceptación expresa de esas dos decisiones por quien evalúa **no quedó anotada antes de correr** y falta registrarla en `decisiones.md` |
 
 Además se corrió E-E3-1 **por el servidor** (F2, `herramientas/e_e3_1_servidor.py`, 2026-11-11, commit `aad2731`): 0 celdas
 distintas en los 7 pares con y sin pausa y en 3 corridas detenidas. Es una comprobación de cierre, no reemplaza a la
@@ -145,8 +157,30 @@ v4.0 (las enciende el paso que la detenida no llega a dar); queda declarado en F
 | Métrica | diferencia absoluta mediana de NDVI y NDMI; % de celdas que cambian de clase de combustible; IoU entre huellas a las 48 h | — |
 | Evaluador | `herramientas/e_e3_2.py`, LisandroV2002 | — |
 
-**Resultado: PENDIENTE.** **Lectura al pie: PENDIENTE.** Qué ya se sabe que difiere: método del compuesto (ventana contra
-mediana del banco) y, en (c), el verano para v4.0 (aclaración (c)).
+Qué ya se sabía que difiere: método del compuesto (ventana contra mediana del banco) y, en (c), el verano para v4.0
+(aclaración (c)).
+
+**Resultado (dato, act. 16/11; `E-E3-2_resultado.md`, Windows, commit `d4118d8`): no se cumple.**
+
+| Criterio | Umbral | Medido | |
+|---|---|---|---|
+| 1. Diferencia absoluta mediana | ≤ 0,02 | (a) NDVI 0,0053, NDMI 0,0062; (b) NDVI 0,0016, NDMI 0,0007 (2.793.912 celdas, 0 % sin dato) | se cumple |
+| 2. Celdas que cambian de clase | < 3 % en cada motor | v4.0 11,943 % (333.667 celdas); v3.1 librev2 0,188 % (5.258) | **no se cumple** (v4.0) |
+| 3. IoU de las huellas a 48 h | ≥ 0,95 en cada motor | v4.0 0,8946 (13.122 contra 13.272 ha); v3.1 librev2 0,9973 (38.142 contra 38.197 ha) | **no se cumple** (v4.0) |
+
+Informativo, fuera del criterio: los compuestos de verano de 2024 hechos por AWS contra los de GEE dan una diferencia
+absoluta mediana de NDVI de 0,0021 (enero), 0,0098 (febrero) y 0,0027 (marzo), con percentil 95 de 0,056, 0,075 y 0,089;
+la ventana del evento (a) tiene percentil 95 de 0,022.
+
+**Lectura al pie**: los índices por AWS reproducen los de GEE en la mediana y v3.1 da prácticamente la misma huella con unos
+u otros. En v4.0 no: una de cada ocho celdas cambia de modelo SB40 y las huellas se apartan (IoU 0,895), aunque la superficie
+total casi no cambia (1,14 %). **(inferencia, sin verificar)** El cambio viene de los compuestos de verano hechos por AWS,
+que son los que usa la regla 3.3b para asignar el SB40, y no de la ventana del evento: según el guion, de ahí
+sale el SB40 de v4.0, y su cola de diferencias es entre dos veces y media y cuatro veces más ancha que la de la ventana. No se midió qué
+umbral de la regla ni qué mes lo causa. Un solo evento y una sola época (límite declarado en el prerregistro).
+**Consecuencia** (plan, R5): la vía AWS no se habilita y sigue rotulada "en prueba"; queda por decidir si se ajusta el
+método del compuesto de verano por AWS y se vuelve a evaluar, o si v4.0 exige los compuestos de GEE y se lo dice en la
+pantalla. El criterio y los umbrales no se tocan.
 
 ### 4.4 E-E3-4 A (en vivo contra reproducción desde la bitácora)
 
@@ -158,8 +192,12 @@ mediana del banco) y, en (c), el verano para v4.0 (aclaración (c)).
 | Métrica | celdas distintas en el tiempo de llegada; criterio 0 | — |
 | Evaluador | `herramientas/e_e3_4.py`, LisandroV2002 | — |
 
-**Resultado: PENDIENTE** (en las pruebas de humo de 3 h y en `test/app`, 0 celdas distintas y la misma cadena de hash).
-**Lectura al pie: PENDIENTE.**
+**Resultado (dato, act. 16/11; `E-E3-4_resultado.md`, Windows, commit `d4118d8`): se cumple.** En los 15 pares (5 corridas
+× 3 motores), 0 celdas distintas en el tiempo de llegada, la misma cadena de hash y ninguna entrada sin aplicar. Antes, en
+las pruebas de humo de 3 h y en `test/app`, había dado lo mismo.
+**Lectura al pie**: solo difiere de dónde salen las intervenciones (órdenes en pausa contra la bitácora). Se concluye que
+una corrida con cortafuegos y viento manual se repite celda por celda desde su `corrida.json` y su `bitacora.jsonl`, en
+los tres motores, en esta máquina. Un solo evento (Las Lagunas 2024); no se probó reproducir en otra computadora.
 
 ### 4.5 E-E3-4 B (en vivo contra offline con los mismos trazos desde el inicio)
 
@@ -169,8 +207,16 @@ mediana del banco) y, en (c), el verano para v4.0 (aclaración (c)).
 | Viento | manual en pausa: v4.0 gira gradualmente en la hora siguiente, v3.1 cambia de golpe (esperado, no cuenta como falla) | la serie editada |
 | Métrica | IoU de la huella final ≥ 0,99 y la misma longitud de cortafuego (la recortada, D-E3-28, 14) | — |
 
-**Resultado: PENDIENTE.** **Lectura al pie: PENDIENTE.** Límite conocido: un trazo de suelo mineral antes de iniciar que pasa
-por la celda de ignición no da lo mismo que a t = 0 (F5_informe §5); los trazos de E-E3-4 no pasan por ahí.
+**Resultado (dato, act. 16/11; `E-E3-4_resultado.md`, Windows, commit `d4118d8`): se cumple.** En los 15 pares, IoU de la
+huella final 1,000000 (0 celdas con tiempo de llegada distinto) y la misma longitud de cortafuego aplicada. En v3.1 el
+trazo de 25 m de la hora 12 se recortó porque pasa en parte por celdas ya alcanzadas (corrida 3: quedan 6.580 m de 7.000
+en librev2 y 5.280 m en libre; corrida 5: 4.440 m y 4.590 m); en v4.0 entró entero. La longitud que se compara es la
+aplicada después del recorte (D-E3-28, 14).
+**Lectura al pie**: se concluye que un cortafuego o un cambio de viento aplicados en pausa dan la misma huella que la
+corrida offline del motor con esos mismos trazos (ya recortados) y la serie editada desde el inicio. No se concluye que el
+trazo **sin recortar** cargado desde el inicio dé lo mismo, ni nada sobre si un cortafuego real detendría el fuego. Un solo
+evento. Límite conocido: un trazo de suelo mineral antes de iniciar que pasa por la celda de ignición no da lo mismo que a
+t = 0 (F5_informe §5); los trazos de E-E3-4 no pasan por ahí.
 
 ### 4.6 Modo "ambos" (v4.0 contra v3.1 librev2, la misma corrida)
 
@@ -188,7 +234,8 @@ por la celda de ignición no da lo mismo que a t = 0 (F5_informe §5); los trazo
 | Métrica | coincidencia = área quemada por los dos / envolvente; aviso por debajo del 50 % a las 24 h (D-E3-05) | — |
 
 **Resultado (dato, F3_informe §4)**: en Las Lagunas 2024, 30 h, v4.0 2.963 ha y v3.1 librev2 8.136 ha; coinciden en el 34 % a
-las 24 h y la pantalla mostró el aviso de discrepancia. Memoria total de los dos a la vez: E-E3-3, **PENDIENTE**.
+las 24 h y la pantalla mostró el aviso de discrepancia. Memoria total de los dos a la vez (act. 16/11, E-E3-3, Las Lagunas 48 h, Windows):
+1.364 MB de máximo muestreado por el servidor y 1.356 MB con dos procesos; la suma de los picos individuales, 1.404 y 1.419 MB.
 **Lectura al pie**: difieren en casi todo lo que define el modelo (motor y vecindad, viento, combustible, barreras, humedad,
 extinción por lluvia; plan §2.3 y §6.2).
 La coincidencia mide cuánto discrepan dos modelos, **no** cuál acierta. No se puede atribuir la diferencia a un solo factor.
@@ -247,14 +294,45 @@ superficie celda por celda en cantidad; la igualdad de los tiempos de llegada en
 | Qué | Estado |
 |---|---|
 | Misma corrida, misma computadora | (dato) E-E3-1: offline, proceso y proceso con pausa dan lo mismo; Las Chacras v4.0 72 h repetida en la F6 por otro camino (F6-referencia) es idéntica celda por celda a la de E-E3-1 |
-| Reproducción desde la bitácora | (dato) en `test/app` y en las pruebas de humo de E-E3-4: misma cadena de hash y 0 celdas distintas. Formal: E-E3-4 A, **PENDIENTE** |
-| Equivalencia con la corrida offline con los mismos trazos | (dato) F5: 0 celdas distintas en los dos motores con un trazo en pausa, viento manual y suelo mineral. Formal: E-E3-4 B, **PENDIENTE** |
+| Reproducción desde la bitácora | (dato) en `test/app` y en las pruebas de humo de E-E3-4: misma cadena de hash y 0 celdas distintas. Formal (act. 16/11): E-E3-4 A **se cumple**, 0 celdas distintas y la misma cadena en los 15 pares |
+| Equivalencia con la corrida offline con los mismos trazos | (dato) F5: 0 celdas distintas en los dos motores con un trazo en pausa, viento manual y suelo mineral. Formal (act. 16/11): E-E3-4 B **se cumple**, IoU 1,000000 y la misma longitud aplicada en los 15 pares |
 | Entre computadoras | ver §4.8: mismas cantidades; referencia bit a bit fijada en Linux (`c7730d0`); las otras máquinas **PENDIENTE** |
 | Rastreo de cada resultado | los guiones anotan commit, archivos sin registrar, sha256 del congelado y de los datos; desde la F6, también la ficha de la máquina (procesador, AVX-512, versiones) |
 
 ## 6. Rendimiento y requisitos (plan §2.7)
 
-Medición formal: E-E3-3, **PENDIENTE**. Lo que hay hasta ahora (proceso sin órdenes, tandas de E-E3-1 y de la F6):
+### 6.1 Medición formal: E-E3-3 (act. 16/11)
+
+(dato) `E-E3-3_resultado.md`: Windows 11, AMD Ryzen 5 8600G (6 núcleos, 12 hilos, AVX-512), 31,7 GB, Python 3.14.2, commit
+`d4118d8`; carga de fondo 5 % de CPU al empezar y al terminar. Tres repeticiones por par, la primera en frío; mediana y rango.
+
+| Escenario | Motor | ha | s/h simulada | MB pico (`peak_wset`) | Hasta la 1.ª hora: frío / caliente (s) |
+|---|---|---|---|---|---|
+| La Aguada 36 h | v4.0 | 1.348 | 0,204 (0,204–0,205) | 223 | 2,5 / 2,5 |
+| Las Lagunas 48 h | v4.0 | 12.839 | 0,981 (0,976–0,983) | 526 | 3,7 / 3,7 |
+| Las Lagunas 48 h | v3.1 libre | 34.793 | 0,315 (0,314–0,362) | 872 | 5,9 / 3,5 |
+| Las Lagunas 48 h | v3.1 librev2 | 32.915 | 0,316 (0,316–0,363) | 884 | 6,0 / 3,7 |
+| Las Chacras 72 h | v4.0 | 2.356 | 0,375 (0,365–0,409) | 495 | 6,6 / 3,5 |
+| Las Chacras 72 h | v3.1 libre | 1.526 | 0,297 (0,295–0,350) | 864 | 6,0 / 3,6 |
+| Las Chacras 72 h | v3.1 librev2 | 3.065 | 0,300 (0,300–0,351) | 877 | 6,0 / 3,7 |
+
+| Meta del prerregistro | Medido | |
+|---|---|---|
+| v3.1 ≤ 0,5 s por hora simulada (mediana de cada par) | 0,297 a 0,316; el máximo de todas las repeticiones, en frío, 0,363 | **se cumple** |
+| Modo "ambos" dentro de 16 GB | 1.364 MB (servidor) y 1.356 MB (dos procesos) de máximo muestreado; suma de picos 1.404 y 1.419 MB | **se cumple** |
+| v4.0 ≤ 3 s/h con unas 30.000 ha | ningún escenario del diseño pasa de 12.839 ha (0,981 s/h) | **no evaluable con el diseño** |
+
+En el modo "ambos" v4.0 tardó 1,10 s/h y v3.1 librev2 0,44 s/h (contra 0,98 y 0,32 solos): la corrida de 48 h termina en 53 s.
+**Fuera del prerregistro** (una corrida, en caliente): Las Chacras v4.0 libre 141 h, 29.319 ha, 0,770 s/h y 539 MB.
+
+**Lectura al pie**: en esta máquina las dos metas evaluables se cumplen con margen, y el requisito de 16 GB para el modo
+"ambos" es conservador: usa menos de 1,5 GB. La meta de v4.0 con 30.000 ha sigue sin evaluación formal; la corrida aparte
+queda muy por debajo de 3 s/h, pero es un evento y no entra en el criterio. Es una sola computadora, de escritorio y sin
+carga: no dice cuánto tarda en una máquina más chica, y no hay medición con 8 GB.
+
+### 6.2 Antecedentes (antes de E-E3-3)
+
+Lo que había antes de la medición formal (proceso sin órdenes, tandas de E-E3-1 y de la F6):
 
 | Escenario | Motor | Windows, 2026-11-11 (s/h · memoria pico) | Linux, 2026-11-14 (s/h · memoria pico) |
 |---|---|---|---|
@@ -276,20 +354,24 @@ Fuera del prerregistro (F6_referencia_v40.md, Linux): Las Chacras v4.0 libre 141
   (`peak_wset` contra `ru_maxrss`): no se comparan entre sí.
 - (inferencia) Los dos motores a la vez usarían 1,4 a 1,7 GB (suma de los picos individuales de v4.0 y v3.1 librev2 en Las
   Lagunas: 0,54 + 0,88 en Windows, 0,66 + 1,03 en Linux): el requisito de 16 GB para el modo
-  "ambos" del plan parece conservador y 8 GB alcanzarían con holgura. Se confirma o se corrige con E-E3-3 (**PENDIENTE**) y
-  se fija en la guía de uso (F7).
+  "ambos" del plan parece conservador y 8 GB alcanzarían con holgura. (act. 16/11) E-E3-3 lo confirma en la parte medida:
+  1,36 GB de máximo muestreado (§6.1); que 8 GB alcancen sigue siendo inferencia, no se midió en una máquina de 8 GB. Se
+  fija en la guía de uso (F7).
 - La meta de v4.0 "≤ 3 s/h con unas 30.000 ha" no se puede evaluar con el diseño de E-E3-3; la corrida aparte de 29.319 ha
   queda muy por debajo (0,69 s/h acá), pero es un evento y una máquina.
 
 ## 7. Límites
 
 - **Lo verificado es la conducción, no la predicción** (§1). Nada de este informe dice si las huellas son correctas.
-- **Prerregistros sin evaluar**: E-E3-2, E-E3-3 y E-E3-4 no están evaluados; E-E3-1 lo evaluó quien
-  escribió el código (D-E3-13). El criterio de la F6 ("todos los prerregistros evaluados e informados") **no se cumple
-  todavía**.
+- **Prerregistros** (act. 16/11): los cuatro están evaluados e informados. E-E3-1 y E-E3-4 se cumplen; E-E3-3 se cumple
+  en las dos metas evaluables y la tercera no se puede evaluar con su diseño; **E-E3-2 no se cumple** (v4.0) y la vía AWS
+  sigue "en prueba" (§4.3). E-E3-1 lo evaluó quien escribió el código (D-E3-13); los otros tres, la otra persona. Con esto
+  el criterio de la F6 ("todos los prerregistros evaluados e informados, se cumplan o no") **se cumple en esa parte**.
+  Quedan abiertas la decisión sobre la vía AWS para v4.0 y la aceptación expresa del guion de E-E3-4 (§3).
 - **Windows**: los arreglos de la F6 (reemplazo de la huella con reintentos, lectura tolerante en el servidor, borrado
   comprobado de tomas de índices) se probaron en Linux simulando los errores. El código de F4, F5 y F6 no pasó todavía por la
-  integración continua en Windows (**PENDIENTE**: primer empuje de la rama).
+  integración continua en Windows (**PENDIENTE**: primer empuje de la rama). (act. 16/11) Ya pasó: `pruebas` en verde en
+  `windows-latest` sobre `114f488` y `d4118d8`, y `probar.py` completo en un Windows 11 real (§2).
 - **Código sin commit**: las pruebas de §2.1 y la fila 3 del modo histórico se corrieron con los cambios de la F6 sin commit.
   Hay que repetirlas sobre el commit de la F6.
 - **Modo histórico**: 2 de 15 eventos con datos en el clon; filas 4 a 12 de §7.2 sin regenerar; las cifras son de un evento no
