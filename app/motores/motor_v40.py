@@ -10,7 +10,8 @@ Intervenciones (F5, contrato 1.5; el detalle está en barreras_v40.py):
   `cortafuegos.geojson` (EPSG:5345, `ancho_m`, `tipo: cortafuego`) y, si hay trazos a suelo mineral,
   `modificador_cortafuegos.tif` (0 en las celdas del trazo, nodata = 1, en la grilla base), y se agregan a la definición como
   `mitigacion.barreras_extra` / `mitigacion.modificador_combustible`. Sin trazos no se agrega nada (identidad E-E3-1).
-  Se informan en `resultados.cortafuegos_iniciales`. Con `base.escenario` se acepta `configuracion.cortafuegos` (y nada
+  Se informan en `resultados.cortafuegos_iniciales`. Si alguno resulta rechazado (no toca la zona que se simula), la corrida
+  se corta con error al crearse el autómata, antes del primer paso (D-E3-31). Con `base.escenario` se acepta `configuracion.cortafuegos` (y nada
   más) y los trazos se combinan con la `mitigacion` que ya traiga el escenario.
 - En pausa, `control.aplicar` (cortafuego o viento manual) cambia el autómata en memoria. Un cortafuego entra con
   `rasterizar_barreras_extra`, recortado a las celdas no afectadas ni intermedias de enlaces entre afectadas (D-E3-28, 13);
@@ -31,7 +32,7 @@ import time
 from pathlib import Path
 
 import barreras_v40 as bv
-from control import Control, Detenida
+from control import Control, Detenida, exigir_cortafuegos_iniciales
 
 REPO = Path(__file__).resolve().parents[2]
 RAIZ = REPO / "src" / "v4.0"
@@ -90,6 +91,8 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
             super().__init__(*a, **k)
             estado["au"] = self
             interv.au = self
+            if iniciales:                    # D-E3-31: un trazo inicial rechazado corta la corrida antes del primer paso
+                exigir_cortafuegos_iniciales(interv.informe_iniciales())
 
         def paso_tiempo(self):
             t_min = self.minutos(self.t)

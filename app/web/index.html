@@ -197,6 +197,36 @@
       <div id="tabla" hidden></div>
     </section>
 
+    <section id="sec-historico">
+      <h2>Modo histórico</h2>
+      <p class="nota">Corre un incendio histórico con la ignición recomendada de su ficha y lo compara con lo observado: la cicatriz y los focos VIIRS. Las métricas las calcula el evaluador de v3.1, sin cambios.</p>
+      <ul id="h-lista" class="h-lista" aria-label="Eventos históricos"></ul>
+      <p class="error" id="h-error-lista" role="alert"></p>
+      <div id="h-detalle" hidden>
+        <h3 id="h-titulo"></h3>
+        <div id="h-rotulos" class="h-rotulos"></div>
+        <div id="h-avisos"></div>
+        <dl id="h-ficha" class="ficha"></dl>
+        <div class="h-capas">
+          <label class="casilla"><input type="checkbox" id="h-ver-cicatriz"> Cicatriz observada</label>
+          <label class="casilla"><input type="checkbox" id="h-ver-focos"> Focos VIIRS <span class="suave" id="h-focos-de"></span></label>
+        </div>
+        <div id="h-correr">
+          <label>Motores <span class="suave">(uno a tres; una corrida por motor)</span></label>
+          <div id="h-motores" class="h-motores"></div>
+          <label for="h-horas">Horas a simular <span class="suave" id="h-horas-nota"></span></label>
+          <input id="h-horas" type="number" min="1" step="1" inputmode="numeric">
+          <button class="principal" id="h-iniciar">Correr la ignición recomendada</button>
+          <p class="error" id="h-error" role="alert"></p>
+        </div>
+        <details class="plegable" id="h-documentadas" hidden>
+          <summary>Cifras documentadas <span class="suave" id="h-doc-n"></span></summary>
+          <div id="h-doc-tabla"></div>
+        </details>
+      </div>
+      <div id="h-resultados" hidden></div>
+    </section>
+
     <section id="sec-capas">
       <h2>Capas del mapa</h2>
       <div id="capas"></div>
@@ -209,7 +239,7 @@
     </section>
 
     <footer>
-      <p><strong>Para leer bien el resultado.</strong> La simulación no incluye el combate del fuego. Los eventos de tiempo real usan un pronóstico (de un modelo, no observaciones) y los índices de vegetación más recientes; los EJEMPLO usan los datos de un incendio histórico con ficha. Los dos motores dan resultados distintos: no se promedian.</p>
+      <p><strong>Para leer bien el resultado.</strong> La simulación no incluye el combate del fuego. Los eventos de tiempo real usan un pronóstico (de un modelo, no observaciones) y los índices de vegetación más recientes; los EJEMPLO usan los datos de un incendio histórico con ficha. En el modo histórico, los eventos del lote X-49 (no vistos) son solo para mostrar: no se usan para ajustar el modelo. Los dos motores dan resultados distintos: no se promedian.</p>
       <p id="version"></p>
     </footer>
   </aside>

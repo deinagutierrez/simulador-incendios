@@ -17,7 +17,8 @@ avisar, para probar que el servidor lo detecta. `lado`: tamaño de la grilla, en
 Intervenciones (F5, contrato 1.5), de juguete: un cortafuego vuelve incombustibles las celdas que toca su trazo (las que el
 fuego todavía no alcanzó: el resto se recorta) y el fuego ya no llega a las celdas que quedan separadas del foco por los
 cortafuegos; el ancho y el suelo mineral no cambian nada. El viento manual se acepta y no tiene efecto. Los cortafuegos de
-`configuracion.cortafuegos` se aplican igual, antes de la hora 0. La bitácora y la reproducción son las de `control.py`.
+`configuracion.cortafuegos` se aplican igual, antes de la hora 0 (uno rechazado corta la corrida con error, D-E3-31). La
+bitácora y la reproducción son las de `control.py`.
 """
 from __future__ import annotations
 
@@ -102,7 +103,7 @@ def main() -> int:
     ruta_json = carpeta / "corrida.json"
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from control import Control
+    from control import Control, exigir_cortafuegos_iniciales, reemplazar
     avisos = os.fdopen(os.dup(1), "w", encoding="utf-8", newline="\n")
     try:
         ordenes = os.dup(0)
@@ -140,6 +141,7 @@ def main() -> int:
         for d in trazos:                          # antes de iniciar: lo mismo que aplicarlo a t = 0
             r = fuego.cortafuego(d, 0.0)
             iniciales.append({"estado": r["estado"], "motivo": r["motivo"], **r["datos"]})
+        exigir_cortafuegos_iniciales(iniciales)  # D-E3-31: uno rechazado corta la corrida antes de simular
         llegada_min = fuego.llegada
         control.aplicar = lambda entrada, t: (fuego.cortafuego(entrada["datos"], t) if entrada["tipo"] == "cortafuego"
                                               else {"estado": "aceptada", "t_vigor_min": t, "datos": {"efecto": "ninguno"},
@@ -182,7 +184,7 @@ def main() -> int:
     corrida["resultados"] = res
     tmp = ruta_json.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(corrida, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
-    os.replace(tmp, ruta_json)
+    reemplazar(tmp, ruta_json)                 # el servidor puede estar leyéndolo (Windows)
     control.aviso("final", motivo=res["motivo_fin"], texto=res["motivo_fin_texto"], ha=res["ha_final"], t_sim_min=res["t_simulado_min"],
                   s_computo=res["s_computo"], memoria_pico_mb=None, completa=res["completa"], salida=None)
     return 0

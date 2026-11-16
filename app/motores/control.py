@@ -31,6 +31,35 @@ import intervenciones as iv  # noqa: E402
 HUELLA = "t_llegada_parcial.npy"
 BITACORA = "bitacora.jsonl"
 ESPERA_EN_PAUSA_S = 0.05
+# Reemplazo de archivos que otro proceso puede estar leyendo (la huella parcial la lee el servidor para el mapa): en Windows,
+# `os.replace` sobre un archivo abierto da PermissionError mientras dure la lectura. Se reintenta 20 veces cada 50 ms.
+INTENTOS_REEMPLAZO = 20
+ESPERA_REEMPLAZO_S = 0.05
+
+
+def reemplazar(tmp, destino, intentos: int | None = None, espera_s: float | None = None) -> None:
+    """`os.replace(tmp, destino)`, reintentando ante PermissionError (archivo abierto por otro proceso en Windows). Si
+    sigue fallando después de `intentos` (por defecto `INTENTOS_REEMPLAZO`), deja pasar el último error."""
+    n = max(1, int(INTENTOS_REEMPLAZO if intentos is None else intentos))
+    for i in range(n):
+        try:
+            os.replace(tmp, destino)
+            return
+        except PermissionError:
+            if i == n - 1:
+                raise
+            time.sleep(ESPERA_REEMPLAZO_S if espera_s is None else espera_s)
+
+
+def exigir_cortafuegos_iniciales(informes: list[dict]) -> None:
+    """Decisión D-E3-31 (punto 20): un cortafuego de `configuracion.cortafuegos` (dibujado antes de iniciar) que el motor
+    rechaza corta la corrida antes de simular. `informes` son los de `resultados.cortafuegos_iniciales` (con `estado` y
+    `motivo`), en el orden de los trazos. Lanza ValueError con el primero rechazado; el proceso lo avisa como error fatal."""
+    for i, r in enumerate(informes or []):
+        if (r or {}).get("estado") == "rechazada":
+            motivo = str(r.get("motivo") or "rechazado por el motor")
+            raise ValueError(f"cortafuego {i + 1} de antes de iniciar rechazado ({motivo}); la corrida no se simula: "
+                             "corregir o borrar ese trazo y volver a iniciar")
 
 
 class Detenida(Exception):
@@ -155,11 +184,23 @@ class Control:
         self.aviso("hora", h=int(h), t_sim_min=round(float(t_sim_min), 3), ha=round(float(ha), 2), activas=int(activas),
                    s_computo=self.segundos(), huella=HUELLA, **extra)
 
-    def guardar_huella(self, t_llegada_min: np.ndarray) -> None:
+    def guardar_huella(self, t_llegada_min: np.ndarray) -> bool:
+        """Escribe la huella parcial en un temporal y lo pone en su lugar, reintentando si el servidor la está leyendo
+        (Windows). Si no se puede, avisa un error no fatal y sigue: la corrida no se corta por la huella del mapa (la
+        próxima hora la vuelve a escribir y la salida final del motor no depende de este archivo). Devuelve si quedó."""
         tmp = self.carpeta / (HUELLA + ".tmp")
-        with open(tmp, "wb") as f:
-            np.save(f, np.asarray(t_llegada_min, dtype="float32"))
-        os.replace(tmp, self.carpeta / HUELLA)
+        try:
+            with open(tmp, "wb") as f:
+                np.save(f, np.asarray(t_llegada_min, dtype="float32"))
+            reemplazar(tmp, self.carpeta / HUELLA)
+            return True
+        except OSError as e:
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
+            self.aviso("error", mensaje=f"no se pudo actualizar {HUELLA} (¿abierto por otro proceso?): {e}", fatal=False)
+            return False
 
     # ------------------------------------------------------------------ bitácora y reproducción
     def preparar(self, corrida: dict) -> None:

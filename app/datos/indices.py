@@ -12,6 +12,7 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import shutil
+import time
 from pathlib import Path
 
 import numpy as np
@@ -33,6 +34,29 @@ def ventana_para(fecha_corrida: dt.date, dias: int = DIAS_VENTANA) -> tuple[dt.d
     return hasta - dt.timedelta(days=dias - 1), hasta
 
 
+def _vaciar(carpeta: Path) -> None:
+    """Borra `carpeta` y comprueba que no quedó. En Windows un TIF abierto por otro proceso (el servidor sirviéndolo como
+    capa) impide borrarlo; antes se seguía igual y el `rename` o el `mkdir` posterior fallaban con un error confuso, o se
+    mezclaban archivos viejos con los nuevos. Si no se puede, se falla con un mensaje claro y la toma anterior queda."""
+    for i in range(3):
+        shutil.rmtree(carpeta, ignore_errors=True)
+        if not carpeta.exists():
+            return
+        time.sleep(0.2 * (i + 1))
+    restos = sorted(p.name for p in carpeta.rglob("*") if p.is_file())[:5]
+    raise RuntimeError(f"no se pudo borrar la toma anterior {carpeta} (¿algún archivo abierto por otro programa? quedan "
+                       f"{', '.join(restos) or 'carpetas vacías'}); cerrarlo y volver a pedir la toma")
+
+
+def _poner_en_lugar(tmp: Path, carpeta: Path) -> None:
+    """Pone la carpeta armada `tmp` en lugar de `carpeta` (que se borra antes, comprobando que no quedó)."""
+    _vaciar(carpeta)
+    try:
+        tmp.rename(carpeta)
+    except OSError as e:
+        raise RuntimeError(f"no se pudo poner la toma nueva en {carpeta}: {e}") from e
+
+
 def _info(id_: str, carpeta: Path, fuente: str, rotulo: str, extra: dict) -> dict:
     info = {"id": id_, "tipo": "indices", "fuente": fuente, "rotulo": rotulo, "creada_utc": comun.ahora_utc(),
             "ndvi": f"ndvi_{id_}.tif", "ndmi": f"ndmi_{id_}.tif",
@@ -48,10 +72,9 @@ def toma_aws(fecha_corrida: dt.date, progreso=None, dias: int = DIAS_VENTANA) ->
     id_ = f"I-{hasta:%Y%m%d}-aws"
     carpeta = dir_tomas() / id_
     tmp = carpeta.with_name(carpeta.name + ".tmp")
-    shutil.rmtree(tmp, ignore_errors=True)
+    _vaciar(tmp)
     r = s2.compuesto_ventana(desde, hasta, tmp, id_, progreso=progreso or s2._sin_progreso)
-    shutil.rmtree(carpeta, ignore_errors=True)
-    tmp.rename(carpeta)
+    _poner_en_lugar(tmp, carpeta)
     meta = comun.leer_json(carpeta / f"metadatos_{id_}.json", {})
     rotulo = "Sentinel-2 por AWS" + (" (en prueba hasta E-E3-2)" if AWS_EN_PRUEBA else "")
     return _info(id_, carpeta, "Sentinel-2 L2A, AWS (Earth Search), compuesto de ventana, máscara SCL", rotulo,
@@ -91,7 +114,7 @@ def toma_gee(fecha_corrida: dt.date, dias: int = DIAS_VENTANA) -> dict:
                                  "ventana": [f"{desde}", f"{hasta + dt.timedelta(days=1)}"]}}   # GEE: fin excluido
     r = obtener_indices(ev, pdm.grilla_indices(dom), escala=20.0)
     carpeta = dir_tomas() / id_
-    shutil.rmtree(carpeta, ignore_errors=True)
+    _vaciar(carpeta)
     carpeta.mkdir(parents=True)
     for k in ("ndvi", "ndmi", "n_obs"):
         shutil.copy(r[k], carpeta / f"{k}_{id_}.tif")
@@ -154,7 +177,7 @@ def toma_manual(ruta_ndvi: Path, ruta_ndmi: Path, ventana: list[str], ndmi_nir: 
     sha = hashlib.sha256(ndvi.tobytes() + ndmi.tobytes() + f"{desde}{hasta}{ndmi_nir}".encode()).hexdigest()
     id_ = f"I-{hasta:%Y%m%d}-manual-{sha[:6]}"
     carpeta = dir_tomas() / id_
-    shutil.rmtree(carpeta, ignore_errors=True)
+    _vaciar(carpeta)
     carpeta.mkdir(parents=True)
     g = comun.grilla_dominio()
     comun.escribir_tif(carpeta / f"ndvi_{id_}.tif", [ndvi], g, "int16", comun.NODATA_INDICES, ["NDVI x10000"])

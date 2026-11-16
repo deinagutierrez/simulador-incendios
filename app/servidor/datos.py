@@ -1,6 +1,12 @@
 """Lo que el servidor necesita saber de los datos sin cargar ningún motor: qué eventos tienen datos en este clon (con
-ficha o generados `RT-…`) y cuál es el recuadro del dominio. Lee los YAML de `escenarios/v4.0` (las fichas de v3.1 y v4.0
-son las mismas) y, de los eventos generados, su `insumos_RT-….json`."""
+ficha o generados `RT-…`) y cuál es el recuadro del dominio. Lee los YAML de `escenarios/v4.0` y, de los eventos generados,
+su `insumos_RT-….json`.
+
+Las fichas de v3.1 (`escenarios/v3.1/eventos`) y de v4.0 NO son iguales: en 10 de los 15 eventos difieren los puntos de las
+alternativas de ignición, las horas de las hipótesis o los campos (`recomendada` está en las de v3.1; Las Lagunas 2024
+recomienda `alt0`, que la ficha de v4.0 no tiene). Acá solo se usa la de v4.0 para la lista de eventos, la serie
+meteorológica y los puntos y horas que muestra la pantalla; cada motor lee su propia ficha. El modo histórico (ignición
+recomendada, instantes de evaluación, fin de la simulación) lee las de v3.1, en historicos.py."""
 from __future__ import annotations
 
 import datetime as dt

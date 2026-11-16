@@ -6,7 +6,8 @@ motor llama al empezar cada hora simulada, antes de calcular el viento de esa ho
 
 Intervenciones (F5, contrato 1.5): la simulación arranca con una matriz de barreras vacía completa (las dos variantes de la
 app corren con las barreras apagadas; da lo mismo, ver barreras_v31.py), los cortafuegos de `configuracion.cortafuegos` se
-aplican antes de ejecutar (igual que a t = 0) y `control.aplicar` aplica cortafuegos y viento manual con la corrida en
+aplican antes de ejecutar (igual que a t = 0; si el motor rechaza alguno, la corrida se corta con error antes de simular,
+D-E3-31) y `control.aplicar` aplica cortafuegos y viento manual con la corrida en
 pausa, dentro de `_tablas_hora`, antes de la hora que empieza. Todo está en barreras_v31.py.
 """
 from __future__ import annotations
@@ -18,7 +19,7 @@ from pathlib import Path
 import numpy as np
 
 import barreras_v31
-from control import Control
+from control import Control, exigir_cortafuegos_iniciales
 
 REPO = Path(__file__).resolve().parents[2]
 RAIZ = REPO / "src" / "v3.1"
@@ -118,6 +119,7 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control, var
     for d in trazos_iniciales:                # antes de iniciar: lo mismo que aplicarlos en la pausa de t = 0
         r = interv.cortafuego(d, 0.0, inicial=True)
         iniciales.append({"estado": r["estado"], "motivo": r["motivo"], **d, **r["datos"]})
+    exigir_cortafuegos_iniciales(iniciales)   # D-E3-31: uno rechazado corta la corrida antes de simular
     control.aplicar = interv.aplicar
     sim.ejecutar()
     if not estado["detenida"]:

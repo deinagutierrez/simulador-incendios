@@ -3,10 +3,17 @@
 El proceso motor deja `t_llegada_parcial.npy` (minutos desde el inicio, NaN donde el fuego no llegó) en la grilla del
 dominio, EPSG:5345. Un mapa web estira las imágenes en la proyección Web Mercator (EPSG:3857), así que acá se pasa la
 matriz a esa proyección y se pinta: del amarillo (lo primero que ardió) al rojo oscuro (lo último), transparente lo demás.
+
+El proceso motor reemplaza la huella cada hora simulada mientras el servidor la puede estar leyendo. Una lectura que falla
+(en Windows el archivo puede estar bloqueado un instante, o leerse a medias) se reintenta unas veces y, si sigue fallando,
+se usa la última huella que se leyó bien de esa corrida; si no hay ninguna, se responde como si todavía no hubiera huella.
 """
 from __future__ import annotations
 
 import io
+import threading
+import time
+from collections import OrderedDict
 from functools import lru_cache
 from pathlib import Path
 
@@ -15,6 +22,38 @@ import numpy as np
 HUELLA = "t_llegada_parcial.npy"
 # rampa: fracción del tiempo transcurrido → color
 RAMPA = np.array([[0.0, 255, 237, 160], [0.35, 254, 178, 76], [0.65, 240, 59, 32], [1.0, 128, 0, 38]], dtype="float64")
+INTENTOS_LECTURA = 5
+ESPERA_LECTURA_S = 0.03
+MAX_GUARDADAS = 6                  # últimas huellas leídas bien (una por corrida), para cuando una lectura falla
+
+_guardadas: OrderedDict[str, np.ndarray] = OrderedDict()
+_cerrojo = threading.Lock()
+
+
+def leer(ruta: Path, forma: tuple[int, int] | None = None) -> np.ndarray | None:
+    """Tiempo de llegada (float32) de `ruta`, o None si no existe. Si la lectura falla (archivo bloqueado o a medio
+    escribir, o con otra forma que `forma`), reintenta `INTENTOS_LECTURA` veces y después devuelve la última que se leyó bien
+    de esa ruta (o None si no hubo ninguna). Nunca lanza por el archivo."""
+    ruta = Path(ruta)
+    clave = str(ruta.resolve())
+    for i in range(INTENTOS_LECTURA):
+        if not ruta.exists():
+            return None
+        try:
+            t = np.load(ruta, allow_pickle=False).astype("float32")
+            if t.ndim == 2 and (forma is None or t.shape == tuple(forma)):
+                with _cerrojo:
+                    _guardadas[clave] = t
+                    _guardadas.move_to_end(clave)
+                    while len(_guardadas) > MAX_GUARDADAS:
+                        _guardadas.popitem(last=False)
+                return t
+        except (OSError, ValueError, EOFError):
+            pass
+        if i < INTENTOS_LECTURA - 1:
+            time.sleep(ESPERA_LECTURA_S)
+    with _cerrojo:
+        return _guardadas.get(clave)
 
 
 @lru_cache(maxsize=16)
@@ -38,14 +77,11 @@ def limites(grilla: dict) -> list[list[float]]:
 def png(carpeta: Path, grilla: dict, hora: float | None = None, color: tuple[int, int, int] | None = None) -> bytes | None:
     """PNG de la huella hasta la hora simulada `hora` (o completa). None si todavía no hay huella.
     Sin `color` se pinta con la rampa del tiempo de llegada; con `color`, de un solo color (para comparar dos motores)."""
-    ruta = Path(carpeta) / HUELLA
-    if not ruta.exists():
+    t = leer(Path(carpeta) / HUELLA, (int(grilla["filas"]), int(grilla["cols"])))
+    if t is None:
         return None
     from PIL import Image
     from rasterio.warp import Resampling, reproject
-    t = np.load(ruta).astype("float32")
-    if t.shape != (int(grilla["filas"]), int(grilla["cols"])):
-        return None
     if hora is not None:
         t = np.where(t <= float(hora) * 60.0, t, np.nan)
     origen, destino, ancho, alto, _ = _destino(str(grilla["crs"]), float(grilla["xmin"]), float(grilla["ymax"]),
@@ -70,11 +106,8 @@ def png(carpeta: Path, grilla: dict, hora: float | None = None, color: tuple[int
 
 
 def _cargar(carpeta: Path, grilla: dict, hora: float | None) -> np.ndarray | None:
-    ruta = Path(carpeta) / HUELLA
-    if not ruta.exists():
-        return None
-    t = np.load(ruta).astype("float32")
-    if t.shape != (int(grilla["filas"]), int(grilla["cols"])):
+    t = leer(Path(carpeta) / HUELLA, (int(grilla["filas"]), int(grilla["cols"])))
+    if t is None:
         return None
     return np.isfinite(t) & ((t <= float(hora) * 60.0) if hora is not None else True)
 

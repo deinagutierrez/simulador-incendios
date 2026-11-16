@@ -1,0 +1,42 @@
+# Comparación entre computadoras (D-E3-30, punto 6): corre E-E3-1 completo en Windows y en Linux y compara el sha256 de
+# cada ráster de llegada con la tabla versionada. Sin tolerancia: si una máquina da distinto, la corrida falla, se
+# informa y se investiga (por ejemplo, repitiendo con NPY_DISABLE_CPU_FEATURES=AVX512F). Tarda unos 15 min por sistema:
+# por eso no corre en cada empuje, solo a pedido y una vez por semana.
+name: reproducibilidad
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'        # lunes 06:00 UTC (03:00 en San Luis)
+
+jobs:
+  e-e3-1:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      # Instalación igual a pruebas.yml
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+          cache: pip
+      - name: Instalar bibliotecas
+        run: python -m pip install -r requirements.txt
+      - name: E-E3-1 con comparación de sha256 contra la referencia
+        run: python herramientas/e_e3_1.py --referencia docs/etapa3/prerregistros/E-E3-1_huellas.json
+      - name: Guardar resultados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: E-E3-1-${{ matrix.os }}
+          path: |
+            resultados/app/E-E3-1/resultados.json
+            resultados/app/E-E3-1/huellas.json
+            resultados/app/E-E3-1/**/proceso.log
+          if-no-files-found: warn
