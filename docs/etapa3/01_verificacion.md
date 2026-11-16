@@ -233,10 +233,11 @@ otros 13 esperan la publicación de datos históricos (F7) y los 4 del X-49 sin 
 **Resultado (dato)**: los 7 pares dan las mismas celdas quemadas, las mismas ha y el mismo motivo de fin en las dos máquinas
 (`E-E3-1_resultados.json` contra `resultados/app/E-E3-1/resultados.json`). Eso **no** prueba igualdad bit a bit: ninguna de las
 dos corridas guardó el sha256 del ráster.
-**PENDIENTE**: (1) correr `python herramientas/e_e3_1.py` sobre un commit limpio acá y copiar `resultados/app/E-E3-1/huellas.json`
-a `docs/etapa3/prerregistros/E-E3-1_huellas.json` (hoy tiene `huellas` vacío y el campo `pendiente`); (2) que LisandroV2002 lo
-corra con `--referencia` en su máquina; (3) `.github/workflows/reproducibilidad.yml` (a pedido y los lunes, Windows y Linux).
-Hasta que (1) esté hecho, ese flujo sale con código 3 ("pares sin referencia"). Sin tolerancia: si una máquina da distinto se
+**Hecho (dato, 2026-11-16)**: E-E3-1 corrido acá sobre el commit limpio `c7730d0` (sin código sin registrar): 0 celdas
+distintas en los 7 pares, con y sin pausa, y la tabla de sha256 de los rásteres de llegada quedó como referencia en
+`docs/etapa3/prerregistros/E-E3-1_huellas.json` (offline, proceso y proceso con pausa iguales dentro de cada par).
+**PENDIENTE**: (2) que LisandroV2002 lo corra con `--referencia docs/etapa3/prerregistros/E-E3-1_huellas.json` en su máquina;
+(3) `.github/workflows/reproducibilidad.yml` (a pedido y los lunes, Windows y Linux), que necesita el primer empuje. Sin tolerancia: si una máquina da distinto se
 informa y se investiga (por ejemplo, con `NPY_DISABLE_CPU_FEATURES=AVX512F`).
 **Lectura al pie**: hoy solo se puede decir que dos máquinas distintas, con sistemas y procesadores distintos, dan la misma
 superficie celda por celda en cantidad; la igualdad de los tiempos de llegada entre máquinas sigue **(sin verificar)**.
@@ -248,7 +249,7 @@ superficie celda por celda en cantidad; la igualdad de los tiempos de llegada en
 | Misma corrida, misma computadora | (dato) E-E3-1: offline, proceso y proceso con pausa dan lo mismo; Las Chacras v4.0 72 h repetida en la F6 por otro camino (F6-referencia) es idéntica celda por celda a la de E-E3-1 |
 | Reproducción desde la bitácora | (dato) en `test/app` y en las pruebas de humo de E-E3-4: misma cadena de hash y 0 celdas distintas. Formal: E-E3-4 A, **PENDIENTE** |
 | Equivalencia con la corrida offline con los mismos trazos | (dato) F5: 0 celdas distintas en los dos motores con un trazo en pausa, viento manual y suelo mineral. Formal: E-E3-4 B, **PENDIENTE** |
-| Entre computadoras | ver §4.8: mismas cantidades; bit a bit **PENDIENTE** |
+| Entre computadoras | ver §4.8: mismas cantidades; referencia bit a bit fijada en Linux (`c7730d0`); las otras máquinas **PENDIENTE** |
 | Rastreo de cada resultado | los guiones anotan commit, archivos sin registrar, sha256 del congelado y de los datos; desde la F6, también la ficha de la máquina (procesador, AVX-512, versiones) |
 
 ## 6. Rendimiento y requisitos (plan §2.7)

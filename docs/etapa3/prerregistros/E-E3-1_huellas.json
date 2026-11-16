@@ -1,11 +1,50 @@
 {
  "formato": "incendios_sl.e_e3_1_huellas/1.0",
- "pendiente": "Sin huellas todavía. Se llena con una corrida completa de herramientas/e_e3_1.py sobre un commit limpio (codigo_sin_registrar vacío): se copia acá el resultados/app/E-E3-1/huellas.json que deja, sin el campo 'pendiente'. Lo hace quien coordina después del commit (D-E3-30, punto 6). Mientras tanto, una corrida con --referencia contra este archivo termina con código 3 (sin referencia para comparar).",
- "descripcion": "sha256 del ráster de llegada de cada par escenario/motor de E-E3-1 (offline; el proceso y el proceso con pausa tienen que dar el mismo). Se calcula con huella() de herramientas/e_e3_1.py: dtype en little endian, forma y bytes en orden C, con NaN, +inf y -inf reemplazados por valores fijos y -0,0 por 0,0. Se compara sin tolerancia.",
- "fecha": null,
- "cambio_git": null,
- "codigo_sin_registrar": null,
- "congelado_sha256": null,
- "equipo": null,
- "huellas": {}
+ "fecha": "2026-11-16 09:14",
+ "cambio_git": "c7730d0101980e428ec31c5f37e9421e5486e091",
+ "codigo_sin_registrar": [],
+ "congelado_sha256": "2b32757194d2510bcbc680056f803694be064fc968e35de9c1ab579c10621106",
+ "equipo": {
+  "sistema": "Linux-7.3.3-200.fc44.x86_64-x86_64-with-glibc2.43",
+  "procesador": "AMD Ryzen 7 5700",
+  "nucleos": 16,
+  "nucleos_fisicos": 8,
+  "ram_total_gb": 15.5,
+  "avx512": false,
+  "avx512_segun_cpuinfo": false,
+  "npy_disable_cpu_features": null,
+  "python": "3.14.10",
+  "numpy": "2.5.2",
+  "numba": "0.68.0"
+ },
+ "huellas": {
+  "aguada_36h/v4.0": {
+   "sha256_t_llegada": "9efdbe13a877ca8c1ae0386cd3871cda8190a04ba7fe6cb1d182b7df3a36d266",
+   "celdas_quemadas": 14979
+  },
+  "laslagunas_48h/v4.0": {
+   "sha256_t_llegada": "29cd4b35a655ce7338de0fec044e2af513f8517a8d85fe1323e79493b53357c1",
+   "celdas_quemadas": 142659
+  },
+  "laslagunas_48h/v3.1-libre": {
+   "sha256_t_llegada": "19382bbb434bce923ff82ec15e70ff7603a0460d5a4ba05ece6ea5355b98bac8",
+   "celdas_quemadas": 386588
+  },
+  "laslagunas_48h/v3.1-librev2": {
+   "sha256_t_llegada": "f70159166854d2d5553f23122bad359c07ee3cd8a4379dd84d7fb81991d3774f",
+   "celdas_quemadas": 365724
+  },
+  "chacrasoct_72h/v4.0": {
+   "sha256_t_llegada": "c8bf689aaf72c2ef92ee35c10fa10e3165edd181dcd71d82398d826573e58a9e",
+   "celdas_quemadas": 26181
+  },
+  "chacrasoct_72h/v3.1-libre": {
+   "sha256_t_llegada": "eb93c3a619d0d2e7e8c09531d8ae28d007c0e7edbd1b5dada631e6ad7748d642",
+   "celdas_quemadas": 16954
+  },
+  "chacrasoct_72h/v3.1-librev2": {
+   "sha256_t_llegada": "f2667aecfe6e61ddf235fb8d97471b45a436b8d0801e9b01d6389e1c6966d90c",
+   "celdas_quemadas": 34054
+  }
+ }
 }
