@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulador de incendios — San Luis</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="/web/vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="/web/estilo.css">
 </head>
@@ -89,7 +90,7 @@
         <p class="nota">Viento, temperatura, humedad y lluvia constantes durante todo el período. No es un pronóstico: la toma queda rotulada «escenario manual». Después armá el evento eligiéndola.</p>
         <div class="dos">
           <div><label for="esc-fecha">Día de inicio</label><input id="esc-fecha" type="date"></div>
-          <div><label for="esc-hora">Hora <span class="suave">(Argentina)</span></label><input id="esc-hora" type="time" step="3600"></div>
+          <div><label for="esc-hora">Hora <span class="suave">(Argentina)</span></label><select id="esc-hora"></select></div>
         </div>
         <div class="dos">
           <div><label for="esc-horas">Horas</label><input id="esc-horas" type="number" min="1" max="240" value="48"></div>
@@ -124,10 +125,28 @@
       </div>
       <div class="dos">
         <div><label for="fecha">Día de inicio</label><input id="fecha" type="date"></div>
-        <div><label for="hora">Hora <span class="suave">(Argentina)</span></label><input id="hora" type="time" step="3600"></div>
+        <div><label for="hora">Hora <span class="suave">(Argentina)</span></label><select id="hora" title="Las corridas empiezan en hora en punto"></select></div>
       </div>
       <label for="horas">Horas a simular</label>
       <input id="horas" type="number" min="1" max="240" value="24">
+      <div id="lugar-trazos-config">
+        <div id="herr-cortafuegos" class="herramienta">
+          <h3>Cortafuegos <span class="suave" id="trazos-cuando">(opcional, desde la hora 0)</span></h3>
+          <div class="botones herramientas" role="group" aria-label="Herramientas de trazo">
+            <button id="b-dibujar" aria-pressed="false" title="Dibujá a mano alzada sobre el mapa: apretá, arrastrá y soltá">Dibujar</button>
+            <button id="b-borrador" aria-pressed="false" title="Tocá un trazo sin enviar para borrarlo">Borrador</button>
+            <button id="b-deshacer" disabled title="Deshace el último trazo o borrado (solo trazos sin enviar)">Deshacer</button>
+          </div>
+          <div class="dos">
+            <div><label for="ancho">Ancho del cortafuego</label><select id="ancho"></select></div>
+            <div><label class="casilla casilla-sola" title="Supuesto: el cortafuego deja el suelo desnudo, sin nada que pueda quemarse"><input type="checkbox" id="mineral"><span>a suelo mineral <span class="suave">(supuesto)</span></span></label></div>
+          </div>
+          <p class="nota" id="nota-trazos"></p>
+          <ol id="lista-trazos" class="lista-trazos"></ol>
+          <p class="error" id="error-trazos" role="alert"></p>
+          <button id="b-enviar-trazos" class="principal" hidden>Aplicar los trazos</button>
+        </div>
+      </div>
       <button class="principal" id="iniciar">Iniciar simulación</button>
       <p class="error" id="error" role="alert"></p>
     </section>
@@ -135,13 +154,38 @@
     <section id="sec-control" hidden>
       <h2>2. Simulación</h2>
       <div id="resumen-config" class="resumen"></div>
+      <div class="pausa-en" id="caja-pausar-en">
+        <label for="pausar-en">Pausar en la hora <span class="suave">(vacío: al terminar la hora en curso)</span></label>
+        <input id="pausar-en" type="number" min="0" max="240" step="1" inputmode="numeric" placeholder="la próxima">
+      </div>
       <div class="botones">
         <button id="pausar">Pausar</button>
         <button id="reanudar" hidden>Reanudar</button>
         <button id="detener">Detener</button>
         <button id="nueva" hidden>Nueva simulación</button>
       </div>
+      <p class="nota" id="nota-pausa"></p>
       <p class="error" id="error-control" role="alert"></p>
+      <div id="intervenir" class="intervenir" hidden>
+        <h3>Intervenir en la hora <span id="hora-pausa"></span></h3>
+        <p class="nota" id="nota-intervenir">Lo que apliques acá rige desde la hora de la pausa y queda en la bitácora.</p>
+        <div id="lugar-trazos-pausa"></div>
+        <div class="bloque-viento">
+          <h3>Viento a mano</h3>
+          <div class="dos">
+            <div><label for="v-vel">Velocidad (km/h)</label><input id="v-vel" type="number" min="0" max="216" step="1" inputmode="decimal"></div>
+            <div><label for="v-dir">Viene del (grados)</label><input id="v-dir" type="number" min="0" max="359" step="1" inputmode="decimal" title="0 = norte, 90 = este, 180 = sur, 270 = oeste"></div>
+          </div>
+          <p class="nota" id="v-texto"></p>
+          <div class="aviso" id="aviso-v40" hidden><b>En v4.0 el viento gira de a poco.</b>El motor interpola entre horas: el viento nuevo rige del todo una hora después de la pausa; durante esa hora pasa gradualmente del pronóstico al valor que pongas.</div>
+          <div class="botones">
+            <button id="b-viento">Aplicar desde la hora <span id="v-hora"></span></button>
+            <button id="b-pronostico-viento">Volver al pronóstico</button>
+          </div>
+        </div>
+        <p class="error" id="error-intervenir" role="alert"></p>
+        <ul id="respuestas" class="respuestas"></ul>
+      </div>
       <div id="tarjetas"></div>
       <div id="comparacion" hidden></div>
     </section>
@@ -173,6 +217,7 @@
   <main>
     <div id="mapa" aria-label="Mapa del dominio"></div>
     <div id="leyenda" hidden></div>
+    <div id="largo-trazo" aria-live="polite" hidden></div>
     <div id="tiempo" hidden>
       <button id="reproducir" title="Reproducir" aria-label="Reproducir">▶</button>
       <input id="deslizador" type="range" min="0" max="0" value="0" step="1" aria-label="Hora simulada">

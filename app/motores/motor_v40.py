@@ -4,6 +4,23 @@ Sigue los mismos pasos que src/v4.0/scripts/correr_escenario.py (traducir, ejecu
 un punto de control: una subclase de `Automata` que, en cada hora simulada en punto y antes de avanzar, avisa el avance,
 deja la huella parcial y atiende las órdenes. La subclase reemplaza a `simulador.corrida.Automata` dentro de este proceso;
 ningún archivo de src/v4.0 cambia.
+
+Intervenciones (F5, contrato 1.5; el detalle está en barreras_v40.py):
+- Cortafuegos antes de iniciar (`configuracion.cortafuegos`): por la vía que ya tiene el motor. Se escriben
+  `cortafuegos.geojson` (EPSG:5345, `ancho_m`, `tipo: cortafuego`) y, si hay trazos a suelo mineral,
+  `modificador_cortafuegos.tif` (0 en las celdas del trazo, nodata = 1, en la grilla base), y se agregan a la definición como
+  `mitigacion.barreras_extra` / `mitigacion.modificador_combustible`. Sin trazos no se agrega nada (identidad E-E3-1).
+  Se informan en `resultados.cortafuegos_iniciales`. Con `base.escenario` se acepta `configuracion.cortafuegos` (y nada
+  más) y los trazos se combinan con la `mitigacion` que ya traiga el escenario.
+- En pausa, `control.aplicar` (cortafuego o viento manual) cambia el autómata en memoria. Un cortafuego entra con
+  `rasterizar_barreras_extra`, recortado a las celdas no afectadas ni intermedias de enlaces entre afectadas (D-E3-28, 13);
+  agrega a `datos` `longitud_aplicada_m`, `celdas`, `celdas_recortadas`, `celdas_sha256` y `geometria_offline`. El viento
+  manual reemplaza las filas de la serie posteriores a la pausa: gira durante la hora siguiente (`pleno_min` = t + 60).
+- Para la corrida offline (comparación B de E-E3-4) quedan en la carpeta `cortafuegos_aplicados.geojson` (todos los trazos,
+  también los iniciales, con la geometría que se aplicó), `modificador_aplicado.tif` (si hubo suelo mineral) y
+  `meteo_editada.csv` (si hubo viento manual), listados en `resultados.archivos_offline`: van en el YAML como
+  `mitigacion.barreras_extra`, `mitigacion.modificador_combustible` y `parche.meteo` (esta, con ruta absoluta dentro del
+  repositorio, porque una relativa se busca en la carpeta del evento).
 """
 from __future__ import annotations
 
@@ -13,6 +30,7 @@ import sys
 import time
 from pathlib import Path
 
+import barreras_v40 as bv
 from control import Control, Detenida
 
 REPO = Path(__file__).resolve().parents[2]
@@ -33,12 +51,21 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
     from incendios_sl import config as cfgmod, escenario, resumen
     from simulador import corrida as corrida_mod
     from simulador.ca.automata import Automata
+    from simulador import rutas
     from simulador.outputs import geo
     from simulador.rutas import raiz_datos
 
+    carpeta = Path(carpeta).resolve()
     salida = carpeta / "salida"
     salida.mkdir(parents=True, exist_ok=True)
+    iniciales = list(configuracion.get("cortafuegos") or [])
     estado = {"au": None, "ultima_hora": -1}
+    # v4.0 solo admite insumos dentro del repositorio o de la carpeta de datos. Los de las intervenciones están en la carpeta
+    # de la corrida, que en la app ya está en el repositorio (resultados/app/<id>); si se la puso en otro lado (pruebas), se
+    # la suma a las raíces permitidas solo dentro de este proceso.
+    permitidas = rutas.raices_permitidas
+    if not any(b == carpeta or b in carpeta.parents for b in permitidas()):
+        rutas.raices_permitidas = lambda: permitidas() + [carpeta]
 
     def grilla_de(au) -> dict:
         g = au.capas.grilla
@@ -62,6 +89,7 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
         def __init__(self, *a, **k):
             super().__init__(*a, **k)
             estado["au"] = self
+            interv.au = self
 
         def paso_tiempo(self):
             t_min = self.minutos(self.t)
@@ -74,16 +102,24 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
 
     corrida_mod.Automata = AutomataControlado
 
+    interv = bv.Intervenciones(carpeta, iniciales)
+    control.aplicar = interv.aplicar
+
     # --- escenario: uno existente o una definición propia (se escribe como YAML y se carga igual que offline)
     pedido = {}
     if base.get("escenario"):
-        if configuracion:
-            raise ValueError("`configuracion` solo se combina con `base.definicion`; `base.escenario` se corre tal cual")
+        if any(k != "cortafuegos" for k in configuracion):
+            raise ValueError("`configuracion` solo se combina con `base.definicion`; `base.escenario` se corre tal cual "
+                             "(salvo `cortafuegos`)")
         esc, ruta, nombre = escenario.cargar_corrida(str(base["escenario"]), None)
+        if iniciales:
+            esc = interv.preparar_iniciales(esc, raiz_datos(), Path(ruta).parent)
     else:
         definicion, pedido = ignicion_libre.aplicar(cfgmod, dict(base["definicion"]), configuracion)
         for clave, valor in POR_DEFECTO.items():
             definicion.setdefault(clave, valor)
+        if iniciales:
+            definicion = interv.preparar_iniciales(definicion, raiz_datos(), carpeta)
         archivo = carpeta / "escenario_base.yaml"
         archivo.write_text(yaml.safe_dump(definicion, allow_unicode=True, sort_keys=False), encoding="utf-8")
         esc, ruta, nombre = escenario.cargar_corrida(None, archivo)
@@ -112,7 +148,7 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
         t_min = au.minutos(au.t)
         return {"motivo_fin": "detenida", "motivo_fin_texto": "Detenida por el usuario.", "ha_final": round(au.area_quemada_ha(), 2),
                 "t_simulado_min": round(t_min, 3), "salida": "salida", "completa": False,
-                "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign
+                "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign | interv.informe()
 
     segundos = time.time() - t_reloj
     shutil.copy(ruta, salida / f"escenario_{nombre}.yaml")
@@ -141,4 +177,4 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
     t_min = float(ind[-1]["minutos_desde_t0"]) if ind else 0.0
     return {"motivo_fin": au.motivo_fin, "motivo_fin_texto": au.motivo_fin_texto, "ha_final": round(au.area_quemada_ha(), 2),
             "t_simulado_min": round(t_min, 3), "salida": "salida", "completa": True,
-            "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign
+            "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign | interv.informe()

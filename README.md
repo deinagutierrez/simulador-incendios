@@ -6,9 +6,9 @@ Dominio Las Lagunas–Potrerillos: 2.500 km², celdas de 30 m.
 Este repositorio reúne los dos motores de propagación del proyecto, tal como quedaron validados, y el **simulador interactivo**
 que se está construyendo sobre ellos: un programa que corre en la computadora y se maneja desde el navegador.
 
-> **Estado al 2026-11-13: fase F4 en la rama `f4-datos`.** El simulador (`app/`) corre los dos motores desde el navegador
+> **Estado al 2026-11-14: fase F5 en la rama `f5-intervenciones` (sobre `f4-datos`).** El simulador (`app/`) corre los dos motores desde el navegador
 > con eventos históricos de ejemplo o con datos bajados en el momento (pronóstico de Open-Meteo e índices de Sentinel-2).
-> Faltan cortafuegos y viento manual (F5), verificación (F6) y entrega (F7). Plan completo: [docs/etapa3/00_plan.md](docs/etapa3/00_plan.md).
+> Con cortafuegos a mano alzada, viento manual en pausa y bitácora reproducible. Faltan verificación (F6) y entrega (F7). Plan completo: [docs/etapa3/00_plan.md](docs/etapa3/00_plan.md).
 
 ## Empezar
 

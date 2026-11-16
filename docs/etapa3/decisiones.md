@@ -84,3 +84,12 @@ El usuario aprobó `F4_pedido_de_aprobacion.md` completo, con los cambios del 12
 | Código | Decisión | Estado |
 |---|---|---|
 | D-E3-27 | **Opción A de `F4_informe.md` §5.1.** En la parte (c) de E-E3-2, el lado AWS de v4.0 usa también compuestos de verano hechos por AWS (enero a marzo de 2024, método de SIM), porque el SB40 de la regla 3.3b y el NDVI de verano salen de ellos y no del compuesto de ventana. Sin esto, el cambio de clase SB40 daba 0 % por construcción. Se los da a v4.0 `herramientas/e_e3_2_motor.py`, que ejecuta `app/motores/proceso.py` tal cual con la carpeta de verano adelante en la búsqueda (`eventos.dirs_compuestos`), sin tocar los compuestos del repositorio ni ningún archivo congelado; el guion comprueba en la procedencia del SB40 que cada lado usó los suyos. La comparación de esos compuestos con los de GEE se informa sin entrar en el criterio. Decidida antes de correr la evaluación; detalle en `prerregistros/E-E3-2_aclaracion_c.md` | decidida por el usuario |
+
+## 2026-11-13 — Aprobaciones para empezar la F5
+
+El usuario aprobó `F5_pedido_de_aprobacion.md` completo.
+
+| Código | Decisión | Estado |
+|---|---|---|
+| D-E3-28 | **Alcance y diseño de la F5**: puntos 1 a 30 del pedido. Entre ellos: la F5 completa (también la pantalla) la hace el frente A (1); el archivo de trazos y horas de E-E3-4 se etiqueta antes del código (3); las corridas empiezan en hora en punto (6); en v3.1 los trazos se codifican con la función real `preparar_barreras_enlaces`, envuelta (7), y las dos variantes arrancan con una matriz de barreras vacía (8); el recorte en v4.0 quita también las intermedias de enlaces diagonales entre celdas afectadas (13); se informa la longitud dibujada y la recortada, y el criterio B de E-E3-4 usa la recortada (14); "más horas" en caliente no se ofrece (15); bitácora encadenada con hash (17) y reproducción hecha por el proceso motor (19); contrato 1.5 (22) | aprobada |
+| D-E3-29 | **Corrección del plan §2.3** (punto 9): la variante librev2 de v3.1 es `modelo_v2` con las barreras de caminos **apagadas** (`evaluar_v2.py`), como se validó y como la corre el simulador desde la F1. El plan decía "barreras de caminos activas". No cambia ningún resultado | aprobada |

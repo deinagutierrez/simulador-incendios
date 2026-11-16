@@ -5,11 +5,18 @@ Cada corrida vive en `resultados/app/<id>/`:
     estado.json       estado que lleva el servidor; con esto se reconstruye la lista al volver a arrancar
     eventos.jsonl     todos los avisos del proceso y los cambios de estado, numerados
     t_llegada_parcial.npy, salida/, proceso.log   los escribe el proceso motor
+    bitacora.jsonl    (F5) la bitácora encadenada, entrada por entrada en el momento; la escribe el proceso motor
 
 `corrida.json` lleva además, desde el formato 1.2, el bloque `insumos` (procedencia de los datos de un evento generado
 `RT-…`, Anexo C del plan) y `advertencias` (sus rótulos y avisos, o "EJEMPLO" para un evento con ficha).
 
 Estados: creada → iniciando → corriendo ⇄ (pausando →) pausada → terminada | detenida | error | interrumpida.
+
+Intervenciones (F5, contrato 1.5 §4.2): con la corrida en pausa, el servidor manda `intervenir` con un `ref` propio y espera
+el aviso `intervencion` con ese `ref`. La bitácora se junta de los avisos mientras la corrida está en marcha. En un grupo
+"ambos", las dos corridas se pausan en la misma hora (`pausar` con `en_t_sim_min`) y reciben la misma intervención. Una
+corrida se puede reproducir desde su bitácora: la nueva copia tal cual la configuración de `corrida.json` y lleva
+`reproduccion`; la aplica el propio proceso motor.
 """
 from __future__ import annotations
 
@@ -20,10 +27,12 @@ import secrets
 import subprocess
 import sys
 import threading
+import math
 import time
 from pathlib import Path
 
 from . import VERSION, datos
+from .trazos import iv
 
 REPO = Path(__file__).resolve().parents[2]
 MOTORES_REALES = ("v4.0", "v3.1-libre", "v3.1-librev2")
@@ -33,6 +42,11 @@ ACTIVOS = {"iniciando", "corriendo", "pausando", "pausada", "deteniendo"}
 FINALES = {"terminada", "detenida", "error", "interrumpida"}
 LIMITE_ACTIVAS = 2
 FORMATO = "incendios_sl.corrida/1.2"
+ESPERA_INTERVENCION_S = 30.0              # el trazo de v3.1 tarda unos 5 s (D-E3-28, punto 21)
+AVISOS_CON_ENTRADA = ("pausado", "reanudado", "intervencion", "detenido")
+# lo que una reproducción copia tal cual de la corrida original (contrato §1.3); `simulado` y `advertencias` también, para
+# que el motor simulado use la misma grilla y la pantalla muestre los mismos rótulos
+COPIA_REPRODUCCION = ("formato", "motor", "base", "configuracion", "insumos", "programa", "simulado", "advertencias")
 
 
 class Rechazo(Exception):
@@ -71,12 +85,20 @@ class Corrida:
         self.proceso: subprocess.Popen | None = None
         self.candado = threading.RLock()
         self._archivo_eventos = None
+        self.t_pausa: float | None = None          # hora simulada de la pausa actual (con estado "pausada")
+        self.pausa_en: float | None = None         # hora simulada pedida para la próxima pausa (con estado "pausando")
+        self.bitacora_viva: list[dict] = []        # entradas de la bitácora que llegaron en los avisos
+
+    @property
+    def reproduccion_de(self) -> str | None:
+        return self.pedido.get("reproduccion_de")
 
     # ------------------------------------------------------------------ estado en disco
     def resumen(self) -> dict:
         return {"id": self.id, "motor": self.motor, "grupo": self.grupo, "estado": self.estado, "creada_utc": self.creada_utc,
                 "pedido": self.pedido, "listo": self.listo, "ultima_hora": self.ultima_hora, "final": self.final,
-                "error": self.error, "n_eventos": len(self.eventos)}
+                "error": self.error, "n_eventos": len(self.eventos), "pausa_t_sim_min": self.t_pausa,
+                "pausa_en_t_sim_min": self.pausa_en, "reproduccion_de": self.reproduccion_de}
 
     def guardar(self) -> None:
         escribir_json(self.carpeta / "estado.json", self.resumen() | {"actualizado_utc": ahora()})
@@ -101,16 +123,64 @@ class Corrida:
                 self._archivo_eventos.close()
                 self._archivo_eventos = None
 
+    def sumar_a_la_bitacora(self, entrada) -> None:
+        if isinstance(entrada, dict) and isinstance(entrada.get("n"), int):
+            if all(e.get("n") != entrada["n"] for e in self.bitacora_viva):
+                self.bitacora_viva.append(entrada)
+                self.bitacora_viva.sort(key=lambda e: e["n"])
+
+    def corrida_json(self) -> dict | None:
+        try:
+            return json.loads((self.carpeta / "corrida.json").read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return None
+
+    def bitacora_jsonl(self) -> list[dict]:
+        ruta = self.carpeta / "bitacora.jsonl"
+        out = []
+        try:
+            lineas = ruta.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            return out
+        for linea in lineas:
+            try:
+                out.append(json.loads(linea))
+            except json.JSONDecodeError:
+                break                                # una línea a medio escribir: lo anterior vale
+        return out
+
+    def bitacora(self, corrida: dict | None = None) -> tuple[list[dict], str | None]:
+        """(bitácora, raíz). Terminada: la de `corrida.json`. En marcha, con error o interrumpida: la más larga entre la que
+        llegó en los avisos y `bitacora.jsonl`. La raíz, la que dejó el proceso o, mientras tanto, la calculada con la
+        configuración inicial de `corrida.json` (la misma cuenta que hace el proceso)."""
+        c = corrida if corrida is not None else self.corrida_json()
+        if c is not None and self.estado in FINALES and isinstance(c.get("bitacora"), list):
+            return c["bitacora"], c.get("bitacora_raiz")
+        viva, disco = list(self.bitacora_viva), self.bitacora_jsonl()
+        raiz = None
+        if c is not None:
+            try:
+                raiz = c.get("bitacora_raiz") or iv.raiz(c)
+            except (ValueError, TypeError):
+                raiz = None
+        return (disco if len(disco) > len(viva) else viva), raiz
+
+    def estados_intervenciones(self) -> dict[int, str]:
+        """n de la bitácora → estado del aviso `intervencion` (aceptada o recortada)."""
+        return {e["n"]: e.get("estado") for e in self.eventos
+                if e.get("aviso") == "intervencion" and isinstance(e.get("n"), int)}
+
     def detalle(self) -> dict:
         d = self.resumen()
-        ruta = self.carpeta / "corrida.json"
-        if self.estado in FINALES and ruta.exists():
-            try:
-                c = json.loads(ruta.read_text(encoding="utf-8"))
-                d["bitacora"] = c.get("bitacora") or []
-                d["resultados"] = c.get("resultados")
-            except (json.JSONDecodeError, OSError):
-                pass
+        c = self.corrida_json()
+        if c is not None and self.estado in FINALES:
+            d["resultados"] = c.get("resultados")
+        bitacora, raiz = self.bitacora(c)
+        d["bitacora"] = bitacora
+        d["bitacora_raiz"] = raiz
+        d["bitacora_integra"] = iv.verificar_cadena(raiz, bitacora)[0] if raiz else None
+        if c is not None:
+            d["cortafuegos_iniciales"] = list((c.get("configuracion") or {}).get("cortafuegos") or [])
         return d
 
 
@@ -122,6 +192,7 @@ class Gestor:
         self.limite_activas = limite_activas
         self.corridas: dict[str, Corrida] = {}
         self.candado = threading.RLock()
+        self._alineando: dict[str, str] = {}
         self._recuperar()
 
     # ------------------------------------------------------------------ arranque
@@ -142,6 +213,9 @@ class Gestor:
                         c.eventos.append(json.loads(linea))
                     except json.JSONDecodeError:
                         pass
+            for ev in c.eventos:
+                if ev.get("aviso") in AVISOS_CON_ENTRADA:
+                    c.sumar_a_la_bitacora(ev.get("entrada"))
             if c.estado in ACTIVOS:
                 c.error = "El servidor se cerró mientras la corrida estaba en marcha. Queda lo que se había guardado."
                 c.cambiar_estado("interrumpida", motivo=c.error)
@@ -153,6 +227,12 @@ class Gestor:
         if c is None:
             raise Rechazo(f"no existe la corrida {id_}", 404)
         return c
+
+    def del_grupo(self, grupo: str) -> list[Corrida]:
+        cs = sorted((c for c in self.corridas.values() if c.grupo == grupo), key=lambda c: c.id)
+        if not cs:
+            raise Rechazo(f"no existe el grupo {grupo}", 404)
+        return cs
 
     def lista(self) -> list[dict]:
         return [c.resumen() for c in sorted(self.corridas.values(), key=lambda c: c.creada_utc, reverse=True)]
@@ -179,7 +259,8 @@ class Gestor:
         id_ = f"{momento:%Y%m%d-%H%M%S}-{CORTO[motor]}-{secrets.token_hex(2)}"
         carpeta = self.carpeta / id_
         carpeta.mkdir(parents=True)
-        configuracion = {k: pedido[k] for k in ("ignicion", "t_inicio_utc", "horas") if pedido.get(k) not in (None, [], "")}
+        configuracion = {k: pedido[k] for k in ("ignicion", "t_inicio_utc", "horas", "cortafuegos")
+                         if pedido.get(k) not in (None, [], "")}
         corrida = {"formato": FORMATO, "id": id_, "creada_utc": ahora(), "grupo": grupo,
                    "programa": {"version": VERSION, "congelado_sha256": sha_congelado()}, "motor": motor}
         if motor == "simulado":
@@ -202,11 +283,44 @@ class Gestor:
                 corrida["advertencias"] = advertencias
         escribir_json(carpeta / "corrida.json", corrida)
         guardado = {k: v for k, v in pedido.items() if k not in ("iniciar",) and v is not None} | {"motor": motor}
-        c = Corrida(id_, carpeta, motor, guardado, grupo)
+        return self._registrar(id_, carpeta, motor, guardado, grupo)
+
+    def _registrar(self, id_: str, carpeta: Path, motor: str, pedido: dict, grupo: str | None) -> Corrida:
+        c = Corrida(id_, carpeta, motor, pedido, grupo)
         c.anotar({"aviso": "estado", "estado": "creada"})
         c.guardar()
         self.corridas[id_] = c
         return c
+
+    def reproducir(self, id_: str) -> Corrida:
+        """Crea una corrida que reproduce a `id_` desde su bitácora (contrato §1.3 y §4.2): su `corrida.json` copia tal cual
+        la configuración de la original, con `id`, `creada_utc` y grupo nuevos, y agrega `reproduccion`. No la inicia."""
+        o = self.obtener(id_)
+        if o.estado not in ("terminada", "detenida"):
+            raise Rechazo(f"solo se reproduce una corrida terminada o detenida (estado: {o.estado})")
+        original = o.corrida_json()
+        if original is None or not isinstance(original.get("bitacora"), list) or not original.get("bitacora_raiz"):
+            raise Rechazo("la corrida no tiene bitácora encadenada (es anterior a la F5 o no llegó a guardarla)")
+        if o.motor == "simulado" and not self.permitir_simulado:
+            raise Rechazo("el motor simulado no está habilitado en este servidor (--con-simulado)", 422)
+        with self.candado:
+            momento = dt.datetime.now(dt.timezone.utc)
+            nuevo = f"{momento:%Y%m%d-%H%M%S}-{CORTO[o.motor]}-{secrets.token_hex(2)}"
+            carpeta = self.carpeta / nuevo
+            carpeta.mkdir(parents=True)
+            corrida = {"id": nuevo, "creada_utc": ahora(), "grupo": None}
+            corrida |= {k: original[k] for k in COPIA_REPRODUCCION if k in original}
+            actual = sha_congelado()
+            previo = (original.get("programa") or {}).get("congelado_sha256")
+            if previo != actual:
+                corrida["advertencias"] = list(corrida.get("advertencias") or []) + [
+                    f"el congelado de los motores cambió desde la corrida original ({str(previo)[:12]}… → {str(actual)[:12]}…): "
+                    "la reproducción puede no dar lo mismo"]
+            corrida["reproduccion"] = {"de": id_, "raiz": original["bitacora_raiz"], "bitacora": original["bitacora"]}
+            escribir_json(carpeta / "corrida.json", corrida)
+            pedido = {k: v for k, v in o.pedido.items() if k not in ("reproduccion_de",)} | {"motor": o.motor,
+                                                                                             "reproduccion_de": id_}
+            return self._registrar(nuevo, carpeta, o.motor, pedido, None)
 
     # ------------------------------------------------------------------ control
     def iniciar(self, id_: str) -> Corrida:
@@ -241,12 +355,24 @@ class Gestor:
         except (OSError, ValueError):
             raise Rechazo("no se pudo enviar la orden: el proceso motor cerró su entrada")
 
-    def pausar(self, id_: str) -> Corrida:
+    @staticmethod
+    def hora_en_punto(en_t_sim_min) -> float:
+        """La hora objetivo de una pausa, redondeada hacia arriba a la hora en punto (las pausas caen en hora en punto)."""
+        if isinstance(en_t_sim_min, bool) or not isinstance(en_t_sim_min, (int, float)) or not math.isfinite(en_t_sim_min) \
+                or en_t_sim_min < 0:
+            raise Rechazo("`en_t_sim_min` tiene que ser un número de minutos simulados, 0 o más", 422)
+        return float(math.ceil(float(en_t_sim_min) / 60.0 - 1e-9) * 60)
+
+    def pausar(self, id_: str, en_t_sim_min: float | None = None) -> Corrida:
+        """Pide la pausa: en la próxima hora en punto o, con `en_t_sim_min`, al llegar a esa hora simulada (si ya pasó, en la
+        próxima). Con una pausa ya pedida (`pausando`) y otra hora, la reemplaza."""
         c = self.obtener(id_)
+        objetivo = None if en_t_sim_min is None else self.hora_en_punto(en_t_sim_min)
         with c.candado:
-            if c.estado not in ("iniciando", "corriendo"):
+            if c.estado not in ("iniciando", "corriendo") and not (c.estado == "pausando" and objetivo is not None):
                 raise Rechazo(f"solo se pausa una corrida en marcha (estado: {c.estado})")
-            self._ordenar(c, {"orden": "pausar"})
+            self._ordenar(c, {"orden": "pausar"} if objetivo is None else {"orden": "pausar", "en_t_sim_min": objetivo})
+            c.pausa_en = objetivo
             c.cambiar_estado("pausando")
         return c
 
@@ -256,8 +382,96 @@ class Gestor:
             if c.estado not in ("pausando", "pausada"):
                 raise Rechazo(f"solo se reanuda una corrida en pausa (estado: {c.estado})")
             self._ordenar(c, {"orden": "reanudar"})
+            c.t_pausa = c.pausa_en = None
             c.cambiar_estado("corriendo")
         return c
+
+    # ------------------------------------------------------------------ grupo "ambos": pausa en la misma hora
+    @staticmethod
+    def _proxima_pausa_posible(c: Corrida) -> float:
+        if c.estado == "pausada" and c.t_pausa is not None:
+            return float(c.t_pausa)
+        t = float((c.ultima_hora or {}).get("t_sim_min") or 0.0)
+        return t + 60.0 if c.ultima_hora else 0.0
+
+    def _pausar_en(self, c: Corrida, objetivo: float) -> None:
+        """Deja a `c` pausada en `objetivo`, o encaminada a pausarse ahí (si está pausada antes, la reanuda hasta esa hora)."""
+        with c.candado:
+            if c.estado == "pausada":
+                if c.t_pausa is not None and abs(c.t_pausa - objetivo) < 1e-6:
+                    return
+                self._ordenar(c, {"orden": "reanudar"})
+                c.t_pausa = None
+            self._ordenar(c, {"orden": "pausar", "en_t_sim_min": objetivo})
+            c.pausa_en = objetivo
+            c.cambiar_estado("pausando")
+
+    def pausar_grupo(self, grupo: str, en_t_sim_min: float | None = None) -> dict:
+        """Pausa las corridas de un grupo en la misma hora simulada: la pedida o, si no se pide o ya pasó para alguna, la
+        primera hora en punto a la que todas pueden llegar. Si igual alguna se pasa (sus avisos van atrasados), un hilo las
+        vuelve a alinear en la hora de la que quedó más adelante."""
+        cs = self.del_grupo(grupo)
+        with self.candado:
+            for c in cs:
+                if c.estado not in ("iniciando", "corriendo", "pausando", "pausada"):
+                    raise Rechazo(f"la corrida {c.id} no está en marcha (estado: {c.estado})")
+            objetivo = max(self._proxima_pausa_posible(c) for c in cs)
+            if en_t_sim_min is not None:
+                objetivo = max(objetivo, self.hora_en_punto(en_t_sim_min))
+            for c in cs:
+                self._pausar_en(c, objetivo)
+            ficha = secrets.token_hex(4)
+            self._alineando[grupo] = ficha
+        threading.Thread(target=self._alinear, args=(grupo, cs, ficha), name=f"alinear-{grupo}", daemon=True).start()
+        return {"grupo": grupo, "en_t_sim_min": objetivo, "corridas": [c.resumen() for c in cs]}
+
+    def _alinear(self, grupo: str, cs: list[Corrida], ficha: str, vueltas: int = 5) -> None:
+        for _ in range(vueltas):
+            while True:
+                if self._alineando.get(grupo) != ficha:
+                    return                           # otro pedido de pausa del grupo tomó el control
+                if any(c.estado not in ("pausando", "pausada") for c in cs):
+                    return                           # alguna se reanudó, se detuvo o terminó: no se insiste
+                if all(c.estado == "pausada" for c in cs):
+                    break
+                time.sleep(0.05)
+            horas = [c.t_pausa for c in cs]
+            if None in horas or max(horas) - min(horas) < 1e-6:
+                return
+            with self.candado:
+                if self._alineando.get(grupo) != ficha:
+                    return
+                try:
+                    for c in cs:
+                        self._pausar_en(c, max(horas))
+                except Rechazo:
+                    return
+
+    def intervenir_grupo(self, grupo: str, entrada: dict, espera_s: float = ESPERA_INTERVENCION_S) -> dict:
+        """La misma intervención a todas las corridas del grupo, que tienen que estar en pausa en la misma hora."""
+        cs = self.del_grupo(grupo)
+        with self.candado:
+            for c in cs:
+                if c.estado != "pausada":
+                    raise Rechazo(f"la corrida {c.id} ({c.motor}) no está en pausa (estado: {c.estado}); "
+                                  "pausá el grupo con /api/grupos/<grupo>/pausar")
+                if c.reproduccion_de:
+                    raise Rechazo(f"la corrida {c.id} es una reproducción: no acepta intervenciones nuevas")
+            horas = {c.t_pausa for c in cs}
+            if len(horas) != 1:
+                detalle = ", ".join(f"{c.motor}: {c.t_pausa:g} min" for c in cs)
+                raise Rechazo(f"las corridas del grupo están en pausa en horas distintas ({detalle}); pausalas juntas "
+                              "con /api/grupos/<grupo>/pausar")
+            enviados = [(c, *self._enviar_intervencion(c, entrada)) for c in cs]
+        limite = time.monotonic() + espera_s
+        respuestas = []
+        for c, ref, desde in enviados:
+            aviso = self._esperar_intervencion(c, ref, desde, limite)
+            respuestas.append({"id": c.id, "motor": c.motor, "aviso": aviso,
+                               **({} if aviso else {"error": "el proceso motor no respondió a la intervención"})})
+        if all(r["aviso"] is None for r in respuestas):
+            raise Rechazo("ningún proceso motor del grupo respondió a la intervención", 504)
+        return {"grupo": grupo, "t_sim_min": horas.pop(), "respuestas": respuestas}
 
     def detener(self, id_: str) -> Corrida:
         c = self.obtener(id_)
@@ -268,21 +482,36 @@ class Gestor:
             c.cambiar_estado("deteniendo")
         return c
 
-    def intervenir(self, id_: str, entrada: dict, espera_s: float = 5.0) -> dict:
-        """Manda una intervención al proceso y devuelve su respuesta. Solo con la corrida en pausa."""
-        c = self.obtener(id_)
+    def _enviar_intervencion(self, c: Corrida, entrada: dict) -> tuple[str, int]:
         with c.candado:
             if c.estado != "pausada":
-                raise Rechazo("solo se interviene con la corrida en pausa")
+                raise Rechazo(f"solo se interviene con la corrida en pausa (estado: {c.estado})")
+            if c.reproduccion_de:
+                raise Rechazo("una reproducción aplica solo la bitácora original: no acepta intervenciones nuevas")
+            ref = "i-" + secrets.token_hex(6)
             desde = len(c.eventos)
-            self._ordenar(c, {"orden": "intervenir", "entrada": entrada})
-        limite = time.monotonic() + espera_s
-        while time.monotonic() < limite:
+            self._ordenar(c, {"orden": "intervenir", "ref": ref, "entrada": entrada})
+        return ref, desde
+
+    @staticmethod
+    def _esperar_intervencion(c: Corrida, ref: str, desde: int, limite: float) -> dict | None:
+        while True:
             for e in c.eventos[desde:]:
-                if e.get("aviso") == "intervencion":
+                if e.get("aviso") == "intervencion" and e.get("ref") == ref:
                     return e
+            if time.monotonic() >= limite or c.estado in FINALES:
+                return None
             time.sleep(0.05)
-        raise Rechazo("el proceso motor no respondió a la intervención", 504)
+
+    def intervenir(self, id_: str, entrada: dict, espera_s: float = ESPERA_INTERVENCION_S) -> dict:
+        """Manda una intervención al proceso (con un `ref` propio) y devuelve el aviso `intervencion` con ese `ref`.
+        Solo con la corrida en pausa. Espera hasta `espera_s` segundos (504 si no llega)."""
+        c = self.obtener(id_)
+        ref, desde = self._enviar_intervencion(c, entrada)
+        aviso = self._esperar_intervencion(c, ref, desde, time.monotonic() + espera_s)
+        if aviso is None:
+            raise Rechazo("el proceso motor no respondió a la intervención", 504)
+        return aviso
 
     # ------------------------------------------------------------------ lectura de avisos (un hilo por corrida en marcha)
     def _leer_avisos(self, c: Corrida) -> None:
@@ -323,12 +552,17 @@ class Gestor:
                 if c.estado == "iniciando":
                     c.cambiar_estado("corriendo")
             elif tipo == "pausado":
-                if c.estado == "pausando":
+                # las pausas que anota una reproducción no esperan órdenes: no cambian el estado
+                if c.estado == "pausando" and not a.get("reproduccion"):
+                    c.t_pausa = float(a.get("t_sim_min") or 0.0)
+                    c.pausa_en = None
                     c.cambiar_estado("pausada", t_sim_min=a.get("t_sim_min"))
             elif tipo == "final":
                 c.final = a
             elif tipo == "error" and a.get("fatal"):
                 c.error = str(a.get("mensaje"))
+            if tipo in AVISOS_CON_ENTRADA:
+                c.sumar_a_la_bitacora(a.get("entrada"))
             if tipo in ("listo", "hora", "final") or (tipo == "error" and a.get("fatal")):
                 c.guardar()
 

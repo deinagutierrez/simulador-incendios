@@ -7,7 +7,7 @@ El programa nuevo. Plan: `docs/etapa3/00_plan.md`.
 | `app/motores/` | un proceso por corrida que conduce a v3.1 o a v4.0 sin modificarlos; motor simulado para pruebas | A. Motores y datos | fase F1 hecha: corre, avisa, pausa y detiene; ignición en un punto y una hora elegidos |
 | `app/datos/` | pronóstico de Open-Meteo, índices de Sentinel-2 (AWS, Earth Engine o TIF a mano), CSV a mano, modo escenario, evento generado `RT-…`, caché con procedencia | A. Motores y datos | fase F4 hecha (ver `docs/etapa3/F4_informe.md`); E-E3-2 pendiente de evaluar |
 | `app/servidor/` | servidor local (solo `127.0.0.1`), gestor de corridas, avance en vivo, huella para el mapa | B. Servidor e interfaz | fase F2 hecha |
-| `app/web/` | interfaz en el navegador: mapa con capas, panel, línea de tiempo, gráfico, comparación entre motores | B. Servidor e interfaz | fases F3 y F4 hechas; faltan cortafuegos y viento (F5) |
+| `app/web/` | interfaz en el navegador: mapa con capas, panel, línea de tiempo, gráfico, comparación entre motores | B. Servidor e interfaz | fases F3, F4 y F5 hechas (cortafuegos a mano alzada, viento manual, bitácora y reproducción) |
 
 Los dos frentes se encuentran en `docs/etapa3/contrato_servidor_motor.md`. Las pruebas están en `test/app/`.
 

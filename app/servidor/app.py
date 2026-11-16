@@ -1,18 +1,26 @@
-"""Pedidos HTTP del servidor local (fases F2 a F4).
+"""Pedidos HTTP del servidor local (fases F2 a F5).
 
     GET  /api/estado                              versión, motores, eventos con datos, dominio, corridas en marcha
     POST /api/corridas                            crea una corrida (o dos con motor "ambos"); con "iniciar": true la lanza
-                                                  cuerpo: motor, evento, ignicion [{lon, lat}], t_inicio_utc, horas;
+                                                  cuerpo: motor, evento, ignicion [{lon, lat}], t_inicio_utc (en hora en
+                                                  punto), horas, cortafuegos [{ancho_m, suelo_mineral, lonlat | xy_5345}];
                                                   o `definicion` (uso avanzado: un caso de prueba, otra hipótesis…)
     GET  /api/corridas                            lista
-    GET  /api/corridas/<id>                       estado; al terminar, también bitácora y resultados
-    POST /api/corridas/<id>/iniciar|pausar|reanudar|detener
-    POST /api/corridas/<id>/intervenciones        solo en pausa; hoy el motor contesta "rechazada" (llega con la fase F5)
+    GET  /api/corridas/<id>                       estado y bitácora (también en marcha); al terminar, resultados
+    POST /api/corridas/<id>/iniciar|reanudar|detener
+    POST /api/corridas/<id>/pausar                cuerpo opcional {en_t_sim_min}: pausa en esa hora simulada
+    POST /api/corridas/<id>/intervenciones        {tipo: cortafuego | viento_manual, datos}; solo en pausa; devuelve el
+                                                  aviso `intervencion` del motor (espera hasta 30 s)
+    POST /api/corridas/<id>/reproducir            {iniciar?}: corrida nueva que reproduce a esta desde su bitácora
+    GET  /api/corridas/<id>/cortafuegos.geojson   cortafuegos de la corrida, en grados (iniciales y de la bitácora)
+    POST /api/grupos/<grupo>/pausar               {en_t_sim_min?}: pausa las dos corridas de un modo "ambos" en la misma hora
+    POST /api/grupos/<grupo>/intervenciones       la misma intervención a las dos (en pausa en la misma hora)
     GET  /api/corridas/<id>/eventos               avance en vivo, por un canal de una sola vía (text/event-stream)
     GET  /api/corridas/<id>/quemado.png?hora=N    huella para el mapa, hasta la hora simulada N (o completa);
                                                   con color=rrggbb, de un solo color (para comparar dos motores)
     GET  /api/corridas/<id>/perimetro.geojson?hora=N   contorno del área quemada hasta la hora N
-    GET  /api/corridas/<id>/exportar              zip con corrida.json, los resultados del motor y los perímetros por hora
+    GET  /api/corridas/<id>/exportar              zip con corrida.json, los resultados del motor, los perímetros por hora,
+                                                  bitacora.jsonl y cortafuegos.geojson
     GET  /api/comparacion?a=<id>&b=<id>&hora=N    coincidencia entre dos huellas (superficies, envolvente, IoU)
     GET  /api/capas?evento=<id>                   capas de fondo disponibles, con su leyenda
     GET  /api/capas/<capa>.png?evento=<id>        capa ráster lista para superponer en un mapa web
@@ -57,14 +65,17 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from typing import Annotated, Literal
+
 from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
-from . import VERSION, capas, datos, huella
+from . import VERSION, capas, datos, huella, trazos
 from . import trabajos as mod_trabajos
-from .corridas import ACTIVOS, FINALES, MOTORES_REALES, Gestor, Rechazo, sha_congelado, escribir_json
+from .corridas import (ACTIVOS, ESPERA_INTERVENCION_S, FINALES, MOTORES_REALES, Gestor, Rechazo, escribir_json,
+                       sha_congelado)
 from .trabajos import GestorDatos
 
 # app/datos: el servidor solo usa las funciones que leen la caché (tomas(), eventos(), gee_disponible(), borrar()), que no
@@ -83,6 +94,65 @@ class Punto(BaseModel):
     nombre: str | None = None
 
 
+Numero = Annotated[float, Field(allow_inf_nan=False)]
+Par = Annotated[list[Numero], Field(min_length=2, max_length=2)]
+
+
+class Cortafuego(BaseModel):
+    """Un trazo: polilínea en grados (`lonlat`, lo que dibuja la pantalla) o en EPSG:5345 (`xy_5345`), uno de los dos."""
+    model_config = ConfigDict(extra="forbid")
+    ancho_m: int
+    suelo_mineral: bool = False
+    lonlat: list[Par] | None = Field(default=None, min_length=2, max_length=10000)
+    xy_5345: list[Par] | None = Field(default=None, min_length=2, max_length=10000)
+
+    @field_validator("ancho_m")
+    @classmethod
+    def _ancho(cls, v):
+        if v not in trazos.ANCHOS_M:
+            raise ValueError(f"tiene que ser uno de {', '.join(map(str, trazos.ANCHOS_M))}")
+        return v
+
+    @model_validator(mode="after")
+    def _uno_de_los_dos(self):
+        if (self.lonlat is None) == (self.xy_5345 is None):
+            raise ValueError("el trazo lleva `lonlat` (grados) o `xy_5345` (metros), uno de los dos")
+        return self
+
+
+class VientoManual(BaseModel):
+    """`{vel_kmh, dir_desde}` (km/h; grados de donde viene el viento) o `{modo: "pronostico"}` (volver al pronóstico)."""
+    model_config = ConfigDict(extra="forbid")
+    vel_kmh: float | None = Field(default=None, ge=0, le=trazos.VEL_MAX_KMH)
+    dir_desde: float | None = Field(default=None, ge=0, le=360)
+    modo: Literal["pronostico", "manual"] | None = None
+
+    @model_validator(mode="after")
+    def _completo(self):
+        if self.modo == "pronostico":
+            if self.vel_kmh is not None or self.dir_desde is not None:
+                raise ValueError("con `modo: \"pronostico\"` no van `vel_kmh` ni `dir_desde`")
+        elif self.vel_kmh is None or self.dir_desde is None:
+            raise ValueError("faltan `vel_kmh` y `dir_desde` (o `modo: \"pronostico\"` para volver al pronóstico)")
+        return self
+
+
+class PedidoIntervencion(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    tipo: Literal["cortafuego", "viento_manual"]
+    datos: dict
+
+
+class PedidoPausa(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    en_t_sim_min: float | None = Field(default=None, ge=0, allow_inf_nan=False)
+
+
+class PedidoReproducir(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    iniciar: bool = False
+
+
 class PedidoCorrida(BaseModel):
     motor: str
     evento: str | None = None
@@ -91,9 +161,35 @@ class PedidoCorrida(BaseModel):
     horas: int | None = Field(default=None, ge=1, le=240)
     hipotesis: int | None = Field(default=None, ge=0)
     ignicion_ficha: str | None = None
+    cortafuegos: list[Cortafuego] | None = Field(default=None, max_length=100)
     definicion: dict | None = None            # uso avanzado: lo mismo que `base.definicion` del contrato
     simulado: dict | None = None
     iniciar: bool = False
+
+
+def _errores(e: ValidationError) -> str:
+    """Los errores de pydantic en una línea legible: `campo: motivo; …`."""
+    partes = []
+    for x in e.errors():
+        lugar = ".".join(str(p) for p in x.get("loc", ()))
+        msg = str(x.get("msg", "")).removeprefix("Value error, ")
+        partes.append(f"{lugar}: {msg}" if lugar else msg)
+    return "; ".join(partes)
+
+
+def entrada_de_intervencion(pedido: PedidoIntervencion) -> dict:
+    """La entrada `{tipo, datos}` lista para el proceso motor (trazo en EPSG:5345, normalizada), o 422 con el motivo."""
+    modelo = Cortafuego if pedido.tipo == "cortafuego" else VientoManual
+    try:
+        d = modelo.model_validate(pedido.datos).model_dump(exclude_none=True)
+    except ValidationError as e:
+        raise HTTPException(422, f"datos del {pedido.tipo.replace('_', ' ')}: {_errores(e)}")
+    if pedido.tipo == "viento_manual" and d.get("modo") == "manual":
+        d.pop("modo")
+    try:
+        return trazos.entrada(pedido.tipo, d)
+    except ValueError as e:
+        raise HTTPException(422, f"datos del {pedido.tipo.replace('_', ' ')}: {e}")
 
 
 class PedidoMeteo(BaseModel):
@@ -314,7 +410,9 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
             motores.append({"id": "simulado", "de_prueba": True})
         return {"programa": {"nombre": "Simulador de incendios — San Luis", "version": VERSION},
                 "congelado_sha256": sha_congelado(), "motores": motores, "eventos_base": list(datos.eventos_base().values()),
-                "dominio": datos.dominio(), "limite_corridas": gestor.limite_activas, "corridas_en_marcha": gestor.activas()}
+                "dominio": datos.dominio(), "limite_corridas": gestor.limite_activas, "corridas_en_marcha": gestor.activas(),
+                "intervenciones": {"anchos_m": list(trazos.ANCHOS_M), "vel_max_kmh": trazos.VEL_MAX_KMH,
+                                   "espera_s": ESPERA_INTERVENCION_S}}
 
     # ------------------------------------------------------------------ corridas
     @app.post("/api/corridas", status_code=201)
@@ -322,6 +420,15 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
         p = pedido.model_dump()
         if p["horas"] is None and not p.get("definicion"):
             raise HTTPException(422, "faltan las horas a simular")
+        try:
+            trazos.iv.revisar_t_inicio(p.get("t_inicio_utc"))
+        except ValueError as e:
+            raise HTTPException(422, str(e).replace("`configuracion.t_inicio_utc`", "t_inicio_utc"))
+        if p.get("cortafuegos"):
+            try:
+                p["cortafuegos"] = trazos.cortafuegos([c.model_dump(exclude_none=True) for c in pedido.cortafuegos])
+            except ValueError as e:
+                raise HTTPException(422, str(e))
         if p["motor"] != "simulado" and not p.get("definicion"):
             try:
                 datos.revisar_pedido(p)
@@ -345,13 +452,39 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
             d["huella"] = {"limites": huella.limites(c.listo["grilla"]), "url": f"/api/corridas/{id_}/quemado.png"}
         return d
 
+    def _cortafuegos_geojson(c) -> dict:
+        corrida = c.corrida_json() or {}
+        return trazos.geojson(corrida, c.bitacora(corrida)[0], c.estados_intervenciones())
+
+    @app.get("/api/corridas/{id_}/cortafuegos.geojson")
+    def cortafuegos_de_la_corrida(id_: str):
+        """Los cortafuegos de la corrida en grados: los dibujados antes de iniciar y los aplicados en pausa (bitácora)."""
+        return JSONResponse(_cortafuegos_geojson(gestor.obtener(id_)), media_type="application/geo+json",
+                            headers={"Cache-Control": "no-store"})
+
+    @app.post("/api/corridas/{id_}/reproducir", status_code=201)
+    def reproducir(id_: str, pedido: PedidoReproducir | None = Body(default=None)):
+        c = gestor.reproducir(id_)
+        if pedido is not None and pedido.iniciar:
+            gestor.iniciar(c.id)
+        return {"corridas": [c.resumen()]}
+
+    @app.post("/api/grupos/{grupo}/pausar")
+    def pausar_grupo(grupo: str, pedido: PedidoPausa | None = Body(default=None)):
+        return gestor.pausar_grupo(grupo, pedido.en_t_sim_min if pedido else None)
+
+    @app.post("/api/grupos/{grupo}/intervenciones")
+    def intervenir_grupo(grupo: str, pedido: PedidoIntervencion):
+        entrada = entrada_de_intervencion(pedido)
+        return gestor.intervenir_grupo(grupo, entrada)
+
     @app.post("/api/corridas/{id_}/iniciar")
     def iniciar(id_: str):
         return gestor.iniciar(id_).resumen()
 
     @app.post("/api/corridas/{id_}/pausar")
-    def pausar(id_: str):
-        return gestor.pausar(id_).resumen()
+    def pausar(id_: str, pedido: PedidoPausa | None = Body(default=None)):
+        return gestor.pausar(id_, pedido.en_t_sim_min if pedido else None).resumen()
 
     @app.post("/api/corridas/{id_}/reanudar")
     def reanudar(id_: str):
@@ -362,8 +495,13 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
         return gestor.detener(id_).resumen()
 
     @app.post("/api/corridas/{id_}/intervenciones")
-    def intervenir(id_: str, entrada: dict = Body(default={})):
-        return gestor.intervenir(id_, entrada)
+    def intervenir(id_: str, pedido: PedidoIntervencion):
+        """Solo en pausa (409 si no). Devuelve el aviso `intervencion` del motor: `{ref, n, estado, t_vigor_min, pleno_min?,
+        motivo, entrada}`; 422 si el cuerpo no sirve; 504 si el motor no contesta en 30 s."""
+        c = gestor.obtener(id_)
+        if c.estado != "pausada":                    # antes de validar el trazo: el 409 es lo primero que importa
+            raise HTTPException(409, f"solo se interviene con la corrida en pausa (estado: {c.estado})")
+        return gestor.intervenir(id_, entrada_de_intervencion(pedido))
 
     @app.get("/api/corridas/{id_}/eventos")
     async def eventos(id_: str, request: Request, desde: int = 0):
@@ -402,7 +540,7 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
             raise HTTPException(409, "la corrida todavía está en marcha; se exporta cuando termina")
         memoria = io.BytesIO()
         with zipfile.ZipFile(memoria, "w", zipfile.ZIP_DEFLATED) as z:
-            for nombre in ("corrida.json", "estado.json", "eventos.jsonl", "escenario_base.yaml"):
+            for nombre in ("corrida.json", "estado.json", "eventos.jsonl", "bitacora.jsonl", "escenario_base.yaml"):
                 if (c.carpeta / nombre).exists():
                     z.write(c.carpeta / nombre, f"{id_}/{nombre}")
             salida = c.carpeta / "salida"
@@ -416,6 +554,7 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
                     if f:
                         figuras += f["features"]
                 z.writestr(f"{id_}/perimetros_por_hora.geojson", json.dumps({"type": "FeatureCollection", "features": figuras}))
+            z.writestr(f"{id_}/cortafuegos.geojson", json.dumps(_cortafuegos_geojson(c), ensure_ascii=False))
         return Response(memoria.getvalue(), media_type="application/zip",
                         headers={"Content-Disposition": f'attachment; filename="{id_}.zip"'})
 
