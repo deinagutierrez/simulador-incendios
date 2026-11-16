@@ -1,7 +1,8 @@
 # Prerregistro E-E3-2 — Los índices por AWS equivalen a los de Google Earth Engine
 
 Escrito el 2026-11-10, antes de escribir el módulo de índices. Se congela con la etiqueta `prerregistro-E-E3-2`.
-Escribe: ____ · Evalúa (la otra persona): ____
+Escribe: deinagutierrez · Evalúa (la otra persona): LisandroV2002 (D-E3-25, 2026-11-13). El diseño y el criterio no cambian
+respecto de la etiqueta; solo se agregan los nombres.
 
 ## Pregunta
 ¿NDVI y NDMI calculados desde Sentinel-2 L2A en AWS (catálogo Earth Search, máscara de nubes SCL) reemplazan a los que el

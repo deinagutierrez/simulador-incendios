@@ -1,0 +1,180 @@
+{
+ "producto": "NDVI_NDMI_2026_02.tif",
+ "fuente": "Sentinel-2 L2A, AWS (Earth Search), compuesto mensual",
+ "generado_utc": "2026-11-13T18:15:58Z",
+ "codigo": "app/datos (simulador)",
+ "parametros": {
+  "producto": "mensual",
+  "mes": "2026-02",
+  "grilla": {
+   "crs": "EPSG:5345",
+   "res": 30.0,
+   "xmin": 3513060.0,
+   "ymin": 6367770.0,
+   "xmax": 3563220.0,
+   "ymax": 6417900.0,
+   "ncol": 1672,
+   "nfil": 1671
+  },
+  "metodo": {
+   "nombre": "mensual",
+   "ndvi": "(B08-B04)/(B08+B04)",
+   "ndmi": "(B8A-B11)/(B8A+B11)",
+   "remuestreo": "nearest",
+   "lectura_bandas_10m": "nivel de 20 m del COG",
+   "reflectancia": "DN/10000 + (0.0)",
+   "max_nubes_tesela_pct": 80.0,
+   "mascara": "SCL, se descartan las clases [0, 1, 3, 8, 9, 10, 11]",
+   "compuesto": "mediana de los índices por fecha",
+   "version": "1.0"
+  }
+ },
+ "sha256": "d10f9ed3ef138185dd191f665cbb596cafbd0e6db1ac8d703ace01597617cc5e",
+ "n_escenas": 17,
+ "fechas": [
+  "2026-02-05",
+  "2026-02-10",
+  "2026-02-15",
+  "2026-02-20",
+  "2026-02-25"
+ ],
+ "escenas": [
+  {
+   "id": "S2C_20HKK_20260205_0_L2A",
+   "fecha": "2026-02-05",
+   "tesela": "20HKK",
+   "nubes_pct": 54.840022,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGE_20260205_0_L2A",
+   "fecha": "2026-02-05",
+   "tesela": "19HGE",
+   "nubes_pct": 49.108455,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKK_20260210_0_L2A",
+   "fecha": "2026-02-10",
+   "tesela": "20HKK",
+   "nubes_pct": 10.394099,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGE_20260210_0_L2A",
+   "fecha": "2026-02-10",
+   "tesela": "19HGE",
+   "nubes_pct": 13.150491,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKJ_20260210_0_L2A",
+   "fecha": "2026-02-10",
+   "tesela": "20HKJ",
+   "nubes_pct": 9.960338,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGD_20260210_0_L2A",
+   "fecha": "2026-02-10",
+   "tesela": "19HGD",
+   "nubes_pct": 8.002312,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_20HKK_20260215_0_L2A",
+   "fecha": "2026-02-15",
+   "tesela": "20HKK",
+   "nubes_pct": 54.220682,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGE_20260215_0_L2A",
+   "fecha": "2026-02-15",
+   "tesela": "19HGE",
+   "nubes_pct": 53.862876,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGD_20260215_0_L2A",
+   "fecha": "2026-02-15",
+   "tesela": "19HGD",
+   "nubes_pct": 74.500418,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKK_20260220_0_L2A",
+   "fecha": "2026-02-20",
+   "tesela": "20HKK",
+   "nubes_pct": 38.987482,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGE_20260220_0_L2A",
+   "fecha": "2026-02-20",
+   "tesela": "19HGE",
+   "nubes_pct": 68.361604,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKJ_20260220_0_L2A",
+   "fecha": "2026-02-20",
+   "tesela": "20HKJ",
+   "nubes_pct": 15.63224,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGD_20260220_0_L2A",
+   "fecha": "2026-02-20",
+   "tesela": "19HGD",
+   "nubes_pct": 42.896461,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_20HKK_20260225_0_L2A",
+   "fecha": "2026-02-25",
+   "tesela": "20HKK",
+   "nubes_pct": 35.576159,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGE_20260225_0_L2A",
+   "fecha": "2026-02-25",
+   "tesela": "19HGE",
+   "nubes_pct": 45.707923,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_20HKJ_20260225_0_L2A",
+   "fecha": "2026-02-25",
+   "tesela": "20HKJ",
+   "nubes_pct": 38.16213,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGD_20260225_0_L2A",
+   "fecha": "2026-02-25",
+   "tesela": "19HGD",
+   "nubes_pct": 37.458503,
+   "linea_base": "05.12",
+   "boa_offset_applied": true
+  }
+ ],
+ "celdas_sin_dato_pct": 0.0
+}

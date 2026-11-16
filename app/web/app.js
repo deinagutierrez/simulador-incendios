@@ -1,4 +1,4 @@
-/* Pantalla del simulador (fase F3). Habla con el servidor local por los pedidos de docs/etapa3/contrato_servidor_motor.md §4.
+/* Pantalla del simulador (fases F3 y F4). Habla con el servidor local por los pedidos de docs/etapa3/contrato_servidor_motor.md §4.
    Sin bibliotecas salvo Leaflet (app/web/vendor/leaflet). */
 "use strict";
 
@@ -15,11 +15,19 @@ const ESTADOS = {creada: "creada", iniciando: "cargando datos…", corriendo: "s
                  deteniendo: "deteniendo…", terminada: "terminada", detenida: "detenida", error: "con error", interrumpida: "interrumpida"};
 const HUSO_H = -3;                                   // hora argentina, sin horario de verano
 const S = {estado: null, mapa: null, capas: {}, enMapa: {}, marcador: null, usados: [], corridas: [], pedido: null,
-           modo: "configurar", horaVista: 0, enVivo: true, reproduccion: null};
+           modo: "configurar", horaVista: 0, enVivo: true, reproduccion: null,
+           datos: null, trabajo: null, canalTrabajo: null, ocupado: false};
 
 // ---------------------------------------------------------------- utilidades
-async function pedir(ruta, cuerpo) {
-  const r = await fetch(ruta, cuerpo === undefined ? {} : {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(cuerpo)});
+async function pedir(ruta, cuerpo, metodo) {
+  const opciones = cuerpo === undefined ? (metodo ? {method: metodo} : {})
+    : {method: metodo || "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(cuerpo)};
+  return responder(await fetch(ruta, opciones));
+}
+async function subir(ruta, archivo) {                // archivo crudo como cuerpo del pedido (sin formularios multipart)
+  return responder(await fetch(ruta, {method: "POST", headers: {"Content-Type": "application/octet-stream"}, body: archivo}));
+}
+async function responder(r) {
   const datos = await r.json().catch(() => ({}));
   if (!r.ok) {
     const d = datos.detail;
@@ -39,6 +47,8 @@ function aUTC(fecha, hora) {                         // hora argentina → "AAAA
   return new Date(Date.UTC(a, m - 1, d, h - HUSO_H, mi || 0)).toISOString().replace(".000Z", "Z");
 }
 const normalizarUTC = t => String(t).replace(" ", "T").replace("+00:00", "Z");
+const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"})[c]);
+const fechaCorta = d => d ? `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}` : "—";      // "AAAA-MM-DD" → "DD/MM/AAAA"
 const ev = () => S.estado.eventos_base.find(e => e.id === $("evento").value);
 
 // ---------------------------------------------------------------- arranque
@@ -46,9 +56,7 @@ async function arrancar() {
   S.estado = await pedir("/api/estado");
   $("version").textContent = `Programa ${S.estado.programa.version} · motores congelados ${String(S.estado.congelado_sha256).slice(0, 8)}…`;
   $("motor").innerHTML = S.estado.motores.map(m => `<option value="${m.id}">${MOTORES[m.id]?.largo || m.id}</option>`).join("");
-  $("evento").innerHTML = S.estado.eventos_base.map(e => `<option value="${e.id}">${e.nombre || e.id}</option>`).join("");
-  const lagunas = S.estado.eventos_base.find(e => e.id === "SL-2024-LASLAGUNAS");
-  if (lagunas) $("evento").value = lagunas.id;
+  llenarEventos();
 
   const [[sur, oeste], [norte, este]] = S.estado.dominio.limites;
   S.mapa = L.map("mapa", {zoomSnap: 0.25, minZoom: 9, maxZoom: 16, attributionControl: true,
@@ -62,6 +70,8 @@ async function arrancar() {
   S.mapa.on("click", e => { if (S.modo === "configurar") ponerPunto(e.latlng.lat, e.latlng.lng); });
 
   $("evento").onchange = () => { proponerEvento(); cargarCapas(); };
+  $("borrar-rt").onclick = borrarRT;
+  prepararDatos();
   for (const id of ["lat", "lon"]) $(id).onchange = () => ponerPunto(Number($("lat").value), Number($("lon").value), true);
   $("iniciar").onclick = iniciar;
   $("pausar").onclick = () => ordenar("pausar");
@@ -75,21 +85,76 @@ async function arrancar() {
   $("anteriores").onchange = () => { if ($("anteriores").value) abrirAnterior($("anteriores").value); };
 
   proponerEvento();
+  cargarDatos();                                     // no se espera: la zona de datos no frena el mapa
   await cargarCapas();
   await listarAnteriores();
 }
 
+// ---------------------------------------------------------------- selector de evento: tiempo real y ejemplos
+// Los eventos generados (RT-…) van primero; los eventos con ficha se ofrecen rotulados EJEMPLO (plan §4.2).
+function llenarEventos(elegir) {
+  const antes = elegir || $("evento").value;
+  const todos = S.estado.eventos_base;
+  const rt = todos.filter(e => e.tiempo_real).sort((a, b) => String(b.creado_utc || b.id).localeCompare(String(a.creado_utc || a.id)));
+  const ejemplos = todos.filter(e => !e.tiempo_real);
+  $("evento").innerHTML =
+    `<optgroup label="Tiempo real">${rt.length ? rt.map(e => `<option value="${esc(e.id)}">${esc(e.nombre || e.id)}</option>`).join("")
+      : '<option value="" disabled>Todavía no hay: armalo en «Datos»</option>'}</optgroup>` +
+    `<optgroup label="Ejemplos (incendios históricos con ficha)">${ejemplos.map(e => `<option value="${esc(e.id)}">EJEMPLO · ${esc(e.nombre || e.id)}</option>`).join("")}</optgroup>`;
+  const lagunas = ejemplos.find(e => e.id === "SL-2024-LASLAGUNAS");
+  const elegido = todos.find(e => e.id === antes) || rt[0] || lagunas || ejemplos[0];
+  if (elegido) $("evento").value = elegido.id;
+}
+
+async function refrescarEventos(elegir) {
+  const previo = $("evento").value;
+  S.estado = await pedir("/api/estado");
+  llenarEventos(elegir);
+  if (S.modo === "configurar" && $("evento").value !== previo) { proponerEvento(); await cargarCapas(); }
+  else if (S.modo === "configurar") pintarRotulosEvento(ev());
+}
+
+function pintarRotulosEvento(e) {
+  if (!e) { $("rotulos-evento").innerHTML = $("avisos-evento").innerHTML = ""; $("borrar-rt").hidden = true; return; }
+  const rotulos = e.rotulos || [];
+  $("rotulos-evento").innerHTML = (e.tiempo_real ? '<span class="rotulo rt">tiempo real</span>' : "") +
+    rotulos.map(r => `<span class="rotulo${r === "EJEMPLO" ? " ejemplo" : /prueba|escenario|mano/i.test(r) ? " prueba" : ""}">${esc(r)}</span>`).join("");
+  const avisos = (e.avisos || []).filter(a => !(rotulos.includes("EJEMPLO") && /^EJEMPLO/.test(a)));
+  if (!e.tiempo_real) avisos.unshift("Es un ejemplo: el tiempo y la vegetación son los de un incendio histórico, no los de hoy.");
+  $("avisos-evento").innerHTML = avisos.length ? `<div class="aviso">${avisos.length > 1 ? `<ul>${avisos.map(a => `<li>${esc(a)}</li>`).join("")}</ul>` : esc(avisos[0])}</div>` : "";
+  $("borrar-rt").hidden = !e.tiempo_real;
+}
+
 function proponerEvento() {
   const e = ev();
+  pintarRotulosEvento(e);
   if (!e) return;
-  const inicio = e.inicios_de_la_ficha_utc[0] || e.meteo_desde_utc;
+  let inicio = e.tiempo_real ? e.t_inicio_por_defecto_utc : (e.inicios_de_la_ficha_utc || [])[0];
+  inicio = inicio || e.meteo_desde_utc;
+  if (inicio && e.meteo_desde_utc && e.meteo_hasta_utc) {                // dentro del rango de la meteorología
+    const t = new Date(normalizarUTC(inicio)).getTime(), a = new Date(e.meteo_desde_utc).getTime(), b = new Date(e.meteo_hasta_utc).getTime() - 3600e3;
+    inicio = new Date(Math.min(Math.max(t, a), Math.max(a, b))).toISOString();
+  }
   if (inicio) { const l = aLocal(normalizarUTC(inicio)); $("fecha").value = l.fecha; $("hora").value = l.hora; }
   if (e.meteo_desde_utc) {
     $("fecha").min = aLocal(e.meteo_desde_utc).fecha; $("fecha").max = aLocal(e.meteo_hasta_utc).fecha;
-    $("nota-evento").textContent = `Hay datos del tiempo del ${aLocal(e.meteo_desde_utc).texto} al ${aLocal(e.meteo_hasta_utc).texto} (hora argentina).`;
-  }
-  const p = e.ignicion_de_la_ficha[0];
+    $("nota-evento").textContent = `Hay datos del tiempo del ${aLocal(e.meteo_desde_utc).texto} al ${aLocal(e.meteo_hasta_utc).texto} (hora argentina).` +
+      (e.tiempo_real ? " Este evento no trae punto de ignición: marcalo con un clic en el mapa." : "");
+  } else $("nota-evento").textContent = "";
+  const p = (e.ignicion_de_la_ficha || [])[0];
   if (p) ponerPunto(p.lat, p.lon, true); else quitarPunto();
+}
+
+async function borrarRT() {
+  const e = ev();
+  if (!e || !e.tiempo_real) return;
+  if (!confirm(`¿Borrar el evento ${e.id}? Se borran su ficha, su meteorología y su combustible. Las tomas de datos quedan.`)) return;
+  $("error").textContent = "";
+  try {
+    await pedir(`/api/datos/eventos/${encodeURIComponent(e.id)}`, undefined, "DELETE");
+    await refrescarEventos("");
+    cargarDatos();
+  } catch (x) { $("error").textContent = x.message; }
 }
 
 // ---------------------------------------------------------------- punto de ignición
@@ -197,9 +262,17 @@ function dibujarLeyenda() {
 async function iniciar() {
   $("error").textContent = "";
   const horas = Number($("horas").value);
-  if (!$("lat").value || !$("lon").value) return void ($("error").textContent = "Marcá el punto de ignición con un clic en el mapa.");
+  const e = ev();
+  if (!e) return void ($("error").textContent = "Elegí los datos del terreno y del tiempo.");
+  if (!$("lat").value || !$("lon").value) return void ($("error").textContent = e.tiempo_real
+    ? "Este evento de tiempo real no trae punto de ignición: marcalo con un clic en el mapa." : "Marcá el punto de ignición con un clic en el mapa.");
   if (!$("fecha").value || !$("hora").value) return void ($("error").textContent = "Falta el día o la hora de inicio.");
   if (!(horas >= 1 && horas <= 240)) return void ($("error").textContent = "Las horas a simular van de 1 a 240.");
+  if (e.meteo_desde_utc && e.meteo_hasta_utc) {
+    const t = new Date(aUTC($("fecha").value, $("hora").value)).getTime();
+    if (t < new Date(e.meteo_desde_utc).getTime() || t >= new Date(e.meteo_hasta_utc).getTime())
+      return void ($("error").textContent = `La hora de inicio cae fuera de los datos del tiempo (del ${aLocal(e.meteo_desde_utc).texto} al ${aLocal(e.meteo_hasta_utc).texto}).`);
+  }
   const pedido = {motor: $("motor").value, evento: $("evento").value, horas, iniciar: true,
                   ignicion: [{lat: Number($("lat").value), lon: Number($("lon").value)}], t_inicio_utc: aUTC($("fecha").value, $("hora").value)};
   $("iniciar").disabled = true;
@@ -476,6 +549,241 @@ async function abrirAnterior(clave) {
   if (ign) ponerPunto(ign.lat, ign.lon, true);
   seguir(grupo, {motor: grupo.length > 1 ? "ambos" : grupo[0].motor});
   $("anteriores").value = clave;
+}
+
+// ---------------------------------------------------------------- zona de datos (fase F4)
+// Cada pedido que baja o prepara datos lanza un trabajo en un proceso aparte, uno a la vez; se sigue por su canal de eventos.
+const TAREAS = {pronostico: "Bajar el pronóstico", meteo_manual: "Cargar la meteorología (CSV)", escenario: "Armar el escenario",
+                indices_aws: "Bajar los índices (AWS)", indices_gee: "Bajar los índices (Earth Engine)",
+                indices_manual: "Cargar los índices (TIF)", evento: "Armar el evento en tiempo real"};
+const ESTADOS_TRABAJO = {creado: "por empezar…", corriendo: "en marcha…", terminado: "listo", error: "con error", interrumpido: "interrumpido"};
+const TRABAJO_FINAL = ["terminado", "error", "interrumpido"];
+const MAX_CSV_MB = 20, MAX_TIF_MB = 60;
+
+function prepararDatos() {
+  $("b-pronostico").onclick = () => lanzar(() => pedir("/api/datos/meteo", {fuente: "pronostico"}));
+  $("b-aws").onclick = () => lanzar(() => pedir("/api/datos/indices", {fuente: "aws"}));
+  $("b-gee").onclick = () => lanzar(() => pedir("/api/datos/indices", {fuente: "gee"}));
+  $("b-evento").onclick = armarEvento;
+  $("b-csv").onclick = cargarCSV;
+  $("b-tif").onclick = cargarTIF;
+  $("b-escenario").onclick = armarEscenario;
+  const ahora = aLocal(new Date(Math.ceil(Date.now() / 3600e3) * 3600e3).toISOString());
+  $("esc-fecha").value = ahora.fecha; $("esc-hora").value = ahora.hora;
+}
+
+async function cargarDatos() {
+  try { S.datos = await pedir("/api/datos"); }
+  catch (e) { $("error-datos").textContent = "No se pudo leer el estado de los datos: " + e.message; return; }
+  const t = S.datos.trabajo;
+  if (t && (!S.trabajo || S.trabajo.id !== t.id)) {            // el mismo trabajo ya se sigue por su canal
+    S.trabajo = t;
+    if (!TRABAJO_FINAL.includes(t.estado)) seguirTrabajo(t);
+  }
+  pintarDatos();
+}
+
+function hace(horas) {
+  if (horas == null) return "—";
+  if (horas < 1) return "hace menos de 1 h";
+  if (horas < 48) return `hace ${num(horas)} h`;
+  return `hace ${num(horas / 24)} días`;
+}
+
+function pintarDatos() {
+  const d = S.datos;
+  if (!d) return;
+  const a = d.antiguedad || {};
+  $("datos-avisos").innerHTML = (d.avisos || []).length
+    ? `<div class="aviso"><b>Para tener en cuenta</b><ul>${d.avisos.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>` : "";
+
+  const pron = (d.meteo || []).find(t => String(t.id || "").endsWith("-pronostico"));
+  $("datos-pronostico").innerHTML = pron
+    ? `<dt>Toma</dt><dd>${aLocal(normalizarUTC(pron.hora_de_la_toma_utc || pron.creada_utc)).texto}</dd>` +
+      `<dt>Modelo</dt><dd>${esc(pron.modelo || pron.fuente || "—")}</dd>` +
+      `<dt>Cubre</dt><dd>${aLocal(pron.desde_utc).texto} a ${aLocal(pron.hasta_utc).texto}</dd>` +
+      `<dt>Antigüedad</dt><dd class="${a.pronostico_horas > a.pronostico_viejo_horas ? "viejo" : ""}">${hace(a.pronostico_horas)}</dd>`
+    : '<dd class="vacio">No hay ningún pronóstico guardado.</dd>';
+
+  // Se muestra la toma con los datos más recientes (la misma que mide la antigüedad), no la última cargada.
+  const ultimaDe = t => t.ultima_fecha || (t.ventana || [])[1] || "";
+  const ind = [...(d.indices || [])].sort((x, y) => ultimaDe(y).localeCompare(ultimaDe(x)))[0];
+  const ultima = ind ? ultimaDe(ind) : null;
+  $("datos-indices").innerHTML = ind
+    ? `<dt>Ventana</dt><dd>${fechaCorta((ind.ventana || [])[0])} a ${fechaCorta((ind.ventana || [])[1])}</dd>` +
+      `<dt>Fuente</dt><dd>${esc(ind.rotulo || ind.fuente || "—")}</dd>` +
+      (ind.n_escenas != null ? `<dt>Escenas</dt><dd>${num(ind.n_escenas)}${ultima ? ` · la última del ${fechaCorta(ultima)}` : ""}</dd>` : "") +
+      (ind.celdas_sin_dato_pct ? `<dt>Celdas sin dato</dt><dd>${num(ind.celdas_sin_dato_pct, 1)} %</dd>` : "") +
+      `<dt>Antigüedad</dt><dd class="${a.indices_dias > a.indices_viejos_dias ? "viejo" : ""}">${a.indices_dias == null ? "—" : a.indices_dias === 0 ? "de hoy" : a.indices_dias === 1 ? "de ayer" : `${num(a.indices_dias)} días`}</dd>`
+    : '<dd class="vacio">No hay índices guardados.</dd>';
+  $("en-prueba").hidden = !(ind && ind.via === "aws" && ind.en_prueba);
+  const gee = d.gee || {};
+  $("nota-gee").hidden = !!gee.disponible;
+  $("nota-gee").textContent = gee.disponible ? "" : `Earth Engine no está disponible: ${gee.motivo || "sin credenciales"}.`;
+  $("b-gee").title = gee.disponible ? "" : `No disponible: ${gee.motivo || "sin credenciales"}`;
+
+  const nuevo = (lista, que) => lista.length ? `<option value="">La más nueva (${esc(etiquetaToma(lista[0], que))})</option>` : `<option value="">No hay tomas de ${que}</option>`;
+  for (const [id, lista, que] of [["sel-meteo", d.meteo || [], "meteorología"], ["sel-indices", d.indices || [], "índices"]]) {
+    const antes = $(id).value;
+    $(id).innerHTML = nuevo(lista, que) + lista.map(t => `<option value="${esc(t.id)}">${esc(etiquetaToma(t, que))}</option>`).join("");
+    if (lista.some(t => t.id === antes)) $(id).value = antes;
+  }
+  pintarTrabajo();
+}
+
+function etiquetaToma(t, que) {
+  if (que === "índices") {
+    const v = t.ventana || [];
+    return `${t.rotulo || t.fuente || t.id} · ${fechaCorta(v[0])} a ${fechaCorta(v[1])}`;
+  }
+  return `${t.rotulo || t.fuente || t.id} · ${t.desde_utc ? aLocal(t.desde_utc).texto.slice(0, 10) + " a " + aLocal(t.hasta_utc).texto.slice(0, 10) : ""} · tomada ${aLocal(normalizarUTC(t.creada_utc)).texto}`;
+}
+
+function enMarcha() { return S.ocupado || (S.trabajo && !TRABAJO_FINAL.includes(S.trabajo.estado)); }
+
+function pintarTrabajo() {
+  const t = S.trabajo, ocupado = enMarcha(), d = S.datos || {};
+  for (const b of document.querySelectorAll("#sec-datos button.lanza")) b.disabled = ocupado;
+  if (!d.gee?.disponible) $("b-gee").disabled = true;
+  if (!(d.meteo || []).length || !(d.indices || []).length) $("b-evento").disabled = true;
+  $("b-evento").title = $("b-evento").disabled && !ocupado ? "Hace falta al menos una toma de meteorología y una de índices" : "";
+  $("trabajo").hidden = !t;
+  if (!t) return;
+  $("trabajo-nombre").textContent = TAREAS[t.tarea] || t.tarea;
+  $("trabajo-estado").textContent = ESTADOS_TRABAJO[t.estado] || t.estado;
+  const p = t.progreso, barra = $("trabajo-barra");
+  const corre = !TRABAJO_FINAL.includes(t.estado);
+  barra.classList.toggle("indefinida", corre && !(p && p.total > 0));
+  barra.style.width = !corre ? (t.estado === "terminado" ? "100%" : "0") : p && p.total > 0 ? `${Math.min(100, p.hechos / p.total * 100)}%` : "";
+  let texto = "";
+  if (corre) texto = p ? `${p.texto || ""}${p.total > 0 ? ` (${num(p.hechos)} de ${num(p.total)})` : ""}${p.s != null ? ` · ${num(p.s)} s` : ""}` : "Arrancando el proceso de datos…";
+  else if (t.estado === "terminado") texto = resumenResultado(t);
+  else if (t.terminado_utc) texto = `Terminó el ${aLocal(normalizarUTC(t.terminado_utc)).texto}.`;
+  $("trabajo-texto").textContent = texto;
+  $("trabajo-error").textContent = t.estado === "error" || t.estado === "interrumpido" ? (t.error || "El trabajo no terminó bien.") : "";
+  pintarSinRed(t);
+}
+
+function resumenResultado(t) {
+  const r = t.resultado || {}, cuando = t.terminado_utc ? ` el ${aLocal(normalizarUTC(t.terminado_utc)).texto}` : "";
+  if (t.tarea === "evento") return `Evento ${r.id || ""} armado${cuando}. Ya se puede elegir en «Configurar».`;
+  if (t.tarea.startsWith("indices")) return `Toma ${r.id || ""} guardada${cuando}${r.n_escenas != null ? `, con ${num(r.n_escenas)} escenas` : ""}.`;
+  return `Toma ${r.id || ""} guardada${cuando}${r.horas ? `, ${num(r.horas)} horas` : ""}.`;
+}
+
+// Sin red: si la descarga falla y no hay ninguna toma de ese tipo guardada, se dice claro qué queda por hacer.
+function pintarSinRed(t) {
+  const caja = $("trabajo-sin-red"), d = S.datos || {};
+  const bajada = ["pronostico", "indices_aws", "indices_gee"].includes(t.tarea);
+  const sinTomas = t.tarea === "pronostico" ? !(d.meteo || []).length : !(d.indices || []).length;
+  caja.hidden = !(bajada && t.estado === "error" && sinTomas);
+  if (caja.hidden) return;
+  caja.className = "aviso sin-red";
+  caja.innerHTML = `<b>No se pudo bajar ${t.tarea === "pronostico" ? "el pronóstico" : "los índices"} y no hay nada guardado.</b>` +
+    `Puede ser que la computadora no tenga internet. Podés ${t.tarea === "pronostico" ? "cargar un CSV de meteorología o armar un escenario" : "cargar los TIF de NDVI y NDMI"} (abajo, en «Cargar datos a mano» y «Modo escenario»), o simular con un evento de EJEMPLO, que no necesita red.` +
+    `<br><button id="usar-ejemplo">Usar un ejemplo</button>`;
+  $("usar-ejemplo").onclick = usarEjemplo;
+}
+
+function usarEjemplo() {
+  if (S.modo !== "configurar") return;
+  const ejemplo = S.estado.eventos_base.find(e => e.id === "SL-2024-LASLAGUNAS") || S.estado.eventos_base.find(e => !e.tiempo_real);
+  if (!ejemplo) return;
+  $("evento").value = ejemplo.id; proponerEvento(); cargarCapas();
+  $("sec-config").scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+// Lanza un trabajo: `hacer` hace el pedido y devuelve {trabajo}. Un solo trabajo a la vez (el servidor contesta 409 si no).
+async function lanzar(hacer, siempre) {
+  if (enMarcha()) return;
+  $("error-datos").textContent = "";
+  S.ocupado = true; pintarTrabajo();
+  try {
+    const r = await hacer();
+    S.trabajo = r.trabajo;
+    seguirTrabajo(r.trabajo);
+    if (siempre) siempre();
+  } catch (e) {
+    $("error-datos").textContent = e.message;
+  } finally {
+    S.ocupado = false; pintarTrabajo();
+  }
+}
+
+function seguirTrabajo(t) {
+  if (S.canalTrabajo) S.canalTrabajo.close();
+  const canal = S.canalTrabajo = new EventSource(`/api/datos/trabajos/${encodeURIComponent(t.id)}/eventos`);
+  const cerrar = async () => {
+    canal.close();
+    if (S.canalTrabajo === canal) S.canalTrabajo = null;
+    try { S.trabajo = await pedir(`/api/datos/trabajos/${encodeURIComponent(t.id)}`); } catch (e) { /* queda lo que llegó por el canal */ }
+    await alTerminarTrabajo(S.trabajo);
+  };
+  canal.onmessage = m => {
+    const e = JSON.parse(m.data);
+    if (!S.trabajo || S.trabajo.id !== t.id) return;
+    if (e.aviso === "estado") S.trabajo.estado = e.estado;
+    else if (e.aviso === "progreso") S.trabajo.progreso = {hechos: e.hechos, total: e.total, texto: e.texto, s: e.s};
+    else if (e.aviso === "final") S.trabajo.resultado = e.resultado;
+    else if (e.aviso === "error") S.trabajo.error = e.mensaje;
+    pintarTrabajo();
+  };
+  canal.addEventListener("cierre", cerrar);
+  canal.onerror = () => { if (S.trabajo && TRABAJO_FINAL.includes(S.trabajo.estado)) cerrar(); };
+}
+
+async function alTerminarTrabajo(t) {
+  if (!t) return;
+  await cargarDatos();
+  if (t.estado !== "terminado") return;
+  const id = t.resultado?.id;
+  if (t.tarea === "evento") {
+    try { await refrescarEventos(S.modo === "configurar" ? id : undefined); } catch (e) { $("error-datos").textContent = e.message; }
+  } else if (id && ["meteo_manual", "escenario"].includes(t.tarea)) $("sel-meteo").value = id;    // lista para armar el evento
+  else if (id && t.tarea === "indices_manual") $("sel-indices").value = id;
+}
+
+function armarEvento() {
+  const cuerpo = {};
+  if ($("sel-meteo").value) cuerpo.meteo = $("sel-meteo").value;
+  if ($("sel-indices").value) cuerpo.indices = $("sel-indices").value;
+  if ($("nombre-rt").value.trim()) cuerpo.nombre = $("nombre-rt").value.trim();
+  lanzar(() => pedir("/api/datos/evento", cuerpo), () => { $("nombre-rt").value = ""; });
+}
+
+function cargarCSV() {
+  const f = $("archivo-csv").files[0];
+  if (!f) return void ($("error-datos").textContent = "Elegí el archivo CSV de meteorología.");
+  if (f.size > MAX_CSV_MB * 1048576) return void ($("error-datos").textContent = `El CSV pasa el máximo de ${MAX_CSV_MB} MB.`);
+  lanzar(() => subir(`/api/datos/meteo/archivo?nombre=${encodeURIComponent(f.name)}`, f), () => { $("archivo-csv").value = ""; });
+}
+
+function cargarTIF() {
+  const ndvi = $("archivo-ndvi").files[0], ndmi = $("archivo-ndmi").files[0];
+  const d1 = $("ventana-desde").value, d2 = $("ventana-hasta").value;
+  const falta = (!ndvi ? ["el TIF de NDVI"] : []).concat(!ndmi ? ["el TIF de NDMI"] : [], !d1 || !d2 ? ["las dos fechas de la ventana"] : []);
+  if (falta.length) return void ($("error-datos").textContent = `Falta ${falta.join(", ")}.`);
+  if (d2 < d1) return void ($("error-datos").textContent = "La ventana termina antes de empezar.");
+  for (const f of [ndvi, ndmi]) if (f.size > MAX_TIF_MB * 1048576) return void ($("error-datos").textContent = `${f.name} pasa el máximo de ${MAX_TIF_MB} MB.`);
+  lanzar(async () => {
+    $("trabajo-texto").textContent = "Subiendo los archivos…";
+    await subir(`/api/datos/indices/archivo?banda=ndvi&nombre=${encodeURIComponent(ndvi.name)}`, ndvi);
+    await subir(`/api/datos/indices/archivo?banda=ndmi&nombre=${encodeURIComponent(ndmi.name)}`, ndmi);
+    return pedir("/api/datos/indices/manual", {ventana: [d1, d2], ndmi_nir: $("ndmi-nir").value, descripcion: $("descripcion-tif").value.trim()});
+  }, () => { $("archivo-ndvi").value = $("archivo-ndmi").value = ""; });
+}
+
+function armarEscenario() {
+  const v = id => Number($(id).value);
+  const campos = [["esc-horas", "Horas", 1, 240], ["esc-temp", "Temperatura", -40, 50], ["esc-hr", "Humedad", 0, 100],
+                  ["esc-viento", "Viento", 0, 216], ["esc-dir", "Dirección", 0, 360], ["esc-lluvia", "Lluvia", 0, 200]];
+  if (!$("esc-fecha").value || !$("esc-hora").value) return void ($("error-datos").textContent = "Falta el día o la hora de inicio del escenario.");
+  for (const [id, nombre, a, b] of campos) {
+    if ($(id).value === "" || !(v(id) >= a && v(id) <= b)) return void ($("error-datos").textContent = `${nombre}: un valor de ${a} a ${b}.`);
+  }
+  const cuerpo = {desde_utc: aUTC($("esc-fecha").value, $("esc-hora").value), horas: Math.round(v("esc-horas")), temp_c: v("esc-temp"),
+                  hr_pct: v("esc-hr"), viento_kmh: v("esc-viento"), viento_dir_deg: v("esc-dir"), precip_mm: v("esc-lluvia")};
+  lanzar(() => pedir("/api/datos/meteo/escenario", cuerpo));
 }
 
 arrancar().catch(e => { $("error").textContent = "No se pudo hablar con el servidor: " + e.message; });

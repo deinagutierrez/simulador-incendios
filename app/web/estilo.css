@@ -99,3 +99,34 @@ main { position: relative; min-width: 0; }
 #reproducir { width: 34px; height: 34px; padding: 0; border-radius: 50%; }
 #progreso { grid-column: 1 / -1; height: 4px; background: var(--grilla); border-radius: 2px; overflow: hidden; }
 #barra { height: 100%; width: 0; background: var(--acento); transition: width .2s; }
+
+/* ------------------------------------------------------------ zona de datos (fase F4) */
+#panel h3 { margin: 12px 0 4px; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.bloque-datos { margin-top: 4px; }
+.bloque-datos + .bloque-datos { margin-top: 12px; padding-top: 4px; border-top: 1px dashed var(--borde); }
+.ficha { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; font-size: 12.5px; }
+.ficha dt { color: var(--suave); }
+.ficha dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.ficha dd.viejo { color: var(--error); font-weight: 600; }
+.ficha .vacio { grid-column: 1 / -1; color: var(--tenue); text-align: left; }
+.rotulo { display: inline-block; font-size: 10.5px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--borde); background: #fff; color: var(--suave); }
+.rotulo.prueba, .rotulo.ejemplo { background: var(--aviso-fondo); border-color: var(--aviso-borde); color: #6b4a0e; }
+.rotulo.rt { background: #e8f1fb; border-color: #9cc0e8; color: #1d4f8a; }
+#rotulos-evento { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 0; }
+#rotulos-evento:empty, #avisos-evento:empty, #datos-avisos:empty { display: none; }
+#avisos-evento .aviso, #datos-avisos .aviso { margin-top: 6px; }
+.aviso ul { margin: 2px 0 0; padding-left: 16px; }
+.trabajo { border: 1px solid var(--borde); border-radius: 8px; padding: 9px 11px; margin-top: 12px; background: #fff; font-size: 12.5px; }
+.trabajo-titulo { display: flex; gap: 8px; font-weight: 600; }
+.trabajo-titulo .estado { margin-left: auto; font-weight: 400; color: var(--suave); }
+.avance { height: 4px; background: var(--grilla); border-radius: 2px; overflow: hidden; margin: 7px 0 2px; position: relative; }
+#trabajo-barra { height: 100%; width: 0; background: var(--acento); transition: width .2s; }
+#trabajo-barra.indefinida { width: 30%; position: absolute; animation: vaiven 1.4s ease-in-out infinite alternate; }
+@keyframes vaiven { from { left: 0; } to { left: 70%; } }
+.trabajo .nota:empty { display: none; }
+.plegable { margin-top: 12px; border-top: 1px dashed var(--borde); padding-top: 8px; }
+.plegable summary { cursor: pointer; font-size: 13px; font-weight: 600; padding: 2px 0; }
+.plegable[open] summary { margin-bottom: 4px; }
+input[type="file"] { padding: 4px; font-size: 12.5px; }
+.sin-red { margin-top: 8px; }
+.sin-red button { margin-top: 6px; }

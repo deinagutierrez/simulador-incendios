@@ -1,4 +1,4 @@
-# Contrato entre los dos frentes — versión 1.3
+# Contrato entre los dos frentes — versión 1.4
 
 Es el único punto donde se tocan el frente A (motores y datos) y el frente B (servidor e interfaz). Se cambia solo por pedido
 de integración aprobado por las dos personas, subiendo el número de versión.
@@ -19,6 +19,11 @@ cicatriz del evento base; el motor simulado existe (§3); el servidor existe y s
 **Cambios de la 1.2 a la 1.3** (fase F3, 2026-11-11; **propuestos, pendientes de aprobación de la otra persona**):
 pedidos nuevos del servidor para la pantalla (capas de fondo, vectores, contorno, exportación, comparación entre dos
 corridas) y color plano en la imagen de la huella. La raíz `/` pasa a ser la pantalla; la página de prueba queda en `/prueba`.
+
+**Cambios de la 1.3 a la 1.4** (fase F4, 2026-11-13; punto 19 del pedido de la F4, aprobado en D-E3-24; **la revisión
+de la otra persona se hace con la rama `f4-datos` completa**): el proceso motor no cambia. Un evento de `base.definicion` puede
+ser un **evento generado `RT-<AAAAMMDD>-<n>`** (datos bajados en el momento, §1.1); `corrida.json` pasa al formato
+`incendios_sl.corrida/1.2` con los bloques `insumos` y `advertencias`; el servidor suma los pedidos de datos (§4.1).
 
 ## 1. Paquete de corrida
 
@@ -59,8 +64,31 @@ Al terminar, el proceso completa `corrida.json` con `bitacora` (pausas, reanudac
 `resultados` (`ha_final`, `km2_final`, `t_simulado_h`, `s_computo`, `memoria_pico_mb`, `motivo_fin`, `completa`, `archivos`,
 e `ignicion` = `{pedida, usada: [{id, lon, lat, desplazada_m?}], t_inicio_utc}`).
 
-**Todavía no**: viento manual y cortafuegos (fase F5), y eventos armados con datos bajados en el momento (fase F4).
-Hasta entonces los datos son los de un evento con ficha.
+**Todavía no**: viento manual y cortafuegos (fase F5).
+
+### 1.1 Evento generado y procedencia de los insumos (desde la 1.4)
+
+Un evento generado `RT-<AAAAMMDD>-<n>` lo arma el proceso de datos con una toma de meteorología y una de índices
+(`app/datos/evento_rt.py`). Para los motores es un evento con ficha más: su ficha está en `escenarios/v3.1/eventos/` y
+`escenarios/v4.0/eventos/`, y sus datos en `datos/inputSimulacion/{meteo, combustibles/RT-…, eventos/RT-…}` (git y el control
+del congelado ignoran los `RT-*`). Diferencias con un evento histórico:
+
+- no tiene cicatriz ni focos (`referencia_espacial: null`); por eso **la corrida tiene que traer `configuracion.ignicion`**
+  (el servidor rechaza un pedido sin ignición) y se recomienda `configuracion.t_inicio_utc`;
+- su procedencia está en `datos/inputSimulacion/eventos/RT-…/insumos_RT-….json`.
+
+El servidor copia esa procedencia a `corrida.json` (formato `incendios_sl.corrida/1.2`):
+
+| Campo | Contenido |
+|---|---|
+| `insumos.evento` | `id`, `creado_utc`, `archivos` (rutas relativas al repositorio) y `sha256` de cada uno |
+| `insumos.meteo` | `toma`, `fuente`, `modelo`, `rotulo`, `descargado_utc`, `desde_utc`, `hasta_utc`, `sha256` |
+| `insumos.indices_ventana` | `toma`, `fuente`, `rotulo`, `via` (`aws`, `gee` o `manual`), `ventana` [primer y último día], `escenas`, `ndmi_nir` (`B08` o `B8A`), `sha256`, `en_prueba` |
+| `insumos.indices_verano` | `anio`, `archivos`, `faltan`, `sha256` de los compuestos de enero a marzo que usa v4.0 |
+| `insumos.cobertura_anio` | año de la cobertura MapBiomas |
+| `advertencias` | lista de textos para mostrar con la corrida: rótulos de la meteorología y de los índices ("escenario manual", "índices cargados a mano", "en prueba hasta E-E3-2"), avisos de cada toma y "sin cicatriz ni focos". Para un evento con ficha: `["EJEMPLO: datos de un evento histórico"]` |
+
+`insumos` falta en las corridas de eventos con ficha, del motor simulado y de definiciones sin evento.
 
 ## 2. Proceso motor
 
@@ -158,8 +186,34 @@ que guarden lo simulado y espera hasta 15 segundos.
 **Archivos que agrega el servidor a la carpeta de la corrida:** `estado.json` (estado y última hora; con esto reconstruye la
 lista al volver a arrancar), `eventos.jsonl` (todos los eventos, numerados) y `arranque.log`.
 
-Todavía no existen los pedidos del borrador del plan (Anexo D) para bajar datos (F4), el visor autónomo (F7) ni el modo
-histórico (F6).
+Todavía no existen el visor autónomo (F7) ni el modo histórico (F6).
+
+En `GET /api/estado`, cada evento de `eventos_base` trae `tiempo_real` (verdadero para los `RT-…`), `rotulos` y `avisos`
+(los eventos con ficha llevan `EJEMPLO`) y, en los `RT-…`, `t_inicio_por_defecto_utc` e `ignicion_de_la_ficha` vacía.
+
+### 4.1 Datos que cambian (desde la 1.4)
+
+Cada pedido que baja o prepara datos lanza un **trabajo de datos**: un proceso aparte (`app/datos/proceso_datos.py`) con el
+camino de v3.1, que avisa como los procesos motor (líneas JSON `progreso`, `final`, `error`). Se hace **uno a la vez**; el
+segundo se rechaza con 409. Cada trabajo vive en `datos/procesados/app/trabajos/<id>/`. Si el servidor se cierra con un
+trabajo en marcha, lo corta y lo marca `interrumpido`; al volver a arrancar barre los eventos `RT-…` que quedaron a medio armar.
+
+| Pedido | Qué hace |
+|---|---|
+| `GET /api/datos` | tomas de meteorología e índices guardadas, eventos `RT-…`, trabajo actual o último, disponibilidad de Earth Engine (`gee.disponible`, `gee.motivo`), antigüedad del pronóstico (aviso desde 6 h) y de los índices (aviso desde 10 días), avisos |
+| `POST /api/datos/meteo` | `{"fuente": "pronostico"}`: pronóstico de Open-Meteo (`ecmwf_ifs025`, respaldo `best_match`), 5 días atrás y 7 adelante, 16 puntos |
+| `POST /api/datos/meteo/archivo?nombre=x.csv` | cuerpo: el CSV crudo (máx. 20 MB), formato de v3.x o de v4.0; el control de calidad lo hace el trabajo |
+| `POST /api/datos/meteo/escenario` | `{desde_utc, horas, temp_c, hr_pct, viento_kmh, viento_dir_deg, precip_mm}`: serie con valores fijos (más 5 días previos iguales) |
+| `POST /api/datos/indices` | `{"fuente": "aws"|"gee", "fecha_corrida"?}`: compuesto de ventana de 45 días que terminan el día anterior; `gee` contesta 409 con el motivo si no hay biblioteca o credenciales |
+| `POST /api/datos/indices/archivo?banda=ndvi|ndmi&nombre=x.tif` | cuerpo: el GeoTIFF crudo (máx. 60 MB); queda en espera, no lanza trabajo |
+| `POST /api/datos/indices/manual` | `{ventana: [d1, d2], ndmi_nir: "B08"|"B8A", descripcion}`: valida los dos TIF en espera (grilla exacta, int16 × 10000, nodata −32768, rango) y guarda lo declarado |
+| `POST /api/datos/evento` | `{meteo?, indices?, nombre?}`: arma un evento `RT-…` (por defecto con la toma más nueva de cada tipo) |
+| `DELETE /api/datos/eventos/<id>` | borra un `RT-…` (no si una corrida creada o en marcha lo usa, ni mientras se arma otro) |
+| `GET /api/datos/trabajos/<id>` | estado, progreso, resultado o error |
+| `GET /api/datos/trabajos/<id>/eventos` | avance en vivo (`text/event-stream`), como el de las corridas |
+
+Objeto trabajo: `{id, tarea, parametros, estado (creado | corriendo | terminado | error | interrumpido), creado_utc,
+terminado_utc, progreso {hechos, total, texto, s}, resultado, error, n_eventos}`.
 
 ## 5. Advertencia para quien escriba el servidor o las pruebas
 

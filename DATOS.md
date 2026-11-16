@@ -16,6 +16,7 @@ el proyecto no tiene registrada la licencia exacta.
 | `datos/inputSimulacion/grilla`, `sim_v4/dominio` | grilla y máscara del dominio | producto propio | — |
 | `datos/inputSimulacion/sim_v4/estaticos` | topografía, combustibles SB40 e infraestructura en el formato de v4.0 | derivados de las capas anteriores; parámetros de Scott y Burgan (2005) | las de sus fuentes |
 | `datos/inputSimulacion/sim_v4/dinamicos` | compuestos mensuales NDVI/NDMI 2023 y 2024 | Sentinel-2 (Copernicus), procesado en Google Earth Engine | datos Copernicus Sentinel, uso libre con atribución |
+| `datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2026_0{1,2,3}.tif` | compuestos mensuales NDVI/NDMI de enero a marzo de 2026 (verano que usa v4.0 para eventos de 2026), con su `.json` de procedencia (escenas, fechas, método) | Sentinel-2 L2A (Copernicus) en AWS, catálogo Earth Search de Element 84, generado el 2026-11-13 con `app/datos/sentinel2.py` (método de SIM: NDMI con B8A, 30 m, vecino más cercano; máscara SCL en lugar de Cloud Score+) | datos Copernicus Sentinel, uso libre con atribución |
 | `datos/inputSimulacion/sim_v4/conjunto_prueba` | casos La Aguada 2023 y Potrerillos 2024 (v4.0 los exige para arrancar) | cicatrices del COE, MapBiomas Fuego, focos VIIRS, ERA5 | MapBiomas CC-BY 4.0; FIRMS de uso libre; ERA5 CC-BY 4.0; COE a confirmar |
 | `datos/inputSimulacion/{combustibles,eventos,meteo}/SL-2024-LASLAGUNAS` | evento de ejemplo: índices, combustibles, cicatriz, meteorología | Sentinel-2, MapBiomas Fuego, ECMWF IFS vía Open-Meteo | Open-Meteo CC-BY 4.0; el resto como arriba |
 | `datos/inputSimulacion/{combustibles,eventos,meteo}/SL-2023-CHACRASOCT` | Las Chacras octubre 2023 (21 MB), agregado el 2026-11-11 para que cualquiera pueda repetir el prerregistro E-E3-1 (decisión D-E3-15). **Es uno de los cinco eventos no vistos (X-49)**: v3.1 y v4.0 ya se evaluaron una vez contra él; no usarlo para ajustar nada | las mismas | las mismas |
@@ -47,6 +48,10 @@ que los baje y verifique.
 | NDVI y NDMI recientes | Sentinel-2 L2A en AWS, catálogo Earth Search | no necesita |
 | Focos de calor activos (opcional) | NASA FIRMS | clave personal del usuario, por variable de entorno |
 | Índices por Google Earth Engine (opcional) | Google Earth Engine | credenciales personales |
+
+Lo bajado queda en `datos/procesados/app/` (no se sube): tomas de pronóstico (`meteo/`), tomas de índices (`indices/`),
+escenas ya leídas (`sentinel2/escenas/`) y trabajos de datos (`trabajos/`), cada producto con su JSON de procedencia. Los eventos
+generados `RT-…` se escriben en `escenarios/*/eventos/` y `datos/inputSimulacion/` y tampoco se suben (`.gitignore`).
 
 ## Biblioteca de terceros incluida
 

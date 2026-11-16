@@ -1,0 +1,229 @@
+{
+ "producto": "NDVI_NDMI_2026_01.tif",
+ "fuente": "Sentinel-2 L2A, AWS (Earth Search), compuesto mensual",
+ "generado_utc": "2026-11-13T18:15:28Z",
+ "codigo": "app/datos (simulador)",
+ "parametros": {
+  "producto": "mensual",
+  "mes": "2026-01",
+  "grilla": {
+   "crs": "EPSG:5345",
+   "res": 30.0,
+   "xmin": 3513060.0,
+   "ymin": 6367770.0,
+   "xmax": 3563220.0,
+   "ymax": 6417900.0,
+   "ncol": 1672,
+   "nfil": 1671
+  },
+  "metodo": {
+   "nombre": "mensual",
+   "ndvi": "(B08-B04)/(B08+B04)",
+   "ndmi": "(B8A-B11)/(B8A+B11)",
+   "remuestreo": "nearest",
+   "lectura_bandas_10m": "nivel de 20 m del COG",
+   "reflectancia": "DN/10000 + (0.0)",
+   "max_nubes_tesela_pct": 80.0,
+   "mascara": "SCL, se descartan las clases [0, 1, 3, 8, 9, 10, 11]",
+   "compuesto": "mediana de los índices por fecha",
+   "version": "1.0"
+  }
+ },
+ "sha256": "907e8bd4c9c592ea529cd2d89ccaeebb17ccb64d130b838467cb184c7d55685d",
+ "n_escenas": 23,
+ "fechas": [
+  "2026-01-01",
+  "2026-01-06",
+  "2026-01-11",
+  "2026-01-16",
+  "2026-01-21",
+  "2026-01-26"
+ ],
+ "escenas": [
+  {
+   "id": "S2B_20HKK_20260101_0_L2A",
+   "fecha": "2026-01-01",
+   "tesela": "20HKK",
+   "nubes_pct": 0.000567,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGE_20260101_0_L2A",
+   "fecha": "2026-01-01",
+   "tesela": "19HGE",
+   "nubes_pct": 0.00709,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKJ_20260101_0_L2A",
+   "fecha": "2026-01-01",
+   "tesela": "20HKJ",
+   "nubes_pct": 1.965491,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGD_20260101_0_L2A",
+   "fecha": "2026-01-01",
+   "tesela": "19HGD",
+   "nubes_pct": 0.012057,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_20HKK_20260106_0_L2A",
+   "fecha": "2026-01-06",
+   "tesela": "20HKK",
+   "nubes_pct": 0.157133,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGE_20260106_0_L2A",
+   "fecha": "2026-01-06",
+   "tesela": "19HGE",
+   "nubes_pct": 0.033932,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_20HKJ_20260106_0_L2A",
+   "fecha": "2026-01-06",
+   "tesela": "20HKJ",
+   "nubes_pct": 43.78261,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGD_20260106_0_L2A",
+   "fecha": "2026-01-06",
+   "tesela": "19HGD",
+   "nubes_pct": 37.85919,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKK_20260111_0_L2A",
+   "fecha": "2026-01-11",
+   "tesela": "20HKK",
+   "nubes_pct": 0.153463,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGE_20260111_0_L2A",
+   "fecha": "2026-01-11",
+   "tesela": "19HGE",
+   "nubes_pct": 0.006241,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKJ_20260111_0_L2A",
+   "fecha": "2026-01-11",
+   "tesela": "20HKJ",
+   "nubes_pct": 0.000156,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGD_20260111_0_L2A",
+   "fecha": "2026-01-11",
+   "tesela": "19HGD",
+   "nubes_pct": 0.000584,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_20HKK_20260116_0_L2A",
+   "fecha": "2026-01-16",
+   "tesela": "20HKK",
+   "nubes_pct": 1.702075,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGE_20260116_0_L2A",
+   "fecha": "2026-01-16",
+   "tesela": "19HGE",
+   "nubes_pct": 6.987827,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_20HKJ_20260116_0_L2A",
+   "fecha": "2026-01-16",
+   "tesela": "20HKJ",
+   "nubes_pct": 1.584816,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGD_20260116_0_L2A",
+   "fecha": "2026-01-16",
+   "tesela": "19HGD",
+   "nubes_pct": 5.905382,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKK_20260121_0_L2A",
+   "fecha": "2026-01-21",
+   "tesela": "20HKK",
+   "nubes_pct": 1.684128,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGE_20260121_0_L2A",
+   "fecha": "2026-01-21",
+   "tesela": "19HGE",
+   "nubes_pct": 3.765648,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_20HKJ_20260121_0_L2A",
+   "fecha": "2026-01-21",
+   "tesela": "20HKJ",
+   "nubes_pct": 5.492205,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGD_20260121_0_L2A",
+   "fecha": "2026-01-21",
+   "tesela": "19HGD",
+   "nubes_pct": 11.545267,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_20HKJ_20260126_0_L2A",
+   "fecha": "2026-01-26",
+   "tesela": "20HKJ",
+   "nubes_pct": 66.247976,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2C_19HGD_20260126_0_L2A",
+   "fecha": "2026-01-26",
+   "tesela": "19HGD",
+   "nubes_pct": 42.978272,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  },
+  {
+   "id": "S2B_19HGE_20260131_0_L2A",
+   "fecha": "2026-01-31",
+   "tesela": "19HGE",
+   "nubes_pct": 67.91659,
+   "linea_base": "05.11",
+   "boa_offset_applied": true
+  }
+ ],
+ "celdas_sin_dato_pct": 0.0
+}
