@@ -7,8 +7,8 @@ Hecho por el frente A (el usuario, con Claude). Para revisar: la otra persona, c
 
 | Criterio de aceptación del plan (§3) | Estado |
 |---|---|
-| E-E3-4: reproducción desde la bitácora idéntica | **pendiente de la otra persona** (LisandroV2002). Guion listo: `herramientas/e_e3_4.py --evaluador LisandroV2002`. Trazos y horas fijados y etiquetados antes del código (`prerregistro-E-E3-4-trazos`) |
-| E-E3-4: equivalencia con la corrida offline con los mismos trazos desde el inicio | ídem |
+| E-E3-4: reproducción desde la bitácora idéntica | **evaluado el 2026-11-16 por LisandroV2002: se cumple** (`prerregistros/E-E3-4_resultado.md`, commit `d4118d8`, Windows): 0 celdas distintas y la misma cadena de hash en las 5 corridas y los 3 motores. Trazos y horas fijados y etiquetados antes del código (`prerregistro-E-E3-4-trazos`) |
+| E-E3-4: equivalencia con la corrida offline con los mismos trazos desde el inicio | **se cumple** (misma evaluación): IoU 1,000000 y la misma longitud aplicada en los 15 pares; en v3.1 el trazo de 25 m de la hora 12 entró recortado |
 
 Lo que hace ahora el simulador:
 
@@ -68,7 +68,9 @@ Lo que hace ahora el simulador:
 
 ## 6. Lo que queda
 
-- **E-E3-4**: que LisandroV2002 corra `python herramientas/e_e3_4.py --evaluador LisandroV2002`. Son unas 45 corridas de 48 h:
-  calcular varias horas.
+- **E-E3-4** (actualizado el 2026-11-16): LisandroV2002 lo corrió y **se cumple** en A y en B (detalle en
+  `01_verificacion.md` §4.4 y §4.5). Las 45 corridas de 48 h tardaron 21 minutos. El guion se corrió como estaba; falta que
+  quien evalúa deje anotada en `decisiones.md` la aceptación de las dos decisiones del punto 5 de §3 (ignición de la ficha
+  y cómo se mide "misma longitud").
 - Responder §4.
 - Aprobación del contrato 1.5 por la otra persona.
