@@ -20,7 +20,8 @@ import numpy as np
 from . import comun
 
 DIAS_VENTANA = 45
-# La vía AWS queda "en prueba" hasta que E-E3-2 se cumpla (D-E3-24, punto 21). Se cambia a False al aprobarse.
+# La vía AWS queda "en prueba" (D-E3-24, punto 21). E-E3-2 se evaluó dos veces y no se cumplió para v4.0 (D-E3-32,
+# D-E3-33): no se habilita. Para v3.1 cumplió; habilitarla solo para v3.1 es una decisión pendiente.
 AWS_EN_PRUEBA = True
 
 
@@ -76,7 +77,7 @@ def toma_aws(fecha_corrida: dt.date, progreso=None, dias: int = DIAS_VENTANA) ->
     r = s2.compuesto_ventana(desde, hasta, tmp, id_, progreso=progreso or s2._sin_progreso)
     _poner_en_lugar(tmp, carpeta)
     meta = comun.leer_json(carpeta / f"metadatos_{id_}.json", {})
-    rotulo = "Sentinel-2 por AWS" + (" (en prueba hasta E-E3-2)" if AWS_EN_PRUEBA else "")
+    rotulo = "Sentinel-2 por AWS" + (" (en prueba: E-E3-2 no se cumplió para v4.0)" if AWS_EN_PRUEBA else "")
     return _info(id_, carpeta, "Sentinel-2 L2A, AWS (Earth Search), compuesto de ventana, máscara SCL", rotulo,
                  {"via": "aws", "en_prueba": AWS_EN_PRUEBA, "ventana": [f"{desde}", f"{hasta}"], "dias": dias,
                   "ndmi_nir": "B08", "resolucion_m": 20, "n_escenas": r["n_escenas"], "fechas": r["fechas"],

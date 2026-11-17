@@ -1,6 +1,6 @@
 {
  "prerregistro": "E-E3-2",
- "fecha": "2026-11-16 14:59",
+ "fecha": "2026-11-16 21:05",
  "evaluador": "LisandroV2002",
  "alcance": "(a), (b) y (c)",
  "equipo": {
@@ -10,7 +10,7 @@
   "python": "3.14.2"
  },
  "git": {
-  "cambio": "d4118d82d0392b6120b9781fd4610e00c8f39994",
+  "cambio": "6acb38f575b4b33f737a5a8024ee391b7d1860d4",
   "rama": "f7-entrega",
   "codigo_sin_registrar": []
  },
@@ -106,23 +106,25 @@
     "2024-09-16"
    ],
    "desplazamiento": 0.0,
-   "n_escenas": 32,
+   "n_escenas": 40,
    "fechas": [
     "2024-07-30",
     "2024-08-04",
     "2024-08-09",
     "2024-08-14",
+    "2024-08-19",
     "2024-08-24",
     "2024-09-03",
     "2024-09-08",
     "2024-09-13"
    ],
-   "segundos": 278.8,
+   "segundos": 461.8,
    "escenas_de_cache": 0,
    "escenas": [
     "S2B_20HKK_20240730_0_L2A",
     "S2B_19HGE_20240730_0_L2A",
     "S2B_20HKJ_20240730_0_L2A",
+    "S2B_19HGD_20240730_0_L2A",
     "S2A_20HKK_20240804_0_L2A",
     "S2A_19HGE_20240804_0_L2A",
     "S2A_20HKJ_20240804_0_L2A",
@@ -135,10 +137,17 @@
     "S2A_19HGE_20240814_0_L2A",
     "S2A_20HKJ_20240814_0_L2A",
     "S2A_19HGD_20240814_0_L2A",
+    "S2B_20HKK_20240819_0_L2A",
+    "S2B_19HGE_20240819_0_L2A",
+    "S2B_20HKJ_20240819_0_L2A",
+    "S2B_19HGD_20240819_0_L2A",
     "S2A_20HKK_20240824_0_L2A",
     "S2A_19HGE_20240824_0_L2A",
     "S2A_20HKJ_20240824_0_L2A",
     "S2A_19HGD_20240824_0_L2A",
+    "S2B_20HKK_20240829_0_L2A",
+    "S2B_19HGE_20240829_0_L2A",
+    "S2B_20HKJ_20240829_0_L2A",
     "S2B_19HGD_20240829_0_L2A",
     "S2A_20HKK_20240903_0_L2A",
     "S2A_19HGE_20240903_0_L2A",
@@ -160,55 +169,56 @@
     "remuestreo": "average",
     "lectura_bandas_10m": "nivel de 20 m del COG",
     "reflectancia": "DN/10000 + (0.0)",
-    "max_nubes_tesela_pct": 80.0,
-    "mascara": "SCL, se descartan las clases [0, 1, 3, 8, 9, 10, 11]",
+    "max_nubes_tesela_pct": 100.0,
+    "mascara": "SCL, se descartan las clases [0, 1, 2, 3, 7, 8, 9, 10, 11]",
+    "margen_nubes": "100 m alrededor de las clases [3, 8, 9, 10]",
     "compuesto": "mediana de los índices por fecha",
-    "version": "1.0"
+    "version": "1.1"
    },
    "productos": {
     "ndvi_20m": {
      "archivo": "resultados/app/E-E3-2/a/20m/ndvi_E-E3-2-a.tif",
      "existe": true,
-     "bytes": 10386978,
-     "sha256": "a6af3c2c131ab99a3af8c5892f71ed91cd74e9c31ebc6cb075f7d33b4a3d303f"
+     "bytes": 10385730,
+     "sha256": "01464f2d1b17b7da3f0942f92008b7e08a0a6ccfa786e12ea92b68dfb7eb22e6"
     },
     "ndmi_20m": {
      "archivo": "resultados/app/E-E3-2/a/20m/ndmi_E-E3-2-a.tif",
      "existe": true,
-     "bytes": 10279816,
-     "sha256": "400d02b3b61232c918743b8ef8fbdc2cbf9c5e9d853c70387e12c70fa9ffbdac"
+     "bytes": 10271684,
+     "sha256": "69cf069139a5581dcdcba8cd9a56e4fe6d39518d942facc39512e6fa86397284"
     },
     "ndvi_30m": {
      "archivo": "resultados/app/E-E3-2/a/30m/ndvi_30m_aws.tif",
      "existe": true,
-     "bytes": 11732250,
-     "sha256": "a140b84f0b60646bf31343bb61d6645a1bd88de0781724433bdb28908b1b1db0"
+     "bytes": 11732458,
+     "sha256": "154c08b5b737fd6fcd97f000cbe5eef9f8f5c221972c49830c75d401ed4e5fe2"
     },
     "ndmi_30m": {
      "archivo": "resultados/app/E-E3-2/a/30m/ndmi_30m_aws.tif",
      "existe": true,
-     "bytes": 11766005,
-     "sha256": "eebf9d86582c256203b1819a5abec00bfe2132f2ac6d40fc54400e3ac40e3078"
+     "bytes": 11762283,
+     "sha256": "9b4c15119e49744b304dfb5a0c3c917b1bbbe01879d4f3cd08971ff79ddb37cb"
     }
    },
    "metricas": {
     "NDVI": {
      "celdas_total": 2793912,
-     "celdas_comparadas": 2793912,
-     "fraccion_sin_dato_aws": 0.0,
+     "celdas_comparadas": 2793433,
+     "fraccion_sin_dato_aws": 0.000171,
      "fraccion_sin_dato_gee": 0.0,
-     "mediana_abs": 0.0053,
-     "p95_abs": 0.022005,
-     "mediana_con_signo": 0.003211
+     "mediana_abs": 0.005433,
+     "p95_abs": 0.022456,
+     "mediana_con_signo": 0.003489
     },
     "NDMI": {
      "celdas_total": 2793912,
-     "celdas_comparadas": 2793912,
-     "fraccion_sin_dato_aws": 0.0,
+     "celdas_comparadas": 2793433,
+     "fraccion_sin_dato_aws": 0.000171,
      "fraccion_sin_dato_gee": 0.0,
-     "mediana_abs": 0.006244,
-     "p95_abs": 0.024267,
-     "mediana_con_signo": -0.003411
+     "mediana_abs": 0.006811,
+     "p95_abs": 0.026433,
+     "mediana_con_signo": -0.004367
     }
    }
   },
@@ -224,7 +234,7 @@
     "2024-09-23",
     "2024-09-28"
    ],
-   "segundos": 323.7,
+   "segundos": 647.7,
    "escenas": [
     "S2A_20HKK_20240903_0_L2A",
     "S2A_19HGE_20240903_0_L2A",
@@ -258,34 +268,35 @@
     "remuestreo": "nearest",
     "lectura_bandas_10m": "nivel de 20 m del COG",
     "reflectancia": "DN/10000 + (0.0)",
-    "max_nubes_tesela_pct": 80.0,
-    "mascara": "SCL, se descartan las clases [0, 1, 3, 8, 9, 10, 11]",
+    "max_nubes_tesela_pct": 100.0,
+    "mascara": "SCL, se descartan las clases [0, 1, 2, 3, 7, 8, 9, 10, 11]",
+    "margen_nubes": "100 m alrededor de las clases [3, 8, 9, 10]",
     "compuesto": "mediana de los índices por fecha",
-    "version": "1.0"
+    "version": "1.1"
    },
    "producto": {
     "archivo": "resultados/app/E-E3-2/b/NDVI_NDMI_2024_09_aws.tif",
     "existe": true,
-    "bytes": 8706643,
-    "sha256": "e8bc06059a1041cbabecbc953c1416b5d8fc86468b3d1212e519fcf031cb1370"
+    "bytes": 8712099,
+    "sha256": "f28d07a3932aa58a45885c0b5e26982f65536e675175a8f97dc23290b019d558"
    },
    "metricas": {
     "NDVI": {
      "celdas_total": 2793912,
-     "celdas_comparadas": 2793912,
-     "fraccion_sin_dato_aws": 0.0,
+     "celdas_comparadas": 2793237,
+     "fraccion_sin_dato_aws": 0.000242,
      "fraccion_sin_dato_gee": 0.0,
-     "mediana_abs": 0.0016,
-     "p95_abs": 0.0296,
+     "mediana_abs": 0.0019,
+     "p95_abs": 0.0289,
      "mediana_con_signo": 0.0
     },
     "NDMI": {
      "celdas_total": 2793912,
-     "celdas_comparadas": 2793912,
-     "fraccion_sin_dato_aws": 0.0,
+     "celdas_comparadas": 2793237,
+     "fraccion_sin_dato_aws": 0.000242,
      "fraccion_sin_dato_gee": 0.0,
-     "mediana_abs": 0.0007,
-     "p95_abs": 0.0188,
+     "mediana_abs": 0.0008,
+     "p95_abs": 0.0192,
      "mediana_con_signo": 0.0
     }
    }
@@ -344,7 +355,7 @@
     }
    },
    "meteo": {
-    "toma": "M-20261116T1809-manual-a24960",
+    "toma": "M-20261117T0024-manual-a24960",
     "archivo_original": {
      "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv",
      "existe": true,
@@ -363,19 +374,19 @@
      "celdas_sin_dato_pct": 0.0
     },
     "aws": {
-     "id": "I-20240916-manual-e3ae00",
+     "id": "I-20240916-manual-f2c3ba",
      "sha256": {
-      "ndvi": "7ef4f7cb33db0ab4f8a1c8cd770ad776a965242473b45e11eb1436cfeb1f4296",
-      "ndmi": "25ccf071e96361bdcc97cb25d018adf92c9f9e0dda1d344892dab02278e0e391"
+      "ndvi": "87bb3642555cb8f9ee9cf2e49172fe45046dae0b23e6cf8b5761cbe6a091dbc6",
+      "ndmi": "0c0d9172a7cda3abb3971536400b8547f0429f2ade92aa456ab0467d186849e4"
      },
-     "celdas_sin_dato_pct": 0.0
+     "celdas_sin_dato_pct": 0.017
     }
    },
    "eventos": {
     "gee": {
      "id": "RT-20240921-1",
      "sha256": {
-      "ficha": "d87dbdb36af6f94eadfd31f33982f01d0c933491b26db1c059ac29bb57f22813",
+      "ficha": "c010ebd8a60f97fe9165a45ddd3ffebc9d6d609fd9d5cb87f6af7bec31c97a5e",
       "meteo": "c57a8e372a74166232f27fb1f1826476ab1fef952de5c027f0a57630bc15b800",
       "humedad_muerto": "ffd364667bae6d0bf9c4b0d711c30ac82199d490b35a144f68457fb6e55e4fea",
       "clase": "63fab6473b534902965f99dce0f1bc8cf001c5fc00526bb8b9f0be58173ae12d",
@@ -402,14 +413,14 @@
     "aws": {
      "id": "RT-20240921-2",
      "sha256": {
-      "ficha": "71c3ac96acb605b87519d6d6d44c74ab4cd526072b1ee13d709711f3bc28c59f",
+      "ficha": "ed0e592bae18113715d6cee9b0c13cc724c6a42ad01ed790e4c1614d479c9e64",
       "meteo": "c57a8e372a74166232f27fb1f1826476ab1fef952de5c027f0a57630bc15b800",
       "humedad_muerto": "ffd364667bae6d0bf9c4b0d711c30ac82199d490b35a144f68457fb6e55e4fea",
-      "clase": "647c63a6a0f332458445dc9801f30c3873cb5289eebf8eac0e843d4a9025ee4c",
-      "curado": "0b3934e7088d0a61fa6a98b459ee3738d3cefee8a7c5ed7a558d2a6b8712f52f",
-      "calidad": "10fa3d5e405ffe2fac1861b7ee3bc7f60060c0f845860e98c3df15d3f2de178c",
-      "ndvi30": "19437f4fdeff8385fd17c27c22d0614cb3a70355e447d567aabddf6f46940cbf",
-      "ndmi30": "140f0f7382abcc3ecac459ec388664849f0621cfe855ed8195c2c8a2c70a0456"
+      "clase": "24dafdaa8a87adc21f061f2bfdaffebfa20dddbe284f3dc6a64207b29d133eaa",
+      "curado": "5db68923290c31cfe63f15a17a02c03ee427dec323077e3078a6a467df0a5933",
+      "calidad": "aaa8ac7242fe3b9cec3abafedf847e13c103e5fdf673b77534ea803a4edb8681",
+      "ndvi30": "dda71e5850d6ef18a7d4ad61283d8b9b956fa7a1f2c9b15f24150ed113c63796",
+      "ndmi30": "b7c5545f4cd506762a21972ff53f55d89bb811630cf5b1cd0325e392c86c0d83"
      },
      "avisos": [],
      "verano_v40": {
@@ -431,7 +442,7 @@
     "anio": 2024,
     "meses": {
      "NDVI_NDMI_2024_01.tif": {
-      "n_escenas": 22,
+      "n_escenas": 24,
       "fechas": [
        "2024-01-02",
        "2024-01-07",
@@ -440,12 +451,12 @@
        "2024-01-22",
        "2024-01-27"
       ],
-      "segundos": 584.0,
+      "segundos": 623.8,
       "producto": {
        "archivo": "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_01.tif",
        "existe": true,
-       "bytes": 9141858,
-       "sha256": "5181f8cce71e688d3b7dfa87158b3808a3acdbd24bcb80bbd5a783db4c323748"
+       "bytes": 9143553,
+       "sha256": "ba0fae0e562fb6e244644e8a40ba138fc4d4c71ebb8538a8eaf850a0f46b0624"
       },
       "gee": {
        "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_01.tif",
@@ -455,7 +466,7 @@
       }
      },
      "NDVI_NDMI_2024_02.tif": {
-      "n_escenas": 21,
+      "n_escenas": 24,
       "fechas": [
        "2024-02-01",
        "2024-02-06",
@@ -464,12 +475,12 @@
        "2024-02-21",
        "2024-02-26"
       ],
-      "segundos": 241.0,
+      "segundos": 675.9,
       "producto": {
        "archivo": "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_02.tif",
        "existe": true,
-       "bytes": 9153371,
-       "sha256": "8ec3c0c49a4ce6ea94185880819143dafb8d754dc0498c61de98d126119ff275"
+       "bytes": 9154986,
+       "sha256": "f05d8cc0e2c8f88e74a8f658894885850991ad88970d75847d55a3b7149ba819"
       },
       "gee": {
        "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_02.tif",
@@ -479,21 +490,20 @@
       }
      },
      "NDVI_NDMI_2024_03.tif": {
-      "n_escenas": 18,
+      "n_escenas": 24,
       "fechas": [
-       "2024-03-02",
        "2024-03-07",
        "2024-03-12",
        "2024-03-17",
        "2024-03-22",
        "2024-03-27"
       ],
-      "segundos": 232.4,
+      "segundos": 431.2,
       "producto": {
        "archivo": "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_03.tif",
        "existe": true,
-       "bytes": 9198501,
-       "sha256": "a3709114d8ff4a33c3b19b126269053947bc04341d02dcb09e583a8372e1229a"
+       "bytes": 9199052,
+       "sha256": "e34194579f8c1d9b9a9f5d59c9acb2bc28ab3fcf4b8dd9829798f94d11e90919"
       },
       "gee": {
        "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_03.tif",
@@ -507,59 +517,59 @@
      "NDVI_NDMI_2024_01.tif": {
       "NDVI": {
        "celdas_total": 2793912,
-       "celdas_comparadas": 2793912,
-       "fraccion_sin_dato_aws": 0.0,
+       "celdas_comparadas": 2793652,
+       "fraccion_sin_dato_aws": 9.3e-05,
        "fraccion_sin_dato_gee": 0.0,
-       "mediana_abs": 0.0021,
-       "p95_abs": 0.056,
+       "mediana_abs": 0.0027,
+       "p95_abs": 0.0564,
        "mediana_con_signo": 0.0
       },
       "NDMI": {
        "celdas_total": 2793912,
-       "celdas_comparadas": 2793912,
-       "fraccion_sin_dato_aws": 0.0,
+       "celdas_comparadas": 2793652,
+       "fraccion_sin_dato_aws": 9.3e-05,
        "fraccion_sin_dato_gee": 0.0,
-       "mediana_abs": 0.0008,
-       "p95_abs": 0.0334,
+       "mediana_abs": 0.0013,
+       "p95_abs": 0.0342,
        "mediana_con_signo": 0.0
       }
      },
      "NDVI_NDMI_2024_02.tif": {
       "NDVI": {
        "celdas_total": 2793912,
-       "celdas_comparadas": 2793912,
-       "fraccion_sin_dato_aws": 0.0,
+       "celdas_comparadas": 2793503,
+       "fraccion_sin_dato_aws": 0.000146,
        "fraccion_sin_dato_gee": 0.0,
-       "mediana_abs": 0.0098,
-       "p95_abs": 0.0746,
+       "mediana_abs": 0.0092,
+       "p95_abs": 0.0745,
        "mediana_con_signo": 0.0
       },
       "NDMI": {
        "celdas_total": 2793912,
-       "celdas_comparadas": 2793912,
-       "fraccion_sin_dato_aws": 0.0,
+       "celdas_comparadas": 2793503,
+       "fraccion_sin_dato_aws": 0.000146,
        "fraccion_sin_dato_gee": 0.0,
-       "mediana_abs": 0.0065,
-       "p95_abs": 0.0528,
-       "mediana_con_signo": -0.0003
+       "mediana_abs": 0.0064,
+       "p95_abs": 0.0538,
+       "mediana_con_signo": -0.0007
       }
      },
      "NDVI_NDMI_2024_03.tif": {
       "NDVI": {
        "celdas_total": 2793912,
-       "celdas_comparadas": 2793912,
-       "fraccion_sin_dato_aws": 0.0,
+       "celdas_comparadas": 2791693,
+       "fraccion_sin_dato_aws": 0.000794,
        "fraccion_sin_dato_gee": 0.0,
-       "mediana_abs": 0.0027,
-       "p95_abs": 0.0887,
+       "mediana_abs": 0.0026,
+       "p95_abs": 0.0691,
        "mediana_con_signo": 0.0
       },
       "NDMI": {
        "celdas_total": 2793912,
-       "celdas_comparadas": 2793912,
-       "fraccion_sin_dato_aws": 0.0,
+       "celdas_comparadas": 2791693,
+       "fraccion_sin_dato_aws": 0.000794,
        "fraccion_sin_dato_gee": 0.0,
-       "mediana_abs": 0.0006,
+       "mediana_abs": 0.0007,
        "p95_abs": 0.0451,
        "mediana_con_signo": 0.0
       }
@@ -575,7 +585,7 @@
       "texto": "Se alcanzó el fin del horizonte de simulación (duracion_h).",
       "ha": 13122.27,
       "t_sim_min": 2880.0,
-      "s_computo": 55.25,
+      "s_computo": 58.51,
       "memoria_pico_mb": 524.1,
       "completa": true,
       "salida": "salida",
@@ -615,10 +625,10 @@
       "aviso": "final",
       "motivo": "horizonte",
       "texto": "Se alcanzó el fin del horizonte de simulación (duracion_h).",
-      "ha": 13272.03,
+      "ha": 13444.65,
       "t_sim_min": 2880.0,
-      "s_computo": 54.5,
-      "memoria_pico_mb": 526.9,
+      "s_computo": 55.93,
+      "memoria_pico_mb": 529.3,
       "completa": true,
       "salida": "salida",
       "ignicion": {
@@ -659,8 +669,8 @@
       "texto": "fin documentado del incendio alcanzado",
       "ha": 38141.64,
       "t_sim_min": 2880.0,
-      "s_computo": 15.49,
-      "memoria_pico_mb": 885.4,
+      "s_computo": 16.92,
+      "memoria_pico_mb": 884.8,
       "completa": true,
       "salida": "salida",
       "ignicion": {
@@ -699,10 +709,10 @@
       "aviso": "final",
       "motivo": "1",
       "texto": "fin documentado del incendio alcanzado",
-      "ha": 38197.35,
+      "ha": 38199.42,
       "t_sim_min": 2880.0,
-      "s_computo": 15.62,
-      "memoria_pico_mb": 884.6,
+      "s_computo": 15.82,
+      "memoria_pico_mb": 885.4,
       "completa": true,
       "salida": "salida",
       "ignicion": {
@@ -740,25 +750,25 @@
     "v4.0": {
      "huellas": {
       "24h": {
-       "iou": 0.909644,
+       "iou": 0.908525,
        "ha_gee": 2582.91,
-       "ha_aws": 2613.69,
-       "dif_ha": 30.78,
-       "dif_pct": 1.192
+       "ha_aws": 2580.93,
+       "dif_ha": -1.98,
+       "dif_pct": -0.077
       },
       "48h": {
-       "iou": 0.894558,
+       "iou": 0.909465,
        "ha_gee": 13122.27,
-       "ha_aws": 13272.03,
-       "dif_ha": 149.76,
-       "dif_pct": 1.141
+       "ha_aws": 13444.65,
+       "dif_ha": 322.38,
+       "dif_pct": 2.457
       }
      },
      "clases": {
       "celdas_con_dato": 2793912,
-      "celdas_distintas": 333667,
-      "fraccion": 0.119426,
-      "fraccion_sobre_combustibles": 0.126323,
+      "celdas_distintas": 337879,
+      "fraccion": 0.120934,
+      "fraccion_sobre_combustibles": 0.127918,
       "control_rt_gee_vs_evento": {
        "celdas_con_dato": 2793912,
        "celdas_distintas": 0,
@@ -769,25 +779,25 @@
     "v3.1-librev2": {
      "huellas": {
       "24h": {
-       "iou": 0.996585,
+       "iou": 0.99674,
        "ha_gee": 12141.81,
-       "ha_aws": 12168.63,
-       "dif_ha": 26.82,
-       "dif_pct": 0.221
+       "ha_aws": 12167.46,
+       "dif_ha": 25.65,
+       "dif_pct": 0.211
       },
       "48h": {
-       "iou": 0.997337,
+       "iou": 0.997019,
        "ha_gee": 38141.64,
-       "ha_aws": 38197.35,
-       "dif_ha": 55.71,
-       "dif_pct": 0.146
+       "ha_aws": 38199.42,
+       "dif_ha": 57.78,
+       "dif_pct": 0.151
       }
      },
      "clases": {
       "celdas_con_dato": 2793912,
-      "celdas_distintas": 5258,
-      "fraccion": 0.001882,
-      "fraccion_sobre_combustibles": 0.001901,
+      "celdas_distintas": 5472,
+      "fraccion": 0.001959,
+      "fraccion_sobre_combustibles": 0.001978,
       "control_rt_gee_vs_evento": {
        "celdas_con_dato": 2793912,
        "celdas_distintas": 16315,
@@ -810,8 +820,8 @@
   "evento RT-20240921-1",
   "evento RT-20240921-2",
   "toma de índices I-20240916-manual-28f791",
-  "toma de índices I-20240916-manual-e3ae00",
-  "toma de meteorología M-20261116T1809-manual-a24960"
+  "toma de índices I-20240916-manual-f2c3ba",
+  "toma de meteorología M-20261117T0024-manual-a24960"
  ],
  "veredicto": {
   "criterios": {

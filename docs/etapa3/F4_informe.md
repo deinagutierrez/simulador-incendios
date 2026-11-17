@@ -7,10 +7,10 @@ Hecho por el frente A (el usuario, con Claude). Para revisar: la otra persona, c
 
 | Criterio de aceptación del plan (§3) | Estado |
 |---|---|
-| E-E3-2 evaluado | **evaluado el 2026-11-16 por LisandroV2002: no se cumple** (`prerregistros/E-E3-2_resultado.md`, commit `d4118d8`, Windows). Criterio 1 se cumple; 2 y 3 fallan en v4.0 (11,9 % de celdas cambian de clase; IoU a 48 h 0,895) y se cumplen en v3.1 librev2 (0,19 %; 0,997). La vía AWS sigue "en prueba" (§6) |
+| E-E3-2 evaluado | **evaluado dos veces el 2026-11-16 por LisandroV2002: no se cumple**. Segunda evaluación, después de la revisión única de la máscara de nubes (D-E3-32; `prerregistros/E-E3-2_resultado.md`, commit `6acb38f`): v4.0 12,1 % e IoU 0,910; por el prerregistro, GEE pasa a ser obligatorio. Primera (`prerregistros/E-E3-2_resultado_primera_evaluacion.md`, commit `d4118d8`, Windows): Criterio 1 se cumple; 2 y 3 fallan en v4.0 (11,9 % de celdas cambian de clase; IoU a 48 h 0,895) y se cumplen en v3.1 librev2 (0,19 %; 0,997). La vía AWS sigue "en prueba" (§6) |
 | Sin red, el programa arranca con la caché o con un evento de ejemplo y lo rotula | hecho: las tomas guardadas se ofrecen con su fecha y antigüedad; los eventos con ficha van rotulados **EJEMPLO** en la pantalla y en `corrida.json` (`advertencias`). Las 94 pruebas de `test/app` pasan sin red (comprobado con la red cortada) |
 | Con red, pronóstico en menos de 10 s | hecho: **1,4 a 2,0 s** (16 puntos en paralelo). Con el cliente de v3.1 tal cual tardaba 12 s (§4) |
-| Verano 2026 generado | hecho: `NDVI_NDMI_2026_01`, `_02` y `_03` en `datos/inputSimulacion/sim_v4/dinamicos/indices/`, con su `.json` de procedencia |
+| Verano 2026 generado | hecho: `NDVI_NDMI_2026_01`, `_02` y `_03` en `datos/inputSimulacion/sim_v4/dinamicos/indices/`, con su `.json` de procedencia. **Rehecho por Earth Engine el 2026-11-16** (`herramientas/verano_gee.py`, D-E3-34), porque E-E3-2 no se cumplió para v4.0; los primeros, del 2026-11-13, eran por AWS |
 
 Punto por punto del pedido:
 
@@ -97,8 +97,11 @@ sobre celdas combustibles (SB40 > 100). Lo eligió quien escribe, antes de ver r
 ## 6. Lo que queda
 
 - **E-E3-2** (actualizado el 2026-11-16): LisandroV2002 lo corrió y **no se cumple** por v4.0 (detalle y lectura en
-  `01_verificacion.md` §4.3). `AWS_EN_PRUEBA` queda en `True`. Falta decidir, y anotar en `decisiones.md`, si se ajusta el
-  compuesto de verano por AWS y se vuelve a evaluar, o si GEE pasa a obligatorio para v4.0 (prerregistro; plan, R5). El
+  `01_verificacion.md` §4.3). Se revisó la máscara de nubes una vez (D-E3-32, máscara 1.1 en `app/datos/sentinel2.py`) y
+  la segunda evaluación **tampoco se cumple**: por el prerregistro, GEE pasa a ser obligatorio para los índices.
+  `AWS_EN_PRUEBA` queda en `True`. Hecho el 2026-11-16 (D-E3-34): los mensuales de verano por Earth Engine
+  (`herramientas/verano_gee.py`, que ejecuta el programa congelado de v4.0) y el verano 2026 rehecho con ellos. Un verano
+  posterior hecho solo por AWS se puede usar: el simulador lo detecta por su procedencia y lo avisa. El
   denominador del criterio 2 (§5.2) se usó como estaba; sobre celdas combustibles el cambio en v4.0 es 12,6 %, así que el
   veredicto no depende de esa elección.
 - Pantalla: probar en Chrome, Edge y Firefox el ciclo en vivo de un trabajo de datos, la subida de CSV y TIF y el borrado de un

@@ -12,8 +12,11 @@ Dos productos, cada uno con el método del motor que lo usa:
 
 NDVI = (B8 − B4)/(B8 + B4) en los dos. En los dos: índice por fecha y mediana de las fechas, como hacen los scripts de GEE.
 
-Máscara de nubes: capa SCL (se descartan sin dato, saturado, sombra de nube, nube media y alta, cirros y nieve) en lugar de
-Cloud Score+ ≥ 0,6, y se descartan las teselas con más de 80 % de nubes. Reflectancia = DN / 10000 + `desplazamiento`: los
+Máscara de nubes (versión 1.1, revisión única de E-E3-2: `docs/etapa3/prerregistros/E-E3-2_revision_mascara.md`, D-E3-32):
+capa SCL en lugar de Cloud Score+ ≥ 0,6. Se descartan sin dato, saturado, área oscura, sombra de nube, sin clasificar, nube
+media y alta, cirros y nieve, y además las celdas cuyo centro está a 100 m o menos de una celda de sombra o de nube. No se
+descarta ninguna tesela por su porcentaje de nubes (el script de GEE tampoco lo hace). La versión 1.0 descartaba las teselas
+con más de 80 % de nubes, no descartaba las clases 2 y 7 y no tenía margen. Reflectancia = DN / 10000 + `desplazamiento`: los
 metadatos dicen a la vez que la corrección ya está aplicada (`earthsearch:boa_offset_applied`) y que hay que sumar −0,1
 (`raster:bands.offset`); cuál vale se decide con números (prerregistro E-E3-2) y se guarda en la procedencia.
 
@@ -45,9 +48,12 @@ CATALOGO = "https://earth-search.aws.element84.com/v1"
 COLECCION = "sentinel-2-l2a"
 ACTIVOS = {"B04": "red", "B08": "nir", "B8A": "nir08", "B11": "swir16", "SCL": "scl"}
 BANDAS_10M = {"B04", "B08"}
-SCL_INVALIDOS = (0, 1, 3, 8, 9, 10, 11)     # sin dato, saturado, sombra de nube, nube media, nube alta, cirros, nieve
-MAX_NUBES_TESELA = 80.0
-VERSION = "1.0"
+# sin dato, saturado, área oscura, sombra de nube, sin clasificar, nube media, nube alta, cirros, nieve
+SCL_INVALIDOS = (0, 1, 2, 3, 7, 8, 9, 10, 11)
+SCL_CON_MARGEN = (3, 8, 9, 10)              # sombra de nube y nubes: se agrandan con el margen
+MARGEN_NUBES_M = 100.0                      # se descartan las celdas con el centro a esta distancia o menos de una de esas
+MAX_NUBES_TESELA = 100.0                    # 100 = no se descarta ninguna tesela por su porcentaje de nubes
+VERSION = "1.1"
 # Lectura de COG por HTTP: no listar el directorio, pedir rangos juntos y reintentar.
 ENTORNO_GDAL = {"GDAL_DISABLE_READDIR_ON_OPEN": "EMPTY_DIR", "AWS_NO_SIGN_REQUEST": "YES", "GDAL_HTTP_MULTIRANGE": "YES",
                 "GDAL_HTTP_MERGE_CONSECUTIVE_RANGES": "YES", "GDAL_HTTP_MAX_RETRY": "4", "GDAL_HTTP_RETRY_DELAY": "2",
@@ -69,6 +75,8 @@ class Metodo:
     desplazamiento: float = 0.0       # se suma a DN/10000 (0 o −0,1)
     max_nubes: float = MAX_NUBES_TESELA
     scl_invalidos: tuple = SCL_INVALIDOS
+    scl_con_margen: tuple = SCL_CON_MARGEN
+    margen_nubes_m: float = MARGEN_NUBES_M
 
     def bandas(self) -> list[str]:
         return sorted({"B04", "B08", self.nir_ndmi, "B11"})
@@ -77,7 +85,8 @@ class Metodo:
         return {"nombre": self.nombre, "ndvi": "(B08-B04)/(B08+B04)", "ndmi": f"({self.nir_ndmi}-B11)/({self.nir_ndmi}+B11)",
                 "remuestreo": self.remuestreo, "lectura_bandas_10m": "nivel de 20 m del COG",
                 "reflectancia": f"DN/10000 + ({self.desplazamiento})", "max_nubes_tesela_pct": self.max_nubes,
-                "mascara": f"SCL, se descartan las clases {list(self.scl_invalidos)}", "compuesto": "mediana de los índices por fecha",
+                "mascara": f"SCL, se descartan las clases {list(self.scl_invalidos)}",
+                "margen_nubes": f"{self.margen_nubes_m:g} m alrededor de las clases {list(self.scl_con_margen)}", "compuesto": "mediana de los índices por fecha",
                 "version": VERSION}
 
 
@@ -156,6 +165,16 @@ def _leer_con_reintentos(href: str, grilla: Grilla, remuestreo: str, nivel_20m: 
     raise RuntimeError(f"no se pudo leer {href}: {ultimo}")
 
 
+def agrandar(mascara: np.ndarray, radio_celdas: float) -> np.ndarray:
+    """Agrega a `mascara` las celdas cuyo centro está a `radio_celdas` celdas o menos (distancia euclídea) de una marcada."""
+    if radio_celdas < 1 or not mascara.any():
+        return mascara
+    from scipy import ndimage
+    r = int(np.floor(radio_celdas + 1e-9))
+    y, x = np.ogrid[-r:r + 1, -r:r + 1]
+    return ndimage.binary_dilation(mascara, structure=(x * x + y * y) <= radio_celdas * radio_celdas + 1e-9)
+
+
 def indices_escena(it: dict, grilla: Grilla, metodo: Metodo, lector=None) -> tuple[np.ndarray, np.ndarray]:
     """(NDVI, NDMI) de una escena en la grilla, int16 × 10000 con −32768 donde no hay dato o la SCL lo descarta.
     `lector(href, grilla, remuestreo, nivel_20m)` permite reemplazar la lectura en las pruebas."""
@@ -163,6 +182,8 @@ def indices_escena(it: dict, grilla: Grilla, metodo: Metodo, lector=None) -> tup
     activos = it["assets"]
     scl = leer(activos[ACTIVOS["SCL"]]["href"], grilla, "nearest", False)
     valido = (scl != 0) & ~np.isin(scl, metodo.scl_invalidos)
+    if metodo.margen_nubes_m > 0:
+        valido &= ~agrandar(np.isin(scl, metodo.scl_con_margen), metodo.margen_nubes_m / grilla.res)
     if not valido.any():
         vacio = np.full(grilla.forma, comun.NODATA_INDICES, "int16")
         return vacio, vacio.copy()

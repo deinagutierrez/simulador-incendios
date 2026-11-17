@@ -1,0 +1,835 @@
+{
+ "prerregistro": "E-E3-2",
+ "fecha": "2026-11-16 14:59",
+ "evaluador": "LisandroV2002",
+ "alcance": "(a), (b) y (c)",
+ "equipo": {
+  "sistema": "Windows-11-10.0.26300-SP0",
+  "procesador": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+  "nucleos": 12,
+  "python": "3.14.2"
+ },
+ "git": {
+  "cambio": "d4118d82d0392b6120b9781fd4610e00c8f39994",
+  "rama": "f7-entrega",
+  "codigo_sin_registrar": []
+ },
+ "congelado": {
+  "sha256_del_conjunto": "2b32757194d2510bcbc680056f803694be064fc968e35de9c1ab579c10621106",
+  "antes": {
+   "intacto": true,
+   "salida": "versiones congeladas intactas (244 archivos)"
+  },
+  "despues": {
+   "intacto": true,
+   "salida": "versiones congeladas intactas (244 archivos)"
+  }
+ },
+ "desplazamiento": 0.0,
+ "criterio": {
+  "umbral_dif_mediana": 0.02,
+  "umbral_cambio_clase": 0.03,
+  "umbral_iou_48h": 0.95
+ },
+ "insumos": {
+  "ficha_v31": {
+   "archivo": "escenarios/v3.1/eventos/SL-2024-LASLAGUNAS.yaml",
+   "existe": true,
+   "bytes": 4180,
+   "sha256": "730c4aca89ead23ae0ddc21de922e464b273a9eb074c1aa1816604fb0c5450e1"
+  },
+  "ficha_v40": {
+   "archivo": "escenarios/v4.0/eventos/SL-2024-LASLAGUNAS.yaml",
+   "existe": true,
+   "bytes": 3110,
+   "sha256": "8ff452244d6a216966fb48e31507274abb7f47c48c80aa849784fd506ecdb037"
+  },
+  "ndvi_30m_gee": {
+   "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/ndvi_30m_SL-2024-LASLAGUNAS.tif",
+   "existe": true,
+   "bytes": 11749553,
+   "sha256": "9caecd1b1e02ec4d3dbd90a691d81ded1a1bcb3251a591654347e7631cd12042"
+  },
+  "ndmi_30m_gee": {
+   "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/ndmi_30m_SL-2024-LASLAGUNAS.tif",
+   "existe": true,
+   "bytes": 11815910,
+   "sha256": "c8dbfe3b53a19f975ed3c273b29ac66b70d9a8a8f87d4ffc36723731a1ea6c1f"
+  },
+  "clase_v31_evento": {
+   "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/combustible_clase_SL-2024-LASLAGUNAS.tif",
+   "existe": true,
+   "bytes": 437279,
+   "sha256": "32ed159618fdb348a6d75b239a3b33bca1ba21bb1a203f804334a556910b2ead"
+  },
+  "mensual_gee": {
+   "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_09.tif",
+   "existe": true,
+   "bytes": 9271380,
+   "sha256": "f3aca19f4a22452086eb3e1825d34ab412f603780bf32dae70c295db08fae41e"
+  },
+  "meteo_dominio": {
+   "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv",
+   "existe": true,
+   "bytes": 87087,
+   "sha256": "a2496054ef2cd3ff645b8018b0fb753f114b6b4ab5cefa56eab3b6f798e8d15e"
+  },
+  "verano_v40_01": {
+   "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_01.tif",
+   "existe": true,
+   "bytes": 9840156,
+   "sha256": "f28c9ca1adbef0445a695146f8ef30a05b62667cf5e59f09c3050c2384fb0f76"
+  },
+  "verano_v40_02": {
+   "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_02.tif",
+   "existe": true,
+   "bytes": 9839558,
+   "sha256": "3c6a511dd5ef97556b456d4a312b32187dd0d7a61840725e93171fe703d2c403"
+  },
+  "verano_v40_03": {
+   "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_03.tif",
+   "existe": true,
+   "bytes": 9877004,
+   "sha256": "b88b647dac7e57e602f69badd9a286fb3c0f70cee706df037a406bc924544f03"
+  },
+  "cobertura_2023": {
+   "archivo": "datos/inputSimulacion/cobertura/cobertura_mapbiomas_col3_2023_las_lagunas_potrerillos.tif",
+   "existe": true,
+   "bytes": 467872,
+   "sha256": "7434bea474fa40d36409c48792e1ff1e51afec474da88f543314fc277f7714c5"
+  }
+ },
+ "partes": {
+  "a": {
+   "ventana_inclusive": [
+    "2024-07-30",
+    "2024-09-16"
+   ],
+   "desplazamiento": 0.0,
+   "n_escenas": 32,
+   "fechas": [
+    "2024-07-30",
+    "2024-08-04",
+    "2024-08-09",
+    "2024-08-14",
+    "2024-08-24",
+    "2024-09-03",
+    "2024-09-08",
+    "2024-09-13"
+   ],
+   "segundos": 278.8,
+   "escenas_de_cache": 0,
+   "escenas": [
+    "S2B_20HKK_20240730_0_L2A",
+    "S2B_19HGE_20240730_0_L2A",
+    "S2B_20HKJ_20240730_0_L2A",
+    "S2A_20HKK_20240804_0_L2A",
+    "S2A_19HGE_20240804_0_L2A",
+    "S2A_20HKJ_20240804_0_L2A",
+    "S2A_19HGD_20240804_0_L2A",
+    "S2B_20HKK_20240809_0_L2A",
+    "S2B_19HGE_20240809_0_L2A",
+    "S2B_20HKJ_20240809_0_L2A",
+    "S2B_19HGD_20240809_0_L2A",
+    "S2A_20HKK_20240814_0_L2A",
+    "S2A_19HGE_20240814_0_L2A",
+    "S2A_20HKJ_20240814_0_L2A",
+    "S2A_19HGD_20240814_0_L2A",
+    "S2A_20HKK_20240824_0_L2A",
+    "S2A_19HGE_20240824_0_L2A",
+    "S2A_20HKJ_20240824_0_L2A",
+    "S2A_19HGD_20240824_0_L2A",
+    "S2B_19HGD_20240829_0_L2A",
+    "S2A_20HKK_20240903_0_L2A",
+    "S2A_19HGE_20240903_0_L2A",
+    "S2A_20HKJ_20240903_0_L2A",
+    "S2A_19HGD_20240903_0_L2A",
+    "S2B_20HKK_20240908_0_L2A",
+    "S2B_19HGE_20240908_0_L2A",
+    "S2B_20HKJ_20240908_0_L2A",
+    "S2B_19HGD_20240908_0_L2A",
+    "S2A_20HKK_20240913_0_L2A",
+    "S2A_19HGE_20240913_0_L2A",
+    "S2A_20HKJ_20240913_0_L2A",
+    "S2A_19HGD_20240913_0_L2A"
+   ],
+   "metodo": {
+    "nombre": "ventana",
+    "ndvi": "(B08-B04)/(B08+B04)",
+    "ndmi": "(B08-B11)/(B08+B11)",
+    "remuestreo": "average",
+    "lectura_bandas_10m": "nivel de 20 m del COG",
+    "reflectancia": "DN/10000 + (0.0)",
+    "max_nubes_tesela_pct": 80.0,
+    "mascara": "SCL, se descartan las clases [0, 1, 3, 8, 9, 10, 11]",
+    "compuesto": "mediana de los índices por fecha",
+    "version": "1.0"
+   },
+   "productos": {
+    "ndvi_20m": {
+     "archivo": "resultados/app/E-E3-2/a/20m/ndvi_E-E3-2-a.tif",
+     "existe": true,
+     "bytes": 10386978,
+     "sha256": "a6af3c2c131ab99a3af8c5892f71ed91cd74e9c31ebc6cb075f7d33b4a3d303f"
+    },
+    "ndmi_20m": {
+     "archivo": "resultados/app/E-E3-2/a/20m/ndmi_E-E3-2-a.tif",
+     "existe": true,
+     "bytes": 10279816,
+     "sha256": "400d02b3b61232c918743b8ef8fbdc2cbf9c5e9d853c70387e12c70fa9ffbdac"
+    },
+    "ndvi_30m": {
+     "archivo": "resultados/app/E-E3-2/a/30m/ndvi_30m_aws.tif",
+     "existe": true,
+     "bytes": 11732250,
+     "sha256": "a140b84f0b60646bf31343bb61d6645a1bd88de0781724433bdb28908b1b1db0"
+    },
+    "ndmi_30m": {
+     "archivo": "resultados/app/E-E3-2/a/30m/ndmi_30m_aws.tif",
+     "existe": true,
+     "bytes": 11766005,
+     "sha256": "eebf9d86582c256203b1819a5abec00bfe2132f2ac6d40fc54400e3ac40e3078"
+    }
+   },
+   "metricas": {
+    "NDVI": {
+     "celdas_total": 2793912,
+     "celdas_comparadas": 2793912,
+     "fraccion_sin_dato_aws": 0.0,
+     "fraccion_sin_dato_gee": 0.0,
+     "mediana_abs": 0.0053,
+     "p95_abs": 0.022005,
+     "mediana_con_signo": 0.003211
+    },
+    "NDMI": {
+     "celdas_total": 2793912,
+     "celdas_comparadas": 2793912,
+     "fraccion_sin_dato_aws": 0.0,
+     "fraccion_sin_dato_gee": 0.0,
+     "mediana_abs": 0.006244,
+     "p95_abs": 0.024267,
+     "mediana_con_signo": -0.003411
+    }
+   }
+  },
+  "b": {
+   "mes": "2024-09",
+   "desplazamiento": 0.0,
+   "n_escenas": 24,
+   "fechas": [
+    "2024-09-03",
+    "2024-09-08",
+    "2024-09-13",
+    "2024-09-18",
+    "2024-09-23",
+    "2024-09-28"
+   ],
+   "segundos": 323.7,
+   "escenas": [
+    "S2A_20HKK_20240903_0_L2A",
+    "S2A_19HGE_20240903_0_L2A",
+    "S2A_20HKJ_20240903_0_L2A",
+    "S2A_19HGD_20240903_0_L2A",
+    "S2B_20HKK_20240908_0_L2A",
+    "S2B_19HGE_20240908_0_L2A",
+    "S2B_20HKJ_20240908_0_L2A",
+    "S2B_19HGD_20240908_0_L2A",
+    "S2A_20HKK_20240913_0_L2A",
+    "S2A_19HGE_20240913_0_L2A",
+    "S2A_20HKJ_20240913_0_L2A",
+    "S2A_19HGD_20240913_0_L2A",
+    "S2B_20HKK_20240918_0_L2A",
+    "S2B_19HGE_20240918_0_L2A",
+    "S2B_20HKJ_20240918_0_L2A",
+    "S2B_19HGD_20240918_0_L2A",
+    "S2A_20HKK_20240923_0_L2A",
+    "S2A_19HGE_20240923_0_L2A",
+    "S2A_20HKJ_20240923_0_L2A",
+    "S2A_19HGD_20240923_0_L2A",
+    "S2B_20HKK_20240928_0_L2A",
+    "S2B_19HGE_20240928_0_L2A",
+    "S2B_20HKJ_20240928_0_L2A",
+    "S2B_19HGD_20240928_0_L2A"
+   ],
+   "metodo": {
+    "nombre": "mensual",
+    "ndvi": "(B08-B04)/(B08+B04)",
+    "ndmi": "(B8A-B11)/(B8A+B11)",
+    "remuestreo": "nearest",
+    "lectura_bandas_10m": "nivel de 20 m del COG",
+    "reflectancia": "DN/10000 + (0.0)",
+    "max_nubes_tesela_pct": 80.0,
+    "mascara": "SCL, se descartan las clases [0, 1, 3, 8, 9, 10, 11]",
+    "compuesto": "mediana de los índices por fecha",
+    "version": "1.0"
+   },
+   "producto": {
+    "archivo": "resultados/app/E-E3-2/b/NDVI_NDMI_2024_09_aws.tif",
+    "existe": true,
+    "bytes": 8706643,
+    "sha256": "e8bc06059a1041cbabecbc953c1416b5d8fc86468b3d1212e519fcf031cb1370"
+   },
+   "metricas": {
+    "NDVI": {
+     "celdas_total": 2793912,
+     "celdas_comparadas": 2793912,
+     "fraccion_sin_dato_aws": 0.0,
+     "fraccion_sin_dato_gee": 0.0,
+     "mediana_abs": 0.0016,
+     "p95_abs": 0.0296,
+     "mediana_con_signo": 0.0
+    },
+    "NDMI": {
+     "celdas_total": 2793912,
+     "celdas_comparadas": 2793912,
+     "fraccion_sin_dato_aws": 0.0,
+     "fraccion_sin_dato_gee": 0.0,
+     "mediana_abs": 0.0007,
+     "p95_abs": 0.0188,
+     "mediana_con_signo": 0.0
+    }
+   }
+  },
+  "c": {
+   "evento_real": "SL-2024-LASLAGUNAS",
+   "hipotesis": 1,
+   "t_inicio_utc": "2024-09-18T15:00:00Z",
+   "horas": 48,
+   "puntos_ignicion": [
+    {
+     "nombre": "Las Lagunas",
+     "lon": -65.5477,
+     "lat": -32.6367
+    },
+    {
+     "nombre": "Potrerillos",
+     "lon": -65.6232,
+     "lat": -32.6422
+    }
+   ],
+   "cobertura": {
+    "evento_real": 2023,
+    "rt": {
+     "gee": 2023,
+     "aws": 2023
+    },
+    "ficha_rt": {
+     "gee": 2023,
+     "aws": 2023
+    },
+    "t_inicio_por_defecto_rt": {
+     "gee": "2024-09-22T00:00:00Z",
+     "aws": "2024-09-22T00:00:00Z"
+    },
+    "coincide": true,
+    "v40_sb40": {
+     "gee": 2023,
+     "aws": 2023
+    },
+    "v40_sb40_regla": {
+     "gee": "verano",
+     "aws": "verano"
+    },
+    "v40_sb40_verano": {
+     "gee": [
+      "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_01.tif",
+      "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_02.tif",
+      "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_03.tif"
+     ],
+     "aws": [
+      "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_01.tif",
+      "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_02.tif",
+      "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_03.tif"
+     ]
+    }
+   },
+   "meteo": {
+    "toma": "M-20261116T1809-manual-a24960",
+    "archivo_original": {
+     "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv",
+     "existe": true,
+     "bytes": 87087,
+     "sha256": "a2496054ef2cd3ff645b8018b0fb753f114b6b4ab5cefa56eab3b6f798e8d15e"
+    },
+    "sha256_serie": "c57a8e372a74166232f27fb1f1826476ab1fef952de5c027f0a57630bc15b800"
+   },
+   "tomas_indices": {
+    "gee": {
+     "id": "I-20240916-manual-28f791",
+     "sha256": {
+      "ndvi": "6fd1735e36e0dc118a0499263af9d9c9d4455c697e606b22059ac82c9bd70c90",
+      "ndmi": "69f9394ebc2fa8065c621393d7aee5a884e29497b046e7365a69111a9bad77fb"
+     },
+     "celdas_sin_dato_pct": 0.0
+    },
+    "aws": {
+     "id": "I-20240916-manual-e3ae00",
+     "sha256": {
+      "ndvi": "7ef4f7cb33db0ab4f8a1c8cd770ad776a965242473b45e11eb1436cfeb1f4296",
+      "ndmi": "25ccf071e96361bdcc97cb25d018adf92c9f9e0dda1d344892dab02278e0e391"
+     },
+     "celdas_sin_dato_pct": 0.0
+    }
+   },
+   "eventos": {
+    "gee": {
+     "id": "RT-20240921-1",
+     "sha256": {
+      "ficha": "d87dbdb36af6f94eadfd31f33982f01d0c933491b26db1c059ac29bb57f22813",
+      "meteo": "c57a8e372a74166232f27fb1f1826476ab1fef952de5c027f0a57630bc15b800",
+      "humedad_muerto": "ffd364667bae6d0bf9c4b0d711c30ac82199d490b35a144f68457fb6e55e4fea",
+      "clase": "63fab6473b534902965f99dce0f1bc8cf001c5fc00526bb8b9f0be58173ae12d",
+      "curado": "3542a7869f8c3a5254ef97d7413a52ba722c527984837f218f9d250e31983c64",
+      "calidad": "10fa3d5e405ffe2fac1861b7ee3bc7f60060c0f845860e98c3df15d3f2de178c",
+      "ndvi30": "9d435f8253a28e0320bdee44d6d9057819defbd57cb5c5dbe6fc338ad3b0f8a3",
+      "ndmi30": "f6aaefcee97fb0bd788a4f8e423f3ef9b5e7e8244dc04f382f35f234dfce5a12"
+     },
+     "avisos": [],
+     "verano_v40": {
+      "archivos": [
+       "NDVI_NDMI_2024_01.tif",
+       "NDVI_NDMI_2024_02.tif",
+       "NDVI_NDMI_2024_03.tif"
+      ],
+      "faltan": [],
+      "sha256": {
+       "NDVI_NDMI_2024_01.tif": "f28c9ca1adbef0445a695146f8ef30a05b62667cf5e59f09c3050c2384fb0f76",
+       "NDVI_NDMI_2024_02.tif": "3c6a511dd5ef97556b456d4a312b32187dd0d7a61840725e93171fe703d2c403",
+       "NDVI_NDMI_2024_03.tif": "b88b647dac7e57e602f69badd9a286fb3c0f70cee706df037a406bc924544f03"
+      }
+     }
+    },
+    "aws": {
+     "id": "RT-20240921-2",
+     "sha256": {
+      "ficha": "71c3ac96acb605b87519d6d6d44c74ab4cd526072b1ee13d709711f3bc28c59f",
+      "meteo": "c57a8e372a74166232f27fb1f1826476ab1fef952de5c027f0a57630bc15b800",
+      "humedad_muerto": "ffd364667bae6d0bf9c4b0d711c30ac82199d490b35a144f68457fb6e55e4fea",
+      "clase": "647c63a6a0f332458445dc9801f30c3873cb5289eebf8eac0e843d4a9025ee4c",
+      "curado": "0b3934e7088d0a61fa6a98b459ee3738d3cefee8a7c5ed7a558d2a6b8712f52f",
+      "calidad": "10fa3d5e405ffe2fac1861b7ee3bc7f60060c0f845860e98c3df15d3f2de178c",
+      "ndvi30": "19437f4fdeff8385fd17c27c22d0614cb3a70355e447d567aabddf6f46940cbf",
+      "ndmi30": "140f0f7382abcc3ecac459ec388664849f0621cfe855ed8195c2c8a2c70a0456"
+     },
+     "avisos": [],
+     "verano_v40": {
+      "archivos": [
+       "NDVI_NDMI_2024_01.tif",
+       "NDVI_NDMI_2024_02.tif",
+       "NDVI_NDMI_2024_03.tif"
+      ],
+      "faltan": [],
+      "sha256": {
+       "NDVI_NDMI_2024_01.tif": "f28c9ca1adbef0445a695146f8ef30a05b62667cf5e59f09c3050c2384fb0f76",
+       "NDVI_NDMI_2024_02.tif": "3c6a511dd5ef97556b456d4a312b32187dd0d7a61840725e93171fe703d2c403",
+       "NDVI_NDMI_2024_03.tif": "b88b647dac7e57e602f69badd9a286fb3c0f70cee706df037a406bc924544f03"
+      }
+     }
+    }
+   },
+   "verano_aws": {
+    "anio": 2024,
+    "meses": {
+     "NDVI_NDMI_2024_01.tif": {
+      "n_escenas": 22,
+      "fechas": [
+       "2024-01-02",
+       "2024-01-07",
+       "2024-01-12",
+       "2024-01-17",
+       "2024-01-22",
+       "2024-01-27"
+      ],
+      "segundos": 584.0,
+      "producto": {
+       "archivo": "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_01.tif",
+       "existe": true,
+       "bytes": 9141858,
+       "sha256": "5181f8cce71e688d3b7dfa87158b3808a3acdbd24bcb80bbd5a783db4c323748"
+      },
+      "gee": {
+       "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_01.tif",
+       "existe": true,
+       "bytes": 9840156,
+       "sha256": "f28c9ca1adbef0445a695146f8ef30a05b62667cf5e59f09c3050c2384fb0f76"
+      }
+     },
+     "NDVI_NDMI_2024_02.tif": {
+      "n_escenas": 21,
+      "fechas": [
+       "2024-02-01",
+       "2024-02-06",
+       "2024-02-11",
+       "2024-02-16",
+       "2024-02-21",
+       "2024-02-26"
+      ],
+      "segundos": 241.0,
+      "producto": {
+       "archivo": "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_02.tif",
+       "existe": true,
+       "bytes": 9153371,
+       "sha256": "8ec3c0c49a4ce6ea94185880819143dafb8d754dc0498c61de98d126119ff275"
+      },
+      "gee": {
+       "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_02.tif",
+       "existe": true,
+       "bytes": 9839558,
+       "sha256": "3c6a511dd5ef97556b456d4a312b32187dd0d7a61840725e93171fe703d2c403"
+      }
+     },
+     "NDVI_NDMI_2024_03.tif": {
+      "n_escenas": 18,
+      "fechas": [
+       "2024-03-02",
+       "2024-03-07",
+       "2024-03-12",
+       "2024-03-17",
+       "2024-03-22",
+       "2024-03-27"
+      ],
+      "segundos": 232.4,
+      "producto": {
+       "archivo": "resultados/app/E-E3-2/c/verano_aws/NDVI_NDMI_2024_03.tif",
+       "existe": true,
+       "bytes": 9198501,
+       "sha256": "a3709114d8ff4a33c3b19b126269053947bc04341d02dcb09e583a8372e1229a"
+      },
+      "gee": {
+       "archivo": "datos/inputSimulacion/sim_v4/dinamicos/indices/NDVI_NDMI_2024_03.tif",
+       "existe": true,
+       "bytes": 9877004,
+       "sha256": "b88b647dac7e57e602f69badd9a286fb3c0f70cee706df037a406bc924544f03"
+      }
+     }
+    },
+    "comparacion_con_gee_informativa": {
+     "NDVI_NDMI_2024_01.tif": {
+      "NDVI": {
+       "celdas_total": 2793912,
+       "celdas_comparadas": 2793912,
+       "fraccion_sin_dato_aws": 0.0,
+       "fraccion_sin_dato_gee": 0.0,
+       "mediana_abs": 0.0021,
+       "p95_abs": 0.056,
+       "mediana_con_signo": 0.0
+      },
+      "NDMI": {
+       "celdas_total": 2793912,
+       "celdas_comparadas": 2793912,
+       "fraccion_sin_dato_aws": 0.0,
+       "fraccion_sin_dato_gee": 0.0,
+       "mediana_abs": 0.0008,
+       "p95_abs": 0.0334,
+       "mediana_con_signo": 0.0
+      }
+     },
+     "NDVI_NDMI_2024_02.tif": {
+      "NDVI": {
+       "celdas_total": 2793912,
+       "celdas_comparadas": 2793912,
+       "fraccion_sin_dato_aws": 0.0,
+       "fraccion_sin_dato_gee": 0.0,
+       "mediana_abs": 0.0098,
+       "p95_abs": 0.0746,
+       "mediana_con_signo": 0.0
+      },
+      "NDMI": {
+       "celdas_total": 2793912,
+       "celdas_comparadas": 2793912,
+       "fraccion_sin_dato_aws": 0.0,
+       "fraccion_sin_dato_gee": 0.0,
+       "mediana_abs": 0.0065,
+       "p95_abs": 0.0528,
+       "mediana_con_signo": -0.0003
+      }
+     },
+     "NDVI_NDMI_2024_03.tif": {
+      "NDVI": {
+       "celdas_total": 2793912,
+       "celdas_comparadas": 2793912,
+       "fraccion_sin_dato_aws": 0.0,
+       "fraccion_sin_dato_gee": 0.0,
+       "mediana_abs": 0.0027,
+       "p95_abs": 0.0887,
+       "mediana_con_signo": 0.0
+      },
+      "NDMI": {
+       "celdas_total": 2793912,
+       "celdas_comparadas": 2793912,
+       "fraccion_sin_dato_aws": 0.0,
+       "fraccion_sin_dato_gee": 0.0,
+       "mediana_abs": 0.0006,
+       "p95_abs": 0.0451,
+       "mediana_con_signo": 0.0
+      }
+     }
+    }
+   },
+   "corridas": {
+    "v4.0|gee": {
+     "evento": "RT-20240921-1",
+     "final": {
+      "aviso": "final",
+      "motivo": "horizonte",
+      "texto": "Se alcanzó el fin del horizonte de simulación (duracion_h).",
+      "ha": 13122.27,
+      "t_sim_min": 2880.0,
+      "s_computo": 55.25,
+      "memoria_pico_mb": 524.1,
+      "completa": true,
+      "salida": "salida",
+      "ignicion": {
+       "pedida": {
+        "puntos_pedidos": [
+         {
+          "lon": -65.5477,
+          "lat": -32.6367
+         },
+         {
+          "lon": -65.6232,
+          "lat": -32.6422
+         }
+        ],
+        "t_inicio_utc": "2024-09-18T15:00:00Z"
+       },
+       "usada": [
+        {
+         "id": "Las Lagunas",
+         "lon": -65.5477,
+         "lat": -32.6367
+        },
+        {
+         "id": "Potrerillos",
+         "lon": -65.6232,
+         "lat": -32.6422
+        }
+       ],
+       "t_inicio_utc": "2024-09-18T15:00:00+00:00"
+      }
+     }
+    },
+    "v4.0|aws": {
+     "evento": "RT-20240921-2",
+     "final": {
+      "aviso": "final",
+      "motivo": "horizonte",
+      "texto": "Se alcanzó el fin del horizonte de simulación (duracion_h).",
+      "ha": 13272.03,
+      "t_sim_min": 2880.0,
+      "s_computo": 54.5,
+      "memoria_pico_mb": 526.9,
+      "completa": true,
+      "salida": "salida",
+      "ignicion": {
+       "pedida": {
+        "puntos_pedidos": [
+         {
+          "lon": -65.5477,
+          "lat": -32.6367
+         },
+         {
+          "lon": -65.6232,
+          "lat": -32.6422
+         }
+        ],
+        "t_inicio_utc": "2024-09-18T15:00:00Z"
+       },
+       "usada": [
+        {
+         "id": "Las Lagunas",
+         "lon": -65.5477,
+         "lat": -32.6367
+        },
+        {
+         "id": "Potrerillos",
+         "lon": -65.6232,
+         "lat": -32.6422
+        }
+       ],
+       "t_inicio_utc": "2024-09-18T15:00:00+00:00"
+      }
+     }
+    },
+    "v3.1-librev2|gee": {
+     "evento": "RT-20240921-1",
+     "final": {
+      "aviso": "final",
+      "motivo": "1",
+      "texto": "fin documentado del incendio alcanzado",
+      "ha": 38141.64,
+      "t_sim_min": 2880.0,
+      "s_computo": 15.49,
+      "memoria_pico_mb": 885.4,
+      "completa": true,
+      "salida": "salida",
+      "ignicion": {
+       "pedida": {
+        "puntos_pedidos": [
+         {
+          "lon": -65.5477,
+          "lat": -32.6367
+         },
+         {
+          "lon": -65.6232,
+          "lat": -32.6422
+         }
+        ],
+        "t_inicio_utc": "2024-09-18T15:00:00Z"
+       },
+       "usada": [
+        {
+         "id": "Las Lagunas",
+         "lon": -65.547664,
+         "lat": -32.6367302
+        },
+        {
+         "id": "Potrerillos",
+         "lon": -65.6230928,
+         "lat": -32.6421191
+        }
+       ],
+       "t_inicio_utc": "2024-09-18 15:00:00+00:00"
+      }
+     }
+    },
+    "v3.1-librev2|aws": {
+     "evento": "RT-20240921-2",
+     "final": {
+      "aviso": "final",
+      "motivo": "1",
+      "texto": "fin documentado del incendio alcanzado",
+      "ha": 38197.35,
+      "t_sim_min": 2880.0,
+      "s_computo": 15.62,
+      "memoria_pico_mb": 884.6,
+      "completa": true,
+      "salida": "salida",
+      "ignicion": {
+       "pedida": {
+        "puntos_pedidos": [
+         {
+          "lon": -65.5477,
+          "lat": -32.6367
+         },
+         {
+          "lon": -65.6232,
+          "lat": -32.6422
+         }
+        ],
+        "t_inicio_utc": "2024-09-18T15:00:00Z"
+       },
+       "usada": [
+        {
+         "id": "Las Lagunas",
+         "lon": -65.547664,
+         "lat": -32.6367302
+        },
+        {
+         "id": "Potrerillos",
+         "lon": -65.6230928,
+         "lat": -32.6421191
+        }
+       ],
+       "t_inicio_utc": "2024-09-18 15:00:00+00:00"
+      }
+     }
+    }
+   },
+   "por_motor": {
+    "v4.0": {
+     "huellas": {
+      "24h": {
+       "iou": 0.909644,
+       "ha_gee": 2582.91,
+       "ha_aws": 2613.69,
+       "dif_ha": 30.78,
+       "dif_pct": 1.192
+      },
+      "48h": {
+       "iou": 0.894558,
+       "ha_gee": 13122.27,
+       "ha_aws": 13272.03,
+       "dif_ha": 149.76,
+       "dif_pct": 1.141
+      }
+     },
+     "clases": {
+      "celdas_con_dato": 2793912,
+      "celdas_distintas": 333667,
+      "fraccion": 0.119426,
+      "fraccion_sobre_combustibles": 0.126323,
+      "control_rt_gee_vs_evento": {
+       "celdas_con_dato": 2793912,
+       "celdas_distintas": 0,
+       "fraccion": 0.0
+      }
+     }
+    },
+    "v3.1-librev2": {
+     "huellas": {
+      "24h": {
+       "iou": 0.996585,
+       "ha_gee": 12141.81,
+       "ha_aws": 12168.63,
+       "dif_ha": 26.82,
+       "dif_pct": 0.221
+      },
+      "48h": {
+       "iou": 0.997337,
+       "ha_gee": 38141.64,
+       "ha_aws": 38197.35,
+       "dif_ha": 55.71,
+       "dif_pct": 0.146
+      }
+     },
+     "clases": {
+      "celdas_con_dato": 2793912,
+      "celdas_distintas": 5258,
+      "fraccion": 0.001882,
+      "fraccion_sobre_combustibles": 0.001901,
+      "control_rt_gee_vs_evento": {
+       "celdas_con_dato": 2793912,
+       "celdas_distintas": 16315,
+       "fraccion": 0.005839
+      }
+     }
+    }
+   }
+  }
+ },
+ "notas": [
+  "Denominador del cambio de clase (criterio 2): todas las celdas del dominio con dato en los dos mapas; se informa también sobre las celdas combustibles en alguno de los dos. Lo fijó quien escribe, antes de ver resultados.",
+  "En (c) los dos eventos generados reciben los índices a 30 m en int16 × 10000 (la carga manual de índices); los de GEE salen de `ndvi_30m`/`ndmi_30m` del evento y los de AWS de (a). Recorren el mismo camino; la única diferencia es el índice.",
+  "En v4.0 los índices de la ventana entran como `indices_mes_evento`, y el combustible SB40 (regla 3.3b) y el NDVI de verano salen de los compuestos de enero a marzo. Opción A (D-E3-27, decidida antes de evaluar): el lado AWS de v4.0 usa enero a marzo de 2024 hechos por AWS (`verano_aws`) y el lado GEE los del repositorio; la procedencia del SB40 lo comprueba. La comparación de esos compuestos con los de GEE es informativa: no entra en el criterio.",
+  "La cobertura MapBiomas la elige `evento_rt` (año anterior a la fecha de inicio por defecto del evento generado); se comprueba que coincida con la del evento real (`cobertura_anio` de la ficha) y si no coincide (c) no se corre.",
+  "Un solo evento y una sola época (fin de invierno de un año seco); la comparación (c) usa un evento visto (límites declarados en el prerregistro)."
+ ],
+ "errores": [],
+ "limpieza": [
+  "evento RT-20240921-1",
+  "evento RT-20240921-2",
+  "toma de índices I-20240916-manual-28f791",
+  "toma de índices I-20240916-manual-e3ae00",
+  "toma de meteorología M-20261116T1809-manual-a24960"
+ ],
+ "veredicto": {
+  "criterios": {
+   "1_diferencia_mediana": {
+    "cumple": true,
+    "a": true,
+    "b": true,
+    "umbral": "<= 0.02"
+   },
+   "2_cambio_de_clase": {
+    "cumple": false,
+    "umbral": "< 3% en cada motor"
+   },
+   "3_iou_48h": {
+    "cumple": false,
+    "umbral": ">= 0.95 en cada motor"
+   }
+  },
+  "global": "no se cumple"
+ }
+}

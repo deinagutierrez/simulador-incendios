@@ -16,9 +16,9 @@ Evaluación formal generada por `herramientas/e_e3_2.py`. Prerregistro: `E-E3-2_
 
 | | |
 |---|---|
-| Fecha | 2026-11-16 14:59 |
+| Fecha | 2026-11-16 21:05 |
 | Evaluó | LisandroV2002 |
-| Código | cambio de git `d4118d82d039` (rama `f7-entrega`); código sin registrar: 0 archivo(s) |
+| Código | cambio de git `6acb38f575b4` (rama `f7-entrega`); código sin registrar: 0 archivo(s) |
 | Motores congelados | sha256 del conjunto `2b32757194d2510bcbc680056f803694be064fc968e35de9c1ab579c10621106`; intactos antes: sí; después: sí |
 | Equipo | Windows-11-10.0.26300-SP0, 12 núcleos, Python 3.14.2 |
 | Alcance | (a), (b) y (c) |
@@ -42,21 +42,21 @@ Evaluación formal generada por `herramientas/e_e3_2.py`. Prerregistro: `E-E3-2_
 
 ## (a) Compuesto de ventana, Las Lagunas 2024, a 30 m
 
-32 escenas en el catálogo (≤ 80 % de nubes por tesela), 8 fechas con datos. Celdas con dato en los dos productos.
+40 escenas en el catálogo (≤ 100 % de nubes por tesela), 9 fechas con datos. Celdas con dato en los dos productos.
 
 | Índice | Celdas comparadas | Dif. abs. mediana | Percentil 95 | Dif. mediana (AWS − GEE) | Sin dato AWS | Sin dato GEE |
 |---|---|---|---|---|---|---|
-| NDVI | 2.793.912 | 0,0053 | 0,022 | 0,0032 | 0,00 % | 0,00 % |
-| NDMI | 2.793.912 | 0,0062 | 0,024 | -0,0034 | 0,00 % | 0,00 % |
+| NDVI | 2.793.433 | 0,0054 | 0,022 | 0,0035 | 0,02 % | 0,00 % |
+| NDMI | 2.793.433 | 0,0068 | 0,026 | -0,0044 | 0,02 % | 0,00 % |
 
 ## (b) Compuesto mensual, septiembre de 2024
 
-24 escenas en el catálogo (≤ 80 % de nubes por tesela), 6 fechas con datos. Celdas con dato en los dos productos.
+24 escenas en el catálogo (≤ 100 % de nubes por tesela), 6 fechas con datos. Celdas con dato en los dos productos.
 
 | Índice | Celdas comparadas | Dif. abs. mediana | Percentil 95 | Dif. mediana (AWS − GEE) | Sin dato AWS | Sin dato GEE |
 |---|---|---|---|---|---|---|
-| NDVI | 2.793.912 | 0,0016 | 0,030 | 0,0000 | 0,00 % | 0,00 % |
-| NDMI | 2.793.912 | 0,0007 | 0,019 | 0,0000 | 0,00 % | 0,00 % |
+| NDVI | 2.793.237 | 0,0019 | 0,029 | 0,0000 | 0,02 % | 0,00 % |
+| NDMI | 2.793.237 | 0,0008 | 0,019 | 0,0000 | 0,02 % | 0,00 % |
 
 ## (c) Efecto en el modelo
 
@@ -64,8 +64,8 @@ Dos eventos generados con `app/datos/evento_rt.py` (RT-20240921-1 con índices d
 
 | Motor | Cambio de clase | Sobre celdas combustibles | IoU 24 h | IoU 48 h | Sup. 48 h GEE | Sup. 48 h AWS | Dif. 48 h |
 |---|---|---|---|---|---|---|---|
-| v4.0 | 11,943 % | 12,632 % | 0,9096 | 0,8946 | 13122 ha | 13272 ha | 150 ha (1,14 %) |
-| v3.1-librev2 | 0,188 % | 0,190 % | 0,9966 | 0,9973 | 38142 ha | 38197 ha | 56 ha (0,15 %) |
+| v4.0 | 12,093 % | 12,792 % | 0,9085 | 0,9095 | 13122 ha | 13445 ha | 322 ha (2,46 %) |
+| v3.1-librev2 | 0,196 % | 0,198 % | 0,9967 | 0,9970 | 38142 ha | 38199 ha | 58 ha (0,15 %) |
 
 Control (no es criterio): fracción de celdas con clase distinta entre el evento generado con GEE y el mapa del evento real; mide cuánto agrega el camino de los eventos generados (paso por int16 × 10000).
 

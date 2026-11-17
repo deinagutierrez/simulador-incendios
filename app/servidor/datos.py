@@ -156,7 +156,8 @@ def insumos_de_la_corrida(id_evento: str | None) -> tuple[dict | None, list[str]
         "indices_ventana": {"toma": i.get("id"), "fuente": i.get("fuente"), "rotulo": i.get("rotulo"), "via": i.get("via"),
                             "ventana": i.get("ventana"), "escenas": i.get("n_escenas"), "ndmi_nir": i.get("ndmi_nir"),
                             "sha256": i.get("sha256"), "en_prueba": bool(i.get("en_prueba"))},
-        "indices_verano": {"anio": anio_verano, "archivos": v.get("archivos"), "faltan": v.get("faltan"), "sha256": v.get("sha256")},
+        "indices_verano": {"anio": anio_verano, "archivos": v.get("archivos"), "faltan": v.get("faltan"), "sha256": v.get("sha256"),
+                           "origen": v.get("origen")},
         "cobertura_anio": d.get("cobertura_anio"),
     }
     rotulos = list(d.get("rotulos") or [])
