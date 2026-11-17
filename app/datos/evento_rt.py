@@ -28,6 +28,24 @@ import yaml
 from . import comun
 
 HUSO_LOCAL = dt.timezone(dt.timedelta(hours=-3))      # San Luis, sin horario de verano
+
+
+def origen_verano(tif: Path) -> str:
+    """De dónde sale un compuesto de verano de v4.0, según su archivo de procedencia (`<tif>.json`): "gee", "aws" o
+    "entrega" (sin archivo de procedencia: los de la entrega original de v4.0, hechos por Earth Engine). E-E3-2 no se
+    cumplió para v4.0 (D-E3-33): un verano por AWS se puede usar, pero va con aviso."""
+    d = comun.leer_json(Path(str(tif) + ".json"), None)
+    if not isinstance(d, dict):
+        return "entrega"
+    via = str(((d.get("parametros") or {}).get("metodo") or {}).get("via") or "").lower()
+    fuente = str(d.get("fuente") or "").lower()
+    if via == "gee" or "earth engine" in fuente:
+        return "gee"
+    if via == "aws" or "aws" in fuente:
+        return "aws"
+    return "desconocido"
+
+
 PATRON = re.compile(r"^RT-(\d{8})-(\d+)$")
 
 
@@ -141,15 +159,20 @@ def crear(meteo: dict, indices: dict, nombre: str | None = None, aviso=print) ->
         faltan = [p.name for p in verano if not p.exists()]
         if faltan:
             avisos.append("faltan compuestos de verano para v4.0: " + ", ".join(faltan) + " (v4.0 usará su respaldo y lo anota)")
+        origen = {p.name: origen_verano(p) for p in verano if p.exists()}
+        por_aws = [n for n, o in origen.items() if o == "aws"]
+        if por_aws:
+            avisos.append("compuestos de verano de v4.0 hechos por AWS, en prueba (" + ", ".join(por_aws) + "): E-E3-2 no se cumplió "
+                          "para v4.0, su combustible puede diferir del que daría Earth Engine (rehacerlos: herramientas/verano_gee.py)")
         rotulos = [meteo["rotulo"], indices["rotulo"]]
         if indices.get("en_prueba"):
-            avisos.append("índices por AWS en prueba: la vía se habilita cuando se cumpla E-E3-2")
+            avisos.append("índices por AWS en prueba: E-E3-2 se cumplió para v3.1 y no para v4.0 (D-E3-33)")
         archivos = {"ficha": r["ficha_v40"], "meteo": destino_meteo, "humedad_muerto": p_hum,
                     **{k: Path(comb[k]) for k in ("clase", "curado", "calidad", "ndvi30", "ndmi30")}}
         resumen = {"id": id_, "nombre": f["nombre"], "creado_utc": comun.ahora_utc(), "t_inicio_por_defecto_utc": f"{t0:%Y-%m-%dT%H:%M:%SZ}",
                    "meteo": meteo, "indices": {k: v for k, v in indices.items() if k != "escenas"},
                    "cobertura_anio": cobertura,
-                   "verano_v40": {"archivos": [p.name for p in verano if p.exists()], "faltan": faltan,
+                   "verano_v40": {"archivos": [p.name for p in verano if p.exists()], "faltan": faltan, "origen": origen,
                                   "sha256": {p.name: comun.sha256(p) for p in verano if p.exists()}},
                    "archivos": {k: Path(v).relative_to(comun.REPO).as_posix() for k, v in archivos.items()},
                    "sha256": {k: comun.sha256(Path(v)) for k, v in archivos.items()},

@@ -196,9 +196,10 @@ La revisión sumó escenas (verano: 24 por mes contra 22, 21 y 18) y achicó la 
 contra 0,089), pero el cambio de clase de v4.0 no bajó. Coincide con el diagnóstico (`E-E3-2_diagnostico.md` §5): la regla
 3.3b cambia de clase con diferencias de NDVI mucho menores que las que separan a una máscara SCL de Cloud Score+.
 **Consecuencia (prerregistro, "Si no se cumple")**: no hay otra revisión. **GEE pasa a ser obligatorio para los índices** y
-hay que declararlo en la guía de uso (F7). La vía AWS sigue rotulada "en prueba" y no se habilita. Queda por hacer: los
-compuestos mensuales de verano por Earth Engine (F4_informe §6), rehacer por GEE el verano 2026 del repositorio, que hoy
-está hecho por AWS, y decidir entre las dos personas si AWS se habilita solo para v3.1, que cumple los tres criterios en
+hay que declararlo en la guía de uso (F7). La vía AWS sigue rotulada "en prueba" y no se habilita. Hecho el 16/11
+(D-E3-34): `herramientas/verano_gee.py` hace los compuestos mensuales de verano por Earth Engine con el programa congelado
+de v4.0 (regenera enero, febrero y marzo de 2024 idénticos celda a celda a los del repositorio) y el verano 2026 del
+repositorio se rehízo con él; un verano hecho por AWS se sigue pudiendo usar, con aviso. Queda decidir entre las dos personas si AWS se habilita solo para v3.1, que cumple los tres criterios en
 las dos evaluaciones (sería un desvío: el criterio pide "en cada motor").
 
 ### 4.4 E-E3-4 A (en vivo contra reproducción desde la bitácora)

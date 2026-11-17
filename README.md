@@ -69,7 +69,7 @@ Chacras octubre 2023); todavía no baja pronóstico ni índices. Se cierra con C
 | `app/` | el simulador interactivo: procesos que conducen a los motores, servidor local y pantalla con mapa. Ver [app/README.md](app/README.md) |
 | `docs/etapa3/` | plan, decisiones, informes de cada fase (F0 a F3), prerregistros y contrato entre los dos frentes de trabajo |
 | `docs/v3.0`, `docs/v3.1`, `docs/v4.0` | documentos de los motores |
-| `herramientas/` | verificación del clon y control de versiones congeladas |
+| `herramientas/` | verificación del clon y control de versiones congeladas; `verano_gee.py` rehace una vez por año los compuestos de verano de v4.0 por Google Earth Engine (opcional: pide cuenta de GEE y `earthengine-api`) |
 
 ## Correr un motor a mano
 

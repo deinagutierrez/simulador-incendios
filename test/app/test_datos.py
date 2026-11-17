@@ -283,6 +283,27 @@ def test_mascara_revisada_clases_y_margen(cache):
     assert s2.dir_escenas(g, sin_margen) != s2.dir_escenas(g, s2.metodo_mensual())
 
 
+def test_origen_del_verano_de_v40(tmp_path):
+    """El aviso de verano por AWS sale de la procedencia de cada compuesto (D-E3-33): GEE, AWS o entrega original."""
+    def con(nombre, contenido):
+        tif = tmp_path / nombre
+        tif.write_bytes(b"x")
+        if contenido is not None:
+            Path(str(tif) + ".json").write_text(json.dumps(contenido), encoding="utf-8")
+        return tif
+
+    aws = con("a.tif", {"fuente": "Sentinel-2 L2A, AWS (Earth Search), compuesto mensual", "parametros": {"metodo": {"nombre": "mensual"}}})
+    gee = con("g.tif", {"fuente": "Sentinel-2 SR armonizado, Google Earth Engine, Cloud Score+ cs_cdf >= 0,60, compuesto mensual",
+                        "parametros": {"metodo": {"via": "gee"}}})
+    assert evento_rt.origen_verano(aws) == "aws" and evento_rt.origen_verano(gee) == "gee"
+    assert evento_rt.origen_verano(con("e.tif", None)) == "entrega"
+    assert evento_rt.origen_verano(con("r.tif", {"fuente": "otra cosa"})) == "desconocido"
+    # los del repositorio: 2023 y 2024 son la entrega original; 2026 se rehízo por Earth Engine
+    ind = REPO / "datos" / "inputSimulacion" / "sim_v4" / "dinamicos" / "indices"
+    assert {evento_rt.origen_verano(ind / f"NDVI_NDMI_2024_{m:02d}.tif") for m in (1, 2, 3)} == {"entrega"}
+    assert {evento_rt.origen_verano(ind / f"NDVI_NDMI_2026_{m:02d}.tif") for m in (1, 2, 3)} == {"gee"}
+
+
 # =================================================================== meteorología
 def _serie(horas: int = 48) -> pd.DataFrame:
     t = pd.date_range("2026-11-10 12:00", periods=horas, freq="1h", tz="UTC")
