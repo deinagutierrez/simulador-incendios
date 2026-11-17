@@ -172,6 +172,25 @@ def test_matriz_vacia_igual_a_barreras_apagadas(variante, tmp_path):
     assert r["distintas_llegada"] == 0 and r["distintas_estado"] == 0
 
 
+# ------------------------------------------------------------------------------------------------ regla de cruce (D-E3-35)
+def test_cruce_por_umbral_solo_en_las_variantes_de_la_app():
+    import motor_v31
+    for variante in ("libre", "libre_v2"):
+        esc = {"evento": "SL-2024-LASLAGUNAS", "variante": variante}
+        assert motor_v31.cruce_por_umbral(esc)
+        assert esc["parche"] == {"barreras": {"cruce": {"modo": "umbral"}}}
+    # conserva lo que la definición ya traía en el parche
+    esc = {"variante": "libre_v2", "parche": {"contencion": {"activo": False}, "barreras": {"cruce": {"lambda": 1.5}}}}
+    assert motor_v31.cruce_por_umbral(esc)
+    assert esc["parche"] == {"contencion": {"activo": False}, "barreras": {"cruce": {"lambda": 1.5, "modo": "umbral"}}}
+    # no toca otras variantes, ni una definición que fuerza las barreras de caminos, cambia de modelo o ya elige el modo
+    for esc in ({"variante": "barreras"}, {"variante": "ambas"}, {"variante": "libre_v2", "barreras": "on"},
+                {"variante": "libre", "modelo": "modelo_v2"}, {},
+                {"variante": "libre_v2", "parche": {"barreras": {"cruce": {"modo": "probabilistico"}}}}):
+        copia = json.loads(json.dumps(esc))
+        assert not motor_v31.cruce_por_umbral(esc) and esc == copia, esc
+
+
 # ------------------------------------------------------------------------------------------------ códigos del trazo
 def test_codigos_con_la_funcion_real_igual_a_la_copia_en_ventana(tmp_path):
     trazos = [intervenciones.validar_cortafuego(d) for d in (DELANTE, SOBRE_LO_QUEMADO, CERCA_DEL_FOCO)]
@@ -198,6 +217,9 @@ def test_trazo_antes_de_iniciar_igual_a_t0(tmp_path):
     for clave in ("enlaces", "enlaces_sha256", "celdas_mineral", "celdas_mineral_sha256", "longitud_aplicada_m"):
         assert ini[0][clave] == aviso["entrada"]["datos"][clave], clave
     assert ini[0]["celdas_mineral"] > 0
+    # D-E3-35: la corrida usa el cruce por umbral (2) y lo deja escrito en la definición que corre el motor
+    assert antes["corrida"]["resultados"]["barreras"]["modo_cruce"] == 2
+    assert en_t0["corrida"]["resultados"]["barreras"]["modo_cruce"] == 2
     assert _distintas(_llegada(tmp_path / "antes"), _llegada(tmp_path / "t0")) == 0
     # y el trazo hace algo: sin él la corrida es otra
     assert antes["corrida"]["resultados"]["ha_final"] != _correr(tmp_path / "sin", "v3.1-librev2", 4)["corrida"]["resultados"]["ha_final"]
