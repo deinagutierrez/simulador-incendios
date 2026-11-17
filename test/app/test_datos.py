@@ -11,6 +11,7 @@ Las demás usan una caché temporal (se reemplaza `comun.CACHE`).
 """
 from __future__ import annotations
 
+import dataclasses
 import datetime as dt
 import io
 import json
@@ -234,10 +235,52 @@ def test_buscar_paginado_y_nubes():
     assert cuerpo["collections"] == ["sentinel-2-l2a"] and cuerpo["bbox"] == [-66.0, -33.5, -65.5, -33.0]
     assert cuerpo["datetime"] == "2026-09-27T00:00:00Z/2026-11-10T23:59:59Z"
     assert s.pedidos[1][2]["token"] == "pagina2"
-    # la escena con 85 % de nubes se descarta, la repetida aparece una vez, orden por fecha
-    assert [it["id"] for it in out] == ["S2X_T20HA_20261001_0_L2A", "S2X_T20HB_20261011_0_L2A"]
+    # la repetida aparece una vez, orden por fecha; la de 85 % de nubes queda (máscara 1.1: no se descartan teselas, D-E3-32)
+    assert [it["id"] for it in out] == ["S2X_T20HA_20261001_0_L2A", "S2X_T20HA_20261005_0_L2A", "S2X_T20HB_20261011_0_L2A"]
+    # con un tope explícito sí se descarta
+    con_tope = s2.buscar((-66.0, -33.5, -65.5, -33.0), dt.date(2026, 9, 27), dt.date(2026, 11, 10), max_nubes=80.0, sesion=_Sesion())
+    assert [it["id"] for it in con_tope] == ["S2X_T20HA_20261001_0_L2A", "S2X_T20HB_20261011_0_L2A"]
     assert s2.resumen_escena(out[0]) == {"id": "S2X_T20HA_20261001_0_L2A", "fecha": "2026-10-01", "tesela": "20HA",
                                          "nubes_pct": 10.0, "linea_base": "05.11", "boa_offset_applied": True}
+
+
+def test_mascara_revisada_clases_y_margen(cache):
+    """Máscara 1.1 (E-E3-2_revision_mascara.md): clases SCL 2 y 7 descartadas y margen de 100 m alrededor de nubes y sombras."""
+    assert s2.MAX_NUBES_TESELA == 100.0 and s2.MARGEN_NUBES_M == 100.0 and s2.VERSION == "1.1"
+    assert set(s2.SCL_INVALIDOS) == {0, 1, 2, 3, 7, 8, 9, 10, 11} and set(s2.SCL_CON_MARGEN) == {3, 8, 9, 10}
+    g = comun.Grilla("EPSG:5345", 30.0, 0.0, 0.0, 30.0 * 40, 30.0 * 40)
+    scl = np.full(g.forma, 4, "uint16")
+    scl[20, 20] = 9          # una celda de nube alta: lleva margen
+    scl[5, 5] = 3            # sombra de nube: lleva margen
+    scl[35, 5] = 2           # área oscura: se descarta sola, sin margen
+    scl[35, 30] = 7          # sin clasificar: se descarta sola, sin margen
+    scl[5, 35] = 11          # nieve: se descarta sola, sin margen
+
+    def lector(href, grilla, remuestreo, nivel_20m):
+        return scl if href.endswith("SCL") else np.full(grilla.forma, 3000 if href.endswith("B08") else 1000, "uint16")
+
+    it = _item("2026-10-01", "A")
+    ndvi, _ = s2.indices_escena(it, g, s2.metodo_mensual(), lector)
+    sin = ndvi == comun.NODATA_INDICES
+    # 100 m a 30 m son 3,33 celdas: caen las celdas con dx² + dy² <= 11,1 (37 por foco)
+    y, x = np.ogrid[:40, :40]
+    esperado = ((x - 20) ** 2 + (y - 20) ** 2 <= 11) | ((x - 5) ** 2 + (y - 5) ** 2 <= 11)
+    for f, c in ((35, 5), (35, 30), (5, 35)):
+        esperado[f, c] = True
+    np.testing.assert_array_equal(sin, esperado)
+    assert sin[20, 23] and sin[23, 21] and not sin[20, 24] and not sin[23, 22] and not sin[35, 6]
+    # a 20 m (producto de ventana) el margen son 5 celdas
+    g20 = comun.Grilla("EPSG:5345", 20.0, 0.0, 0.0, 20.0 * 40, 20.0 * 40)
+    ndvi20, _ = s2.indices_escena(it, g20, s2.metodo_ventana(), lector)
+    sin20 = ndvi20 == comun.NODATA_INDICES
+    assert sin20[20, 25] and sin20[23, 24] and not sin20[20, 26] and not sin20[24, 24]
+    # sin margen queda la máscara por clase sola; el margen y las clases van a la procedencia y a la clave de la caché
+    sin_margen = dataclasses.replace(s2.metodo_mensual(), margen_nubes_m=0.0)
+    ndvi0, _ = s2.indices_escena(it, g, sin_margen, lector)
+    assert int((ndvi0 == comun.NODATA_INDICES).sum()) == 5
+    d = s2.metodo_mensual().como_dict()
+    assert d["version"] == "1.1" and "100 m" in d["margen_nubes"] and d["max_nubes_tesela_pct"] == 100.0
+    assert s2.dir_escenas(g, sin_margen) != s2.dir_escenas(g, s2.metodo_mensual())
 
 
 # =================================================================== meteorología
