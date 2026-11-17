@@ -9,6 +9,9 @@ app corren con las barreras apagadas; da lo mismo, ver barreras_v31.py), los cor
 aplican antes de ejecutar (igual que a t = 0; si el motor rechaza alguno, la corrida se corta con error antes de simular,
 D-E3-31) y `control.aplicar` aplica cortafuegos y viento manual con la corrida en
 pausa, dentro de `_tablas_hora`, antes de la hora que empieza. Todo está en barreras_v31.py.
+
+Regla de cruce de los cortafuegos (D-E3-35): las dos variantes de la app corren con el cruce de barreras en modo `umbral`
+(ver `cruce_por_umbral`). Como arrancan sin barreras de caminos, solo afecta a los cortafuegos dibujados.
 """
 from __future__ import annotations
 
@@ -23,6 +26,35 @@ from control import Control, exigir_cortafuegos_iniciales
 
 REPO = Path(__file__).resolve().parents[2]
 RAIZ = REPO / "src" / "v3.1"
+VARIANTES_SIN_CAMINOS = ("libre", "libre_v2")          # las dos de la app: barreras de caminos apagadas (D-E3-29)
+
+
+def cruce_por_umbral(esc: dict) -> bool:
+    """Pone en la definición el cruce de barreras en modo `umbral` (decisión D-E3-35). Devuelve True si la cambió.
+
+    La regla por defecto de v3.x es una logística en L/W (largo de llama sobre ancho de la barrera) que nunca baja de
+    σ(0) = 1/(1 + e^(β·λ)) = 1,8 % con β = 4 y λ = 1: cada enlace deja pasar el fuego 1,8 % de las veces por hora aunque no
+    haya llama, y se vuelve a sortear cada hora. Con un cortafuego dibujado eso da un cruce seguro en una o dos horas, sea
+    del ancho que sea (medido el 2026-11-17: 13 cruces en 684 intentos con 10 m y 16 en 997 con 25 m). v4.0 lo corrige
+    con `normalizar`; v3.1 no tiene esa opción, pero sí el modo `umbral` de su propio modelo: el fuego cruza solo si
+    L/W > λ, sin sorteo y sin piso.
+
+    Se pide por el camino que el motor ya ofrece (`parche` del escenario, que `correr_escenario.py` fusiona con el modelo),
+    así queda escrito en `escenario_base.yaml` y la corrida offline equivalente usa la misma regla. No se toca si la
+    definición trae otra variante, fuerza `barreras`, cambia de `modelo` o ya elige un modo de cruce: con barreras de
+    caminos, la regla validada es la del modelo."""
+    if esc.get("variante") not in VARIANTES_SIN_CAMINOS or "barreras" in esc or "modelo" in esc:
+        return False
+    parche = dict(esc.get("parche") or {})
+    barreras = dict(parche.get("barreras") or {})
+    cruce = dict(barreras.get("cruce") or {})
+    if "modo" in cruce:
+        return False
+    cruce["modo"] = "umbral"
+    barreras["cruce"] = cruce
+    parche["barreras"] = barreras
+    esc["parche"] = parche
+    return True
 
 
 def cargar(base: dict, configuracion: dict, carpeta: Path, variante_por_defecto: str) -> dict:
@@ -51,6 +83,7 @@ def cargar(base: dict, configuracion: dict, carpeta: Path, variante_por_defecto:
     else:
         esc, pedido = ignicion_libre.aplicar(cfgmod, dict(base["definicion"]), configuracion)
         esc.setdefault("variante", variante_por_defecto)
+        cruce_por_umbral(esc)
         ruta = Path(carpeta) / "escenario_base.yaml"
         ruta.write_text(yaml.safe_dump(esc, allow_unicode=True, sort_keys=False), encoding="utf-8")
         nombre = str(esc.get("nombre") or ruta.stem)
