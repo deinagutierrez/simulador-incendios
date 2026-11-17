@@ -2,7 +2,7 @@
 
     python herramientas/e_e3_2_diagnostico.py
 
-No es parte de la evaluación ni cambia su resultado: se corrió después de ver el veredicto (`E-E3-2_resultado.md`, no se
+No es parte de la evaluación ni cambia su resultado: se corrió después de ver el veredicto de la primera evaluación (no se
 cumple) para saber de dónde sale el cambio de clase de v4.0. Informe: `docs/etapa3/prerregistros/E-E3-2_diagnostico.md`.
 
 Solo lee. Necesita lo que deja `herramientas/e_e3_2.py` en `resultados/app/E-E3-2/c/verano_aws/` (los compuestos de enero a
@@ -86,7 +86,7 @@ def main() -> int:
     dist = (sb_g != sb_a) & (sb_g != g.NODATA) & (sb_a != g.NODATA)
     claves = np.where((lc == 12) & (dem >= g.COTA_ALTURA), -12, lc.astype("int16"))
 
-    print("== 1. Reconstrucción (tiene que dar lo de E-E3-2_resultados.json, partes.c.por_motor.v4.0.clases)")
+    print("== 1. Reconstrucción (tiene que dar lo de E-E3-2_resultados.json de esa evaluación, partes.c.por_motor.v4.0.clases)")
     f, n, tot = cambio(sb_g, sb_a)
     print(f"  celdas con dato {tot}; distintas {n}; {f:.3f} %")
     print(f"  corrimiento del NDVI de las leñosas, GEE: {corr_g}")

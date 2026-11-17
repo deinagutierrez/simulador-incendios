@@ -5,7 +5,7 @@ Guion: `herramientas/e_e3_2_diagnostico.py` (solo lee; necesita `resultados/app/
 Rótulos: **(dato)** medido con el guion · **(inferencia)** · **(sin verificar)**.
 
 **Qué es y qué no es.** Es un análisis **posterior al veredicto**: se hizo después de ver que E-E3-2 no se cumple
-(`E-E3-2_resultado.md`). No cambia el resultado, el criterio ni los umbrales, y no es parte de la evaluación. Sirve para
+(hoy `E-E3-2_resultado_primera_evaluacion.md`). No cambia el resultado, el criterio ni los umbrales, y no es parte de la evaluación. Sirve para
 decidir qué hacer según la sección "Si no se cumple" del prerregistro. No se volvió a correr ningún motor: mide el cambio
 de clase (criterio 2), no las huellas (criterio 3).
 
@@ -26,7 +26,11 @@ de clase (criterio 2), no las huellas (criterio 3).
 (dato) El guion arma el SB40 de cada lado con las funciones de v4.0 (`simulador/fuel/generar_sb40.py`, sin tocar),
 siguiendo `incendios_sl.eventos.preparar_combustible` con la regla 3.3b: cobertura MapBiomas 2023, MDT, mediana por celda
 de enero a marzo de 2024 y corrimiento de las leñosas. Da **333.667 celdas distintas de 2.793.912 (11,943 %)**, lo mismo
-que `E-E3-2_resultados.json` (`partes.c.por_motor.v4.0.clases`).
+que `E-E3-2_resultados_primera_evaluacion.json` (`partes.c.por_motor.v4.0.clases`).
+
+**Nota del 2026-11-16, después de la segunda evaluación**: todas las cifras de este documento son de la **primera**
+evaluación (máscara 1.0). Sus intermedios quedaron en `resultados/app/E-E3-2_primera_evaluacion/`; el guion lee
+`resultados/app/E-E3-2/`, que ahora tiene los de la segunda (máscara 1.1), así que corrido hoy describe la segunda.
 
 ## 3. Qué entrada lo causa
 

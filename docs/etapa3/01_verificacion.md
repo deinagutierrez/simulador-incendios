@@ -96,7 +96,7 @@ código que evalúan. Regla del plan (Anexo B): uno escribe y el otro evalúa.
 | Código | Pregunta | Escribe | Evalúa | Etiqueta | Resultado | Desvíos y anexos declarados |
 |---|---|---|---|---|---|---|
 | E-E3-1 | ¿Conduce a los motores sin alterarlos? | el usuario (deinagutierrez), con Claude | **el mismo frente** (D-E3-13) | `prerregistro-E-E3-1` | **se cumple**: 0 celdas distintas en los 7 pares, con y sin pausa (`E-E3-1_resultado.md`, 2026-11-11, Windows, commit `7cbe5b4`) | D-E3-13: evaluó quien escribió el código (la otra persona no pudo); compensado con criterio binario etiquetado antes, guion sin pasos manuales y repetible. Las Chacras se corrió con los datos aún fuera de git; luego se subieron sin cambios (D-E3-15, mismo sha256 del conjunto `52d145b3c3df…`). v3.1 en Las Chacras cortó sola a las 45–46 h (motivo 3), igual offline y en el proceso |
-| E-E3-2 | ¿Los índices por AWS equivalen a los de GEE? | deinagutierrez, con Claude | LisandroV2002 (D-E3-25) | `prerregistro-E-E3-2` (los nombres se agregaron después sin cambiar diseño ni criterio) | **no se cumple** (act. 16/11; `E-E3-2_resultado.md`, Windows, commit `d4118d8`): criterio 1 se cumple (diferencia absoluta mediana 0,0007 a 0,0062); criterios 2 y 3 fallan en v4.0 (11,9 % de celdas cambian de clase; IoU a 48 h 0,895) y se cumplen en v3.1 librev2 (0,19 %; 0,997) | dos anexos escritos antes de evaluar y sin ver cifras de (b) ni (c): `E-E3-2_escala.md` (escala de reflectancia DN/10000, elegida contra (a) como pide el diseño) y `E-E3-2_aclaracion_c.md` (D-E3-27: en (c) el lado AWS de v4.0 usa también el verano hecho por AWS; sin eso el cambio de clase SB40 daba 0 % por construcción). Como no se cumple, la vía AWS sigue rotulada "en prueba" (`indices.AWS_EN_PRUEBA` sin cambiar) |
+| E-E3-2 | ¿Los índices por AWS equivalen a los de GEE? | deinagutierrez, con Claude | LisandroV2002 (D-E3-25) | `prerregistro-E-E3-2` (los nombres se agregaron después sin cambiar diseño ni criterio) | **no se cumple, en dos evaluaciones** (act. 16/11). Segunda, después de la revisión única de la máscara (D-E3-32; `E-E3-2_resultado.md`, commit `6acb38f`): v4.0 12,1 % de celdas cambian de clase e IoU a 48 h 0,910; v3.1 librev2 cumple. Por el prerregistro, GEE pasa a ser obligatorio (§4.3). Primera (`E-E3-2_resultado_primera_evaluacion.md`, Windows, commit `d4118d8`): criterio 1 se cumple (diferencia absoluta mediana 0,0007 a 0,0062); criterios 2 y 3 fallan en v4.0 (11,9 % de celdas cambian de clase; IoU a 48 h 0,895) y se cumplen en v3.1 librev2 (0,19 %; 0,997) | dos anexos escritos antes de evaluar y sin ver cifras de (b) ni (c): `E-E3-2_escala.md` (escala de reflectancia DN/10000, elegida contra (a) como pide el diseño) y `E-E3-2_aclaracion_c.md` (D-E3-27: en (c) el lado AWS de v4.0 usa también el verano hecho por AWS; sin eso el cambio de clase SB40 daba 0 % por construcción). Como no se cumple, la vía AWS sigue rotulada "en prueba" (`indices.AWS_EN_PRUEBA` sin cambiar) |
 | E-E3-3 | ¿Cuánto tarda y cuánta memoria usa? | deinagutierrez, con Claude | LisandroV2002 (D-E3-30) | `prerregistro-E-E3-3` (nombres agregados después) | **medición completa** (act. 16/11; `E-E3-3_resultado.md`, Windows, commit `d4118d8`): v3.1 ≤ 0,5 s/h **se cumple** (medianas 0,297 a 0,316); modo "ambos" dentro de 16 GB **se cumple** (máximo muestreado 1.364 MB); v4.0 con unas 30.000 ha **no evaluable con el diseño** | la meta de v4.0 "≤ 3 s/h con unas 30.000 ha" **no se puede evaluar con el diseño** (ningún escenario de E-E3-1 pasa de 12.839 ha con v4.0); se informa así y se agrega aparte, rotulada "fuera del prerregistro", Las Chacras v4.0 libre 141 h (D-E3-30, punto 8). La memoria pico de Windows (`peak_wset`) y la de Linux (`ru_maxrss`) no son la misma métrica |
 | E-E3-4 | ¿Las intervenciones son reproducibles? | deinagutierrez, con Claude | LisandroV2002 | `prerregistro-E-E3-4` y `prerregistro-E-E3-4-trazos` (`9fabd7c`, trazos y horas fijados antes del código de intervenciones) | **se cumple** (act. 16/11; `E-E3-4_resultado.md`, Windows, commit `d4118d8`): en las 5 corridas y los 3 motores, A con 0 celdas distintas y la misma cadena de hash; B con IoU 1,000000 y la misma longitud aplicada | el guion usa la ignición de la ficha (hipótesis 1), no `configuracion.ignicion`; "misma longitud" se mide con la geometría en v4.0 y con la identidad de celdas o enlaces cuando hay recorte (F5_informe §3, 5): conviene que quien evalúa lo acepte antes de correr. (act. 16/11) El guion se corrió tal como estaba, sin cambios; la aceptación expresa de esas dos decisiones por quien evalúa **no quedó anotada antes de correr** y falta registrarla en `decisiones.md` |
 
@@ -160,7 +160,7 @@ v4.0 (las enciende el paso que la detenida no llega a dar); queda declarado en F
 Qué ya se sabía que difiere: método del compuesto (ventana contra mediana del banco) y, en (c), el verano para v4.0
 (aclaración (c)).
 
-**Resultado (dato, act. 16/11; `E-E3-2_resultado.md`, Windows, commit `d4118d8`): no se cumple.**
+**Primera evaluación (dato, act. 16/11; `E-E3-2_resultado_primera_evaluacion.md`, Windows, commit `d4118d8`): no se cumple.**
 
 | Criterio | Umbral | Medido | |
 |---|---|---|---|
@@ -181,6 +181,25 @@ umbral de la regla ni qué mes lo causa. Un solo evento y una sola época (lími
 **Consecuencia** (plan, R5): la vía AWS no se habilita y sigue rotulada "en prueba"; queda por decidir si se ajusta el
 método del compuesto de verano por AWS y se vuelve a evaluar, o si v4.0 exige los compuestos de GEE y se lo dice en la
 pantalla. El criterio y los umbrales no se tocan.
+
+**Segunda evaluación (dato, act. 16/11 noche; `E-E3-2_resultado.md`, Windows, commit `6acb38f`): no se cumple.** Es la
+que permite el prerregistro después de la revisión única de la máscara de nubes (`E-E3-2_revision_mascara.md`, D-E3-32: sin
+descartar teselas por nubes, clases SCL 2 y 7 descartadas, margen de 100 m), escrita y registrada antes de medir.
+
+| Criterio | Primera (máscara 1.0) | Segunda (máscara 1.1) | |
+|---|---|---|---|
+| 1. Diferencia absoluta mediana | (a) 0,0053 y 0,0062; (b) 0,0016 y 0,0007 | (a) 0,0054 y 0,0068; (b) 0,0019 y 0,0008 | se cumple |
+| 2. Cambio de clase | v4.0 11,943 %; v3.1 librev2 0,188 % | v4.0 **12,093 %**; v3.1 librev2 0,196 % | **no se cumple** (v4.0) |
+| 3. IoU a 48 h | v4.0 0,8946; v3.1 librev2 0,9973 | v4.0 **0,9095**; v3.1 librev2 0,9970 | **no se cumple** (v4.0) |
+
+La revisión sumó escenas (verano: 24 por mes contra 22, 21 y 18) y achicó la cola de marzo (percentil 95 del NDVI 0,069
+contra 0,089), pero el cambio de clase de v4.0 no bajó. Coincide con el diagnóstico (`E-E3-2_diagnostico.md` §5): la regla
+3.3b cambia de clase con diferencias de NDVI mucho menores que las que separan a una máscara SCL de Cloud Score+.
+**Consecuencia (prerregistro, "Si no se cumple")**: no hay otra revisión. **GEE pasa a ser obligatorio para los índices** y
+hay que declararlo en la guía de uso (F7). La vía AWS sigue rotulada "en prueba" y no se habilita. Queda por hacer: los
+compuestos mensuales de verano por Earth Engine (F4_informe §6), rehacer por GEE el verano 2026 del repositorio, que hoy
+está hecho por AWS, y decidir entre las dos personas si AWS se habilita solo para v3.1, que cumple los tres criterios en
+las dos evaluaciones (sería un desvío: el criterio pide "en cada motor").
 
 ### 4.4 E-E3-4 A (en vivo contra reproducción desde la bitácora)
 
@@ -364,10 +383,12 @@ Fuera del prerregistro (F6_referencia_v40.md, Linux): Las Chacras v4.0 libre 141
 
 - **Lo verificado es la conducción, no la predicción** (§1). Nada de este informe dice si las huellas son correctas.
 - **Prerregistros** (act. 16/11): los cuatro están evaluados e informados. E-E3-1 y E-E3-4 se cumplen; E-E3-3 se cumple
-  en las dos metas evaluables y la tercera no se puede evaluar con su diseño; **E-E3-2 no se cumple** (v4.0) y la vía AWS
-  sigue "en prueba" (§4.3). E-E3-1 lo evaluó quien escribió el código (D-E3-13); los otros tres, la otra persona. Con esto
+  en las dos metas evaluables y la tercera no se puede evaluar con su diseño; **E-E3-2 no se cumple** (v4.0), tampoco
+  después de la revisión única de la máscara: GEE pasa a ser obligatorio para los índices y la vía AWS sigue "en prueba"
+  (§4.3). La revisión y la segunda evaluación las hizo la misma persona (D-E3-32). E-E3-1 lo evaluó quien escribió el código (D-E3-13); los otros tres, la otra persona. Con esto
   el criterio de la F6 ("todos los prerregistros evaluados e informados, se cumplan o no") **se cumple en esa parte**.
-  Quedan abiertas la decisión sobre la vía AWS para v4.0 y la aceptación expresa del guion de E-E3-4 (§3).
+  Quedan abiertos hacer los compuestos de verano por GEE, si AWS se habilita solo para v3.1, y la aceptación expresa del
+  guion de E-E3-4 (§3).
 - **Windows**: los arreglos de la F6 (reemplazo de la huella con reintentos, lectura tolerante en el servidor, borrado
   comprobado de tomas de índices) se probaron en Linux simulando los errores. El código de F4, F5 y F6 no pasó todavía por la
   integración continua en Windows (**PENDIENTE**: primer empuje de la rama). (act. 16/11) Ya pasó: `pruebas` en verde en

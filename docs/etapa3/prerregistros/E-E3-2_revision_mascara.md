@@ -77,3 +77,22 @@ Los valores (clases 2 y 7; 100 m) se fijan acá y no se ajustan después de ver 
 - **Expectativa de quien revisa, escrita antes de medir**: se espera que el cambio de clase de v4.0 baje pero quede por
   encima del 3 %, porque cambiando solo enero (el mes con mejor cobertura) ya da 3,5 % y la regla 3.3b es muy sensible
   (`E-E3-2_diagnostico.md` §5).
+
+## 7. Resultado (agregado después de medir, 2026-11-16)
+
+Segunda evaluación sobre el commit limpio `6acb38f` (máscara 1.1), una sola corrida: **no se cumple** (`E-E3-2_resultado.md`).
+
+| | Primera (1.0) | Segunda (1.1) |
+|---|---|---|
+| Criterio 1, (a): NDVI y NDMI | 0,0053 y 0,0062 | 0,0054 y 0,0068 |
+| Criterio 1, (b): NDVI y NDMI | 0,0016 y 0,0007 | 0,0019 y 0,0008 |
+| Criterio 2, v4.0 | 11,943 % | 12,093 % |
+| Criterio 2, v3.1 librev2 | 0,188 % | 0,196 % |
+| Criterio 3, v4.0 (IoU a 48 h) | 0,8946 | 0,9095 |
+| Criterio 3, v3.1 librev2 | 0,9973 | 0,9970 |
+| Escenas de verano (enero, febrero, marzo) | 22, 21, 18 | 24, 24, 24 |
+| NDVI de verano contra GEE, percentil 95 (enero, febrero, marzo) | 0,056; 0,075; 0,089 | 0,056; 0,075; 0,069 |
+
+La expectativa escrita en §6 no se cumplió en una parte: el cambio de clase de v4.0 no bajó. Con esto se aplica el
+prerregistro: **GEE pasa a ser obligatorio para los índices**. La máscara 1.1 queda en el código (v3.1 sigue cumpliendo y
+usa más escenas), con la vía AWS rotulada "en prueba".
