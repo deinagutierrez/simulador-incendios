@@ -1,0 +1,2376 @@
+{
+ "prerregistro": "E-E3-4",
+ "humo": false,
+ "fecha": "2026-11-17 10:08",
+ "evaluador": "LisandroV2002 (repeticion tras D-E3-35, no es la evaluacion formal)",
+ "alcance": "5 corridas × 3 motores, 48 h, comparaciones A y B",
+ "equipo": {
+  "sistema": "Windows-11-10.0.26300-SP0",
+  "procesador": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+  "nucleos": 20,
+  "python": "3.14.7"
+ },
+ "git": {
+  "cambio": "54a0bddbd0edff08b499cbd53036550c9d403380",
+  "rama": "v31-cruce-umbral",
+  "etiquetas": {
+   "prerregistro-E-E3-4": "2e4a4fd9928e3c0323e776597ddc75f8a82fb78e",
+   "prerregistro-E-E3-4-trazos": "9fabd7c1841f4ea66551a6e6831312663d5cd348"
+  },
+  "codigo_sin_registrar": []
+ },
+ "congelado": {
+  "sha256_del_conjunto": "2b32757194d2510bcbc680056f803694be064fc968e35de9c1ab579c10621106",
+  "antes": {
+   "intacto": true,
+   "salida": "versiones congeladas intactas (244 archivos)"
+  },
+  "despues": {
+   "intacto": true,
+   "salida": "versiones congeladas intactas (244 archivos)"
+  }
+ },
+ "trazos_etiqueta": {
+  "etiqueta": "prerregistro-E-E3-4-trazos",
+  "existe": true,
+  "igual": true,
+  "sha256_etiqueta": "06a4c909b743a6eaa08306fe780215db55077dc4d5e4f34185a7a71745581092"
+ },
+ "criterio": {
+  "umbral_iou": 0.99,
+  "tolerancia_longitud_m": 0.011
+ },
+ "insumos": {
+  "prerregistro": {
+   "archivo": "docs/etapa3/prerregistros/E-E3-4_intervenciones.md",
+   "existe": true,
+   "bytes": 2131,
+   "sha256": "7183d6188a3299dfdb3eb4c37eab9bc48000bc4ab054f082f5910dc2857689a6"
+  },
+  "trazos": {
+   "archivo": "docs/etapa3/prerregistros/E-E3-4_trazos.json",
+   "existe": true,
+   "bytes": 4444,
+   "sha256": "06a4c909b743a6eaa08306fe780215db55077dc4d5e4f34185a7a71745581092"
+  },
+  "ficha_v31": {
+   "archivo": "escenarios/v3.1/eventos/SL-2024-LASLAGUNAS.yaml",
+   "existe": true,
+   "bytes": 4180,
+   "sha256": "730c4aca89ead23ae0ddc21de922e464b273a9eb074c1aa1816604fb0c5450e1"
+  },
+  "ficha_v40": {
+   "archivo": "escenarios/v4.0/eventos/SL-2024-LASLAGUNAS.yaml",
+   "existe": true,
+   "bytes": 3110,
+   "sha256": "8ff452244d6a216966fb48e31507274abb7f47c48c80aa849784fd506ecdb037"
+  },
+  "meteo_dominio": {
+   "archivo": "datos/inputSimulacion/meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv",
+   "existe": true,
+   "bytes": 87087,
+   "sha256": "a2496054ef2cd3ff645b8018b0fb753f114b6b4ab5cefa56eab3b6f798e8d15e"
+  },
+  "clase_v31": {
+   "archivo": "datos/inputSimulacion/combustibles/SL-2024-LASLAGUNAS/combustible_clase_SL-2024-LASLAGUNAS.tif",
+   "existe": true,
+   "bytes": 437279,
+   "sha256": "32ed159618fdb348a6d75b239a3b33bca1ba21bb1a203f804334a556910b2ead"
+  },
+  "barreras_enlaces_v31": {
+   "archivo": "datos/inputSimulacion/barreras/barreras_enlaces_las_lagunas_potrerillos.npz",
+   "existe": true,
+   "bytes": 376037,
+   "sha256": "b4602bf795ac2f55c176861cf379975b66b24a1de286f66a0951e3ead4fa6b02"
+  }
+ },
+ "corridas": [
+  {
+   "corrida": 1,
+   "motor": "v4.0",
+   "descripcion": "un cortafuego de 10 m dibujado antes de iniciar",
+   "vivo": {
+    "s": 48.2,
+    "final": {
+     "motivo": "horizonte",
+     "ha": 12234.6,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18T15:00:00+00:00",
+    "pausas_min": [],
+    "intervenciones": [],
+    "intervenciones_esperadas": 0,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [],
+    "bitacora_raiz": "97d9535a709904488503adaddf807dcd2508cd552066b1a04b8da2a2a9904944",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [
+     {
+      "estado": "aceptada",
+      "motivo": "aplicado antes de iniciar",
+      "ancho_m": 10,
+      "suelo_mineral": false,
+      "longitud_dibujada_m": 8506.11,
+      "longitud_aplicada_m": 8506.11,
+      "celdas": 291,
+      "celdas_sha256": "0122bbb16225051e4cb11d0eee4b71d2f376f27c113371aa58f64ca09744f83e"
+     }
+    ],
+    "archivos_offline": {
+     "barreras_extra": "cortafuegos_aplicados.geojson"
+    },
+    "intervenciones_v31": null,
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 46.1,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c1_v4_0/vivo",
+     "raiz_original": "97d9535a709904488503adaddf807dcd2508cd552066b1a04b8da2a2a9904944",
+     "raiz": "97d9535a709904488503adaddf807dcd2508cd552066b1a04b8da2a2a9904944",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 0,
+     "n": 0,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 45.8,
+    "iou_final": 1.0,
+    "celdas_vivo": 135940,
+    "celdas_offline": 135940,
+    "ha_vivo": 12234.6,
+    "ha_offline": 12234.6,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "inicial",
+       "n_bitacora": null,
+       "t_sim_min": 0.0,
+       "estado": "aceptada",
+       "ancho_m": 10,
+       "longitud_dibujada_m": 8506.11,
+       "longitud_aplicada_m": 8506.11,
+       "geometria_offline": "polilinea",
+       "longitud_offline_m": 8506.11,
+       "celdas_offline": 291,
+       "celdas_vivo": 291,
+       "mismas_celdas": true,
+       "misma_longitud": true
+      }
+     ],
+     "cumple": true,
+     "geometrias_sin_par": 0,
+     "longitud_aplicada_total_m": 8506.11
+    },
+    "archivos": {
+     "barreras_extra": "cortafuegos_aplicados.geojson"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 1,
+   "motor": "v3.1-librev2",
+   "descripcion": "un cortafuego de 10 m dibujado antes de iniciar",
+   "vivo": {
+    "s": 26.2,
+    "final": {
+     "motivo": "1",
+     "ha": 31162.59,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [],
+    "intervenciones": [],
+    "intervenciones_esperadas": 0,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [],
+    "bitacora_raiz": "d4591b8d43c4cb70901fc12f0e686fcb8b04abdc65faed65a0f80f4c84c63f93",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [
+     {
+      "estado": "aceptada",
+      "motivo": "",
+      "ancho_m": 10,
+      "suelo_mineral": false,
+      "longitud_dibujada_m": 8506.11,
+      "longitud_aplicada_m": 8506.11,
+      "enlaces": 5354,
+      "enlaces_recortados": 0,
+      "enlaces_sha256": "6c051bb472e215cdadf4fa20699ee9f8ba05b8c8c1c92be4218d63a703efcd31",
+      "celdas": 1162,
+      "celdas_sha256": "bae231f55cab94899781dd7358e200ebaae9f821be7c3a034a8bd43221f4f447"
+     }
+    ],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 1,
+     "horas_viento_manual": 0,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 5354,
+     "archivos": [
+      "barreras_enlaces.npz",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 26.0,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c1_v3_1_librev2/vivo",
+     "raiz_original": "d4591b8d43c4cb70901fc12f0e686fcb8b04abdc65faed65a0f80f4c84c63f93",
+     "raiz": "d4591b8d43c4cb70901fc12f0e686fcb8b04abdc65faed65a0f80f4c84c63f93",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 0,
+     "n": 0,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 15.7,
+    "iou_final": 1.0,
+    "celdas_vivo": 346251,
+    "celdas_offline": 346251,
+    "ha_vivo": 31162.59,
+    "ha_offline": 31162.59,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "inicial",
+       "n_bitacora": null,
+       "t_sim_min": 0.0,
+       "estado": "aceptada",
+       "ancho_m": 10,
+       "longitud_dibujada_m": 8506.11,
+       "longitud_aplicada_m": 8506.11,
+       "geometria_offline": "enlaces",
+       "enlaces": 5354,
+       "enlaces_recortados": 0,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      }
+     ],
+     "matriz_es_la_union": true,
+     "espejo_es_la_matriz": true,
+     "cumple": true,
+     "npz_sin_par": 0,
+     "longitud_aplicada_total_m": 8506.11
+    },
+    "espejo": {
+     "barreras": true,
+     "reemplazados": [
+      "barreras/barreras_enlaces_las_lagunas_potrerillos.npz"
+     ],
+     "enlaces": 35,
+     "copias": 0,
+     "sha256_barreras_espejo": "474b661a6f4af2b9c5fbc059bbd92cd040c708ecda6f2f77f2d9a43a07ca1c1e"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 1,
+   "motor": "v3.1-libre",
+   "descripcion": "un cortafuego de 10 m dibujado antes de iniciar",
+   "vivo": {
+    "s": 26.1,
+    "final": {
+     "motivo": "1",
+     "ha": 33915.96,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [],
+    "intervenciones": [],
+    "intervenciones_esperadas": 0,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [],
+    "bitacora_raiz": "4ca41a0ae210a42b97f1d19ccab2411b508e88b84a38d7b1f6aeba2d44d01f8e",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [
+     {
+      "estado": "aceptada",
+      "motivo": "",
+      "ancho_m": 10,
+      "suelo_mineral": false,
+      "longitud_dibujada_m": 8506.11,
+      "longitud_aplicada_m": 8506.11,
+      "enlaces": 5354,
+      "enlaces_recortados": 0,
+      "enlaces_sha256": "6c051bb472e215cdadf4fa20699ee9f8ba05b8c8c1c92be4218d63a703efcd31",
+      "celdas": 1162,
+      "celdas_sha256": "bae231f55cab94899781dd7358e200ebaae9f821be7c3a034a8bd43221f4f447"
+     }
+    ],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 1,
+     "horas_viento_manual": 0,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 5354,
+     "archivos": [
+      "barreras_enlaces.npz",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 26.2,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c1_v3_1_libre/vivo",
+     "raiz_original": "4ca41a0ae210a42b97f1d19ccab2411b508e88b84a38d7b1f6aeba2d44d01f8e",
+     "raiz": "4ca41a0ae210a42b97f1d19ccab2411b508e88b84a38d7b1f6aeba2d44d01f8e",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 0,
+     "n": 0,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 15.7,
+    "iou_final": 1.0,
+    "celdas_vivo": 376844,
+    "celdas_offline": 376844,
+    "ha_vivo": 33915.96,
+    "ha_offline": 33915.96,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "inicial",
+       "n_bitacora": null,
+       "t_sim_min": 0.0,
+       "estado": "aceptada",
+       "ancho_m": 10,
+       "longitud_dibujada_m": 8506.11,
+       "longitud_aplicada_m": 8506.11,
+       "geometria_offline": "enlaces",
+       "enlaces": 5354,
+       "enlaces_recortados": 0,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      }
+     ],
+     "matriz_es_la_union": true,
+     "espejo_es_la_matriz": true,
+     "cumple": true,
+     "npz_sin_par": 0,
+     "longitud_aplicada_total_m": 8506.11
+    },
+    "espejo": {
+     "barreras": true,
+     "reemplazados": [
+      "barreras/barreras_enlaces_las_lagunas_potrerillos.npz"
+     ],
+     "enlaces": 35,
+     "copias": 0,
+     "sha256_barreras_espejo": "474b661a6f4af2b9c5fbc059bbd92cd040c708ecda6f2f77f2d9a43a07ca1c1e"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 2,
+   "motor": "v4.0",
+   "descripcion": "un cortafuego de 10 m agregado en pausa a las 6 h, delante del frente",
+   "vivo": {
+    "s": 45.2,
+    "final": {
+     "motivo": "horizonte",
+     "ha": 12234.6,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18T15:00:00+00:00",
+    "pausas_min": [
+     360.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": "291 celdas, 8506.11 m aplicados"
+     }
+    ],
+    "intervenciones_esperadas": 1,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": {
+     "barreras_extra": "cortafuegos_aplicados.geojson"
+    },
+    "intervenciones_v31": null,
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 45.1,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c2_v4_0/vivo",
+     "raiz_original": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+     "raiz": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 3,
+     "n": 3,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 45.3,
+    "iou_final": 1.0,
+    "celdas_vivo": 135940,
+    "celdas_offline": 135940,
+    "ha_vivo": 12234.6,
+    "ha_offline": 12234.6,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 10,
+       "longitud_dibujada_m": 8506.11,
+       "longitud_aplicada_m": 8506.11,
+       "geometria_offline": "polilinea",
+       "longitud_offline_m": 8506.11,
+       "celdas_offline": 291,
+       "celdas_vivo": 291,
+       "mismas_celdas": true,
+       "misma_longitud": true
+      }
+     ],
+     "cumple": true,
+     "geometrias_sin_par": 0,
+     "longitud_aplicada_total_m": 8506.11
+    },
+    "archivos": {
+     "barreras_extra": "cortafuegos_aplicados.geojson"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 2,
+   "motor": "v3.1-librev2",
+   "descripcion": "un cortafuego de 10 m agregado en pausa a las 6 h, delante del frente",
+   "vivo": {
+    "s": 26.1,
+    "final": {
+     "motivo": "1",
+     "ha": 31162.59,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [
+     360.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": ""
+     }
+    ],
+    "intervenciones_esperadas": 1,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 1,
+     "horas_viento_manual": 0,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 5354,
+     "archivos": [
+      "barreras_enlaces.npz",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 26.1,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c2_v3_1_librev2/vivo",
+     "raiz_original": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+     "raiz": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 3,
+     "n": 3,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 15.6,
+    "iou_final": 1.0,
+    "celdas_vivo": 346251,
+    "celdas_offline": 346251,
+    "ha_vivo": 31162.59,
+    "ha_offline": 31162.59,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 10,
+       "longitud_dibujada_m": 8506.11,
+       "longitud_aplicada_m": 8506.11,
+       "geometria_offline": "enlaces",
+       "enlaces": 5354,
+       "enlaces_recortados": 0,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      }
+     ],
+     "matriz_es_la_union": true,
+     "espejo_es_la_matriz": true,
+     "cumple": true,
+     "npz_sin_par": 0,
+     "longitud_aplicada_total_m": 8506.11
+    },
+    "espejo": {
+     "barreras": true,
+     "reemplazados": [
+      "barreras/barreras_enlaces_las_lagunas_potrerillos.npz"
+     ],
+     "enlaces": 35,
+     "copias": 0,
+     "sha256_barreras_espejo": "474b661a6f4af2b9c5fbc059bbd92cd040c708ecda6f2f77f2d9a43a07ca1c1e"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 2,
+   "motor": "v3.1-libre",
+   "descripcion": "un cortafuego de 10 m agregado en pausa a las 6 h, delante del frente",
+   "vivo": {
+    "s": 27.3,
+    "final": {
+     "motivo": "1",
+     "ha": 33915.96,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [
+     360.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": ""
+     }
+    ],
+    "intervenciones_esperadas": 1,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 1,
+     "horas_viento_manual": 0,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 5354,
+     "archivos": [
+      "barreras_enlaces.npz",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 27.1,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c2_v3_1_libre/vivo",
+     "raiz_original": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+     "raiz": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 3,
+     "n": 3,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 16.4,
+    "iou_final": 1.0,
+    "celdas_vivo": 376844,
+    "celdas_offline": 376844,
+    "ha_vivo": 33915.96,
+    "ha_offline": 33915.96,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 10,
+       "longitud_dibujada_m": 8506.11,
+       "longitud_aplicada_m": 8506.11,
+       "geometria_offline": "enlaces",
+       "enlaces": 5354,
+       "enlaces_recortados": 0,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      }
+     ],
+     "matriz_es_la_union": true,
+     "espejo_es_la_matriz": true,
+     "cumple": true,
+     "npz_sin_par": 0,
+     "longitud_aplicada_total_m": 8506.11
+    },
+    "espejo": {
+     "barreras": true,
+     "reemplazados": [
+      "barreras/barreras_enlaces_las_lagunas_potrerillos.npz"
+     ],
+     "enlaces": 35,
+     "copias": 0,
+     "sha256_barreras_espejo": "474b661a6f4af2b9c5fbc059bbd92cd040c708ecda6f2f77f2d9a43a07ca1c1e"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 3,
+   "motor": "v4.0",
+   "descripcion": "dos cortafuegos (6 m y 25 m) en pausas a las 6 h y a las 12 h; el de 25 m pasa en parte sobre celdas ya quemadas",
+   "vivo": {
+    "s": 60.8,
+    "final": {
+     "motivo": "horizonte",
+     "ha": 12627.0,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18T15:00:00+00:00",
+    "pausas_min": [
+     360.0,
+     720.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": "348 celdas, 10008.00 m aplicados"
+     },
+     {
+      "ref": "720-0",
+      "n": 5,
+      "estado": "aceptada",
+      "t_vigor_min": 720.0,
+      "pleno_min": null,
+      "motivo": "234 celdas, 7000.00 m aplicados"
+     }
+    ],
+    "intervenciones_esperadas": 2,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": {
+     "barreras_extra": "cortafuegos_aplicados.geojson"
+    },
+    "intervenciones_v31": null,
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 72.7,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c3_v4_0/vivo",
+     "raiz_original": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+     "raiz": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 6,
+     "n": 6,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 47.3,
+    "iou_final": 1.0,
+    "celdas_vivo": 140300,
+    "celdas_offline": 140300,
+    "ha_vivo": 12627.0,
+    "ha_offline": 12627.0,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 6,
+       "longitud_dibujada_m": 10008.0,
+       "longitud_aplicada_m": 10008.0,
+       "geometria_offline": "polilinea",
+       "longitud_offline_m": 10008.0,
+       "celdas_offline": 348,
+       "celdas_vivo": 348,
+       "mismas_celdas": true,
+       "misma_longitud": true
+      },
+      {
+       "origen": "pausa",
+       "n_bitacora": 5,
+       "t_sim_min": 720.0,
+       "estado": "aplicada",
+       "ancho_m": 25,
+       "longitud_dibujada_m": 7000.0,
+       "longitud_aplicada_m": 7000.0,
+       "geometria_offline": "polilinea",
+       "longitud_offline_m": 7000.0,
+       "celdas_offline": 234,
+       "celdas_vivo": 234,
+       "mismas_celdas": true,
+       "misma_longitud": true
+      }
+     ],
+     "cumple": true,
+     "geometrias_sin_par": 0,
+     "longitud_aplicada_total_m": 17008.0
+    },
+    "archivos": {
+     "barreras_extra": "cortafuegos_aplicados.geojson"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 3,
+   "motor": "v3.1-librev2",
+   "descripcion": "dos cortafuegos (6 m y 25 m) en pausas a las 6 h y a las 12 h; el de 25 m pasa en parte sobre celdas ya quemadas",
+   "vivo": {
+    "s": 35.8,
+    "final": {
+     "motivo": "1",
+     "ha": 30642.84,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [
+     360.0,
+     720.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": ""
+     },
+     {
+      "ref": "720-0",
+      "n": 5,
+      "estado": "recortada",
+      "t_vigor_min": 720.0,
+      "pleno_min": null,
+      "motivo": "se quitaron 235 enlaces que llegan a celdas ya alcanzadas por el fuego"
+     }
+    ],
+    "intervenciones_esperadas": 2,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 2,
+     "horas_viento_manual": 0,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 10277,
+     "archivos": [
+      "barreras_enlaces.npz",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 35.8,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c3_v3_1_librev2/vivo",
+     "raiz_original": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+     "raiz": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 6,
+     "n": 6,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 15.6,
+    "iou_final": 1.0,
+    "celdas_vivo": 340476,
+    "celdas_offline": 340476,
+    "ha_vivo": 30642.84,
+    "ha_offline": 30642.84,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 6,
+       "longitud_dibujada_m": 10008.0,
+       "longitud_aplicada_m": 10008.0,
+       "geometria_offline": "enlaces",
+       "enlaces": 6330,
+       "enlaces_recortados": 0,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      },
+      {
+       "origen": "pausa",
+       "n_bitacora": 5,
+       "t_sim_min": 720.0,
+       "estado": "aplicada",
+       "ancho_m": 25,
+       "longitud_dibujada_m": 7000.0,
+       "longitud_aplicada_m": 6580.0,
+       "geometria_offline": "enlaces",
+       "enlaces": 3969,
+       "enlaces_recortados": 235,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      }
+     ],
+     "matriz_es_la_union": true,
+     "espejo_es_la_matriz": true,
+     "cumple": true,
+     "npz_sin_par": 0,
+     "longitud_aplicada_total_m": 16588.0
+    },
+    "espejo": {
+     "barreras": true,
+     "reemplazados": [
+      "barreras/barreras_enlaces_las_lagunas_potrerillos.npz"
+     ],
+     "enlaces": 35,
+     "copias": 0,
+     "sha256_barreras_espejo": "e244a15bf93829cce202ee0fa753fb6e0fbbb34416cff01068b29132acfae926"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 3,
+   "motor": "v3.1-libre",
+   "descripcion": "dos cortafuegos (6 m y 25 m) en pausas a las 6 h y a las 12 h; el de 25 m pasa en parte sobre celdas ya quemadas",
+   "vivo": {
+    "s": 35.8,
+    "final": {
+     "motivo": "1",
+     "ha": 32678.55,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [
+     360.0,
+     720.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": ""
+     },
+     {
+      "ref": "720-0",
+      "n": 5,
+      "estado": "recortada",
+      "t_vigor_min": 720.0,
+      "pleno_min": null,
+      "motivo": "se quitaron 981 enlaces que llegan a celdas ya alcanzadas por el fuego"
+     }
+    ],
+    "intervenciones_esperadas": 2,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 2,
+     "horas_viento_manual": 0,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 9531,
+     "archivos": [
+      "barreras_enlaces.npz",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 35.8,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c3_v3_1_libre/vivo",
+     "raiz_original": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+     "raiz": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 6,
+     "n": 6,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 15.7,
+    "iou_final": 1.0,
+    "celdas_vivo": 363095,
+    "celdas_offline": 363095,
+    "ha_vivo": 32678.55,
+    "ha_offline": 32678.55,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 6,
+       "longitud_dibujada_m": 10008.0,
+       "longitud_aplicada_m": 10008.0,
+       "geometria_offline": "enlaces",
+       "enlaces": 6330,
+       "enlaces_recortados": 0,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      },
+      {
+       "origen": "pausa",
+       "n_bitacora": 5,
+       "t_sim_min": 720.0,
+       "estado": "aplicada",
+       "ancho_m": 25,
+       "longitud_dibujada_m": 7000.0,
+       "longitud_aplicada_m": 5280.0,
+       "geometria_offline": "enlaces",
+       "enlaces": 3223,
+       "enlaces_recortados": 981,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      }
+     ],
+     "matriz_es_la_union": true,
+     "espejo_es_la_matriz": true,
+     "cumple": true,
+     "npz_sin_par": 0,
+     "longitud_aplicada_total_m": 15288.0
+    },
+    "espejo": {
+     "barreras": true,
+     "reemplazados": [
+      "barreras/barreras_enlaces_las_lagunas_potrerillos.npz"
+     ],
+     "enlaces": 35,
+     "copias": 0,
+     "sha256_barreras_espejo": "85fb67db2fd73ab5512ac46379e6e1463b30a81aca61f9d8f4e776f542199a7c"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 4,
+   "motor": "v4.0",
+   "descripcion": "viento manual a las 8 h (giro de 90°) y vuelta al pronóstico a las 20 h",
+   "vivo": {
+    "s": 44.2,
+    "final": {
+     "motivo": "horizonte",
+     "ha": 12875.58,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18T15:00:00+00:00",
+    "pausas_min": [
+     480.0,
+     1200.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "480-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 480.0,
+      "pleno_min": 540.0,
+      "motivo": "20 km/h desde 87° desde la fila de 2024-09-19T00:00:00Z; gira durante la hora siguiente"
+     },
+     {
+      "ref": "1200-0",
+      "n": 5,
+      "estado": "aceptada",
+      "t_vigor_min": 1200.0,
+      "pleno_min": 1260.0,
+      "motivo": "vuelve al pronóstico desde la fila de 2024-09-19T12:00:00Z; gira durante la hora siguiente"
+     }
+    ],
+    "intervenciones_esperadas": 2,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": {
+     "meteo": "meteo_editada.csv"
+    },
+    "intervenciones_v31": null,
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 44.9,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c4_v4_0/vivo",
+     "raiz_original": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+     "raiz": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 6,
+     "n": 6,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 45.1,
+    "iou_final": 1.0,
+    "celdas_vivo": 143062,
+    "celdas_offline": 143062,
+    "ha_vivo": 12875.58,
+    "ha_offline": 12875.58,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [],
+     "cumple": true,
+     "nota": "sin cortafuegos"
+    },
+    "archivos": {
+     "meteo": "meteo_editada.csv"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 4,
+   "motor": "v3.1-librev2",
+   "descripcion": "viento manual a las 8 h (giro de 90°) y vuelta al pronóstico a las 20 h",
+   "vivo": {
+    "s": 16.4,
+    "final": {
+     "motivo": "1",
+     "ha": 31404.51,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [
+     480.0,
+     1200.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "480-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 480.0,
+      "pleno_min": null,
+      "motivo": ""
+     },
+     {
+      "ref": "1200-0",
+      "n": 5,
+      "estado": "aceptada",
+      "t_vigor_min": 1200.0,
+      "pleno_min": null,
+      "motivo": ""
+     }
+    ],
+    "intervenciones_esperadas": 2,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 0,
+     "horas_viento_manual": 12,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 0,
+     "archivos": [
+      "viento_horario.csv",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 16.3,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c4_v3_1_librev2/vivo",
+     "raiz_original": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+     "raiz": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 6,
+     "n": 6,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 15.5,
+    "iou_final": 1.0,
+    "celdas_vivo": 348939,
+    "celdas_offline": 348939,
+    "ha_vivo": 31404.51,
+    "ha_offline": 31404.51,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [],
+     "cumple": true,
+     "nota": "sin cortafuegos"
+    },
+    "espejo": {
+     "barreras": false,
+     "reemplazados": [
+      "meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv"
+     ],
+     "enlaces": 34,
+     "copias": 0,
+     "sha256_barreras_espejo": null
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 4,
+   "motor": "v3.1-libre",
+   "descripcion": "viento manual a las 8 h (giro de 90°) y vuelta al pronóstico a las 20 h",
+   "vivo": {
+    "s": 30.0,
+    "final": {
+     "motivo": "1",
+     "ha": 34337.88,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [
+     480.0,
+     1200.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "480-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 480.0,
+      "pleno_min": null,
+      "motivo": ""
+     },
+     {
+      "ref": "1200-0",
+      "n": 5,
+      "estado": "aceptada",
+      "t_vigor_min": 1200.0,
+      "pleno_min": null,
+      "motivo": ""
+     }
+    ],
+    "intervenciones_esperadas": 2,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 0,
+     "horas_viento_manual": 12,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 0,
+     "archivos": [
+      "viento_horario.csv",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 29.1,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c4_v3_1_libre/vivo",
+     "raiz_original": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+     "raiz": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 6,
+     "n": 6,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 28.9,
+    "iou_final": 1.0,
+    "celdas_vivo": 381532,
+    "celdas_offline": 381532,
+    "ha_vivo": 34337.88,
+    "ha_offline": 34337.88,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [],
+     "cumple": true,
+     "nota": "sin cortafuegos"
+    },
+    "espejo": {
+     "barreras": false,
+     "reemplazados": [
+      "meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv"
+     ],
+     "enlaces": 34,
+     "copias": 0,
+     "sha256_barreras_espejo": null
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 5,
+   "motor": "v4.0",
+   "descripcion": "combinación de 3 y 4",
+   "vivo": {
+    "s": 85.4,
+    "final": {
+     "motivo": "horizonte",
+     "ha": 12745.26,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18T15:00:00+00:00",
+    "pausas_min": [
+     360.0,
+     480.0,
+     720.0,
+     1200.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": "348 celdas, 10008.00 m aplicados"
+     },
+     {
+      "ref": "480-0",
+      "n": 5,
+      "estado": "aceptada",
+      "t_vigor_min": 480.0,
+      "pleno_min": 540.0,
+      "motivo": "20 km/h desde 87° desde la fila de 2024-09-19T00:00:00Z; gira durante la hora siguiente"
+     },
+     {
+      "ref": "720-0",
+      "n": 8,
+      "estado": "aceptada",
+      "t_vigor_min": 720.0,
+      "pleno_min": null,
+      "motivo": "234 celdas, 7000.00 m aplicados"
+     },
+     {
+      "ref": "1200-0",
+      "n": 11,
+      "estado": "aceptada",
+      "t_vigor_min": 1200.0,
+      "pleno_min": 1260.0,
+      "motivo": "vuelve al pronóstico desde la fila de 2024-09-19T12:00:00Z; gira durante la hora siguiente"
+     }
+    ],
+    "intervenciones_esperadas": 4,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 7,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 8,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 9,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 10,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 11,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 12,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": {
+     "barreras_extra": "cortafuegos_aplicados.geojson",
+     "meteo": "meteo_editada.csv"
+    },
+    "intervenciones_v31": null,
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 83.9,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c5_v4_0/vivo",
+     "raiz_original": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+     "raiz": "502e31919e806e5903ccfa8a74ef939ec40bd0110c3e4abdb37e5abef10f7b72",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 12,
+     "n": 12,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 85.7,
+    "iou_final": 1.0,
+    "celdas_vivo": 141614,
+    "celdas_offline": 141614,
+    "ha_vivo": 12745.26,
+    "ha_offline": 12745.26,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 6,
+       "longitud_dibujada_m": 10008.0,
+       "longitud_aplicada_m": 10008.0,
+       "geometria_offline": "polilinea",
+       "longitud_offline_m": 10008.0,
+       "celdas_offline": 348,
+       "celdas_vivo": 348,
+       "mismas_celdas": true,
+       "misma_longitud": true
+      },
+      {
+       "origen": "pausa",
+       "n_bitacora": 8,
+       "t_sim_min": 720.0,
+       "estado": "aplicada",
+       "ancho_m": 25,
+       "longitud_dibujada_m": 7000.0,
+       "longitud_aplicada_m": 7000.0,
+       "geometria_offline": "polilinea",
+       "longitud_offline_m": 7000.0,
+       "celdas_offline": 234,
+       "celdas_vivo": 234,
+       "mismas_celdas": true,
+       "misma_longitud": true
+      }
+     ],
+     "cumple": true,
+     "geometrias_sin_par": 0,
+     "longitud_aplicada_total_m": 17008.0
+    },
+    "archivos": {
+     "barreras_extra": "cortafuegos_aplicados.geojson",
+     "meteo": "meteo_editada.csv"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 5,
+   "motor": "v3.1-librev2",
+   "descripcion": "combinación de 3 y 4",
+   "vivo": {
+    "s": 55.2,
+    "final": {
+     "motivo": "1",
+     "ha": 30943.98,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [
+     360.0,
+     480.0,
+     720.0,
+     1200.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": ""
+     },
+     {
+      "ref": "480-0",
+      "n": 5,
+      "estado": "aceptada",
+      "t_vigor_min": 480.0,
+      "pleno_min": null,
+      "motivo": ""
+     },
+     {
+      "ref": "720-0",
+      "n": 8,
+      "estado": "recortada",
+      "t_vigor_min": 720.0,
+      "pleno_min": null,
+      "motivo": "se quitaron 1529 enlaces que llegan a celdas ya alcanzadas por el fuego"
+     },
+     {
+      "ref": "1200-0",
+      "n": 11,
+      "estado": "aceptada",
+      "t_vigor_min": 1200.0,
+      "pleno_min": null,
+      "motivo": ""
+     }
+    ],
+    "intervenciones_esperadas": 4,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 7,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 8,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 9,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 10,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 11,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 12,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 2,
+     "horas_viento_manual": 12,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 8983,
+     "archivos": [
+      "barreras_enlaces.npz",
+      "viento_horario.csv",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 57.7,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c5_v3_1_librev2/vivo",
+     "raiz_original": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+     "raiz": "6e4fc71165bc425777e597073a8b6bd93b37b9580c489de0a73920830c746ed4",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 12,
+     "n": 12,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 28.6,
+    "iou_final": 1.0,
+    "celdas_vivo": 343822,
+    "celdas_offline": 343822,
+    "ha_vivo": 30943.98,
+    "ha_offline": 30943.98,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 6,
+       "longitud_dibujada_m": 10008.0,
+       "longitud_aplicada_m": 10008.0,
+       "geometria_offline": "enlaces",
+       "enlaces": 6330,
+       "enlaces_recortados": 0,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      },
+      {
+       "origen": "pausa",
+       "n_bitacora": 8,
+       "t_sim_min": 720.0,
+       "estado": "aplicada",
+       "ancho_m": 25,
+       "longitud_dibujada_m": 7000.0,
+       "longitud_aplicada_m": 4440.0,
+       "geometria_offline": "enlaces",
+       "enlaces": 2675,
+       "enlaces_recortados": 1529,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      }
+     ],
+     "matriz_es_la_union": true,
+     "espejo_es_la_matriz": true,
+     "cumple": true,
+     "npz_sin_par": 0,
+     "longitud_aplicada_total_m": 14448.0
+    },
+    "espejo": {
+     "barreras": true,
+     "reemplazados": [
+      "barreras/barreras_enlaces_las_lagunas_potrerillos.npz",
+      "meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv"
+     ],
+     "enlaces": 34,
+     "copias": 0,
+     "sha256_barreras_espejo": "54e67b0c3a362781f615393a620f989b7e0ec23055f7cdceded13b6ad6102b61"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  },
+  {
+   "corrida": 5,
+   "motor": "v3.1-libre",
+   "descripcion": "combinación de 3 y 4",
+   "vivo": {
+    "s": 58.3,
+    "final": {
+     "motivo": "1",
+     "ha": 33725.43,
+     "t_sim_min": 2880.0,
+     "completa": true
+    },
+    "t_inicio_utc": "2024-09-18 15:00:00+00:00",
+    "pausas_min": [
+     360.0,
+     480.0,
+     720.0,
+     1200.0
+    ],
+    "intervenciones": [
+     {
+      "ref": "360-0",
+      "n": 2,
+      "estado": "aceptada",
+      "t_vigor_min": 360.0,
+      "pleno_min": null,
+      "motivo": ""
+     },
+     {
+      "ref": "480-0",
+      "n": 5,
+      "estado": "aceptada",
+      "t_vigor_min": 480.0,
+      "pleno_min": null,
+      "motivo": ""
+     },
+     {
+      "ref": "720-0",
+      "n": 8,
+      "estado": "recortada",
+      "t_vigor_min": 720.0,
+      "pleno_min": null,
+      "motivo": "se quitaron 1439 enlaces que llegan a celdas ya alcanzadas por el fuego"
+     },
+     {
+      "ref": "1200-0",
+      "n": 11,
+      "estado": "aceptada",
+      "t_vigor_min": 1200.0,
+      "pleno_min": null,
+      "motivo": ""
+     }
+    ],
+    "intervenciones_esperadas": 4,
+    "anomalias": [],
+    "errores_no_fatales": [],
+    "bitacora": [
+     {
+      "n": 1,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 2,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 3,
+      "t_sim_min": 360.0,
+      "t_vigor_min": 360.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 4,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 5,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 6,
+      "t_sim_min": 480.0,
+      "t_vigor_min": 480.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 7,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 8,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "cortafuego"
+     },
+     {
+      "n": 9,
+      "t_sim_min": 720.0,
+      "t_vigor_min": 720.0,
+      "tipo": "reanudacion"
+     },
+     {
+      "n": 10,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "pausa"
+     },
+     {
+      "n": 11,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "viento_manual"
+     },
+     {
+      "n": 12,
+      "t_sim_min": 1200.0,
+      "t_vigor_min": 1200.0,
+      "tipo": "reanudacion"
+     }
+    ],
+    "bitacora_raiz": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+    "cadena_integra": true,
+    "cortafuegos_iniciales": [],
+    "archivos_offline": null,
+    "intervenciones_v31": {
+     "carpeta": "intervenciones_v31",
+     "cortafuegos": 2,
+     "horas_viento_manual": 12,
+     "celdas_suelo_mineral": 0,
+     "enlaces_con_barrera": 9073,
+     "archivos": [
+      "barreras_enlaces.npz",
+      "viento_horario.csv",
+      "intervenciones.json"
+     ]
+    },
+    "plan_cumplido": true
+   },
+   "A": {
+    "s": 58.3,
+    "celdas_distintas": 0,
+    "reproduccion": {
+     "de": "E-E3-4/c5_v3_1_libre/vivo",
+     "raiz_original": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+     "raiz": "feec888f27758539707ff780805af394b85f357191df62cec735507e5a20146d",
+     "raiz_igual": true,
+     "original_integra": true,
+     "original_primer_fallo": null,
+     "n_original": 12,
+     "n": 12,
+     "cadena_igual": true,
+     "primera_distinta": null,
+     "sin_aplicar": []
+    },
+    "cumple": true
+   },
+   "B": {
+    "s": 26.1,
+    "iou_final": 1.0,
+    "celdas_vivo": 374727,
+    "celdas_offline": 374727,
+    "ha_vivo": 33725.43,
+    "ha_offline": 33725.43,
+    "celdas_distintas_llegada": 0,
+    "longitud": {
+     "trazos": [
+      {
+       "origen": "pausa",
+       "n_bitacora": 2,
+       "t_sim_min": 360.0,
+       "estado": "aplicada",
+       "ancho_m": 6,
+       "longitud_dibujada_m": 10008.0,
+       "longitud_aplicada_m": 10008.0,
+       "geometria_offline": "enlaces",
+       "enlaces": 6330,
+       "enlaces_recortados": 0,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      },
+      {
+       "origen": "pausa",
+       "n_bitacora": 8,
+       "t_sim_min": 720.0,
+       "estado": "aplicada",
+       "ancho_m": 25,
+       "longitud_dibujada_m": 7000.0,
+       "longitud_aplicada_m": 4590.0,
+       "geometria_offline": "enlaces",
+       "enlaces": 2765,
+       "enlaces_recortados": 1439,
+       "enlaces_iguales": true,
+       "misma_longitud": true
+      }
+     ],
+     "matriz_es_la_union": true,
+     "espejo_es_la_matriz": true,
+     "cumple": true,
+     "npz_sin_par": 0,
+     "longitud_aplicada_total_m": 14598.0
+    },
+    "espejo": {
+     "barreras": true,
+     "reemplazados": [
+      "barreras/barreras_enlaces_las_lagunas_potrerillos.npz",
+      "meteo/SL-2024-LASLAGUNAS_ecmwf_ifs_20240917T00_20241010T03_b839008a1f1545e2_dominio.csv"
+     ],
+     "enlaces": 34,
+     "copias": 0,
+     "sha256_barreras_espejo": "8c98c62da49f0a03abacad88d7f650eaa33539a8755b8df89e555bfffbff5457"
+    },
+    "cumple_iou": true,
+    "cumple_longitud": true,
+    "cumple": true
+   }
+  }
+ ],
+ "notas": [
+  "Ignición: la definición es la del evento con la hipótesis 1 y los puntos de la ficha (`hipotesis: 1`, `ignicion: snmf`), como en E-E3-1; se comprueba que la ficha diga la misma hora que el archivo de trazos y se informa la que usó cada corrida (`t_inicio_utc`).",
+  "Intervenciones en vivo: `pausar` con `en_t_sim_min` y, en cada pausa, `intervenir` por la entrada estándar y `reanudar` (el camino del servidor). La reproducción (A) la hace el propio proceso motor con `reproduccion` = {de, raiz, bitacora}.",
+  "Longitud de cortafuego (criterio B, D-E3-28 punto 14), cómo se mide (lo fijó quien escribe, antes de ver resultados): v4.0 carga geometrías; para las líneas se mide la longitud dentro de la grilla de la geometría que carga la corrida offline y se compara con la aplicada en vivo (tolerancia 0,011 m por el redondeo a 0,01 m), y además que toque las mismas celdas. Si la geometría offline son los centros de las celdas (cuando la polilínea recortada no rasteriza exacto), no tiene longitud: se compara que cargue las mismas celdas. v3.1 no carga líneas sino enlaces: se compara que la matriz offline tenga exactamente los enlaces aplicados (sha256 de cada trazo, unión y espejo); con eso, la longitud de lo cargado es la aplicada.",
+  "En v4.0 el viento manual gira durante la hora siguiente a la pausa y en v3.1 cambia de golpe en la hora de la pausa; en los dos casos la corrida offline usa la serie editada del mismo modo, así que no cuenta como diferencia.",
+  "B se mide sobre la huella final (celdas con tiempo de llegada); se informa también la cantidad de celdas con tiempo de llegada distinto, que no es criterio.",
+  "Un solo evento (Las Lagunas 2024), como declara el prerregistro. No dice si un cortafuego real detendría el fuego."
+ ],
+ "errores": [],
+ "definicion": {
+  "evento": "SL-2024-LASLAGUNAS",
+  "hipotesis": 1,
+  "ignicion": "snmf",
+  "horas": 48,
+  "validar": false,
+  "figuras": false
+ },
+ "insumos_sin_cambios": true,
+ "veredicto": {
+  "criterios": {
+   "A_desde_la_bitacora": {
+    "cumple": true,
+    "umbral": "0 celdas distintas en el tiempo de llegada y la misma cadena"
+   },
+   "B_offline": {
+    "cumple": true,
+    "umbral": "IoU de la huella final >= 0.99 y la misma longitud de cortafuego"
+   }
+  },
+  "global": "se cumple",
+  "pares_hechos": 15,
+  "pares_esperados": 15,
+  "planes_cumplidos": true
+ }
+}
