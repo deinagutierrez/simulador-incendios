@@ -278,6 +278,39 @@ def test_indices_cargados_a_mano(servidor, monkeypatch):
     assert servidor.pedir("/api/datos/indices/manual", manual)[0] == 409       # hay que volver a subirlos
 
 
+def pedir_en_dos_partes(servidor, ruta: str, cuerpo: bytes, encabezados: dict | None = None, pausa_s: float = 0.3) -> int:
+    """El código con que el servidor contesta un POST cuyo cuerpo llega un rato después que los encabezados, con
+    «Connection: close». Así manda urllib los pedidos (encabezados y cuerpo en dos envíos) y, con la computadora ocupada,
+    el segundo envío puede llegar tarde."""
+    cab = {"Host": f"127.0.0.1:{servidor.puerto}", "Content-Type": "application/octet-stream",
+           "Content-Length": str(len(cuerpo)), "Connection": "close"} | (encabezados or {})
+    with socket.create_connection(("127.0.0.1", servidor.puerto), timeout=30) as s:
+        s.sendall((f"POST {ruta} HTTP/1.1\r\n" + "".join(f"{k}: {v}\r\n" for k, v in cab.items()) + "\r\n").encode("ascii"))
+        time.sleep(pausa_s)
+        s.sendall(cuerpo)
+        crudo = b""
+        while parte := s.recv(65536):
+            crudo += parte
+    return int(crudo.split(b" ", 2)[1])
+
+
+def test_el_error_de_una_subida_llega_aunque_el_cuerpo_tarde(servidor, monkeypatch):
+    """Si el servidor contesta un error y cierra antes de leer el cuerpo, en Windows el cliente pierde la respuesta
+    (WinError 10053) en vez de ver el código. Por eso el servidor lee el cuerpo entero antes de contestar."""
+    servidor.control()
+    csv = b"time_utc,temperature_2m\n2026-11-13T00:00:00Z,20\n"
+    assert pedir_en_dos_partes(servidor, "/api/datos/meteo/archivo?nombre=x.exe", csv) == 422
+    assert pedir_en_dos_partes(servidor, "/api/datos/indices/archivo?banda=evi&nombre=x.tif", TIF) == 422
+    assert pedir_en_dos_partes(servidor, "/api/datos/indices/archivo?banda=ndmi&nombre=x.exe", TIF) == 422
+    assert pedir_en_dos_partes(servidor, "/api/datos/meteo/archivo?nombre=x.csv", csv,
+                               {"Origin": "http://otra-pagina.example"}) == 403
+    monkeypatch.setattr(mod_app, "MAX_CSV", 10)
+    monkeypatch.setattr(mod_app, "MAX_TIF", 10)
+    assert pedir_en_dos_partes(servidor, "/api/datos/meteo/archivo?nombre=x.csv", csv) == 413
+    assert pedir_en_dos_partes(servidor, "/api/datos/indices/archivo?banda=ndmi&nombre=x.tif", TIF) == 413
+    assert servidor.app.state.gestor_datos.en_marcha() is None
+
+
 def test_google_earth_engine_segun_disponibilidad(servidor, monkeypatch):
     servidor.control()
     monkeypatch.setattr(d_indices, "gee_disponible", lambda: (False, "faltan las credenciales de prueba"))
