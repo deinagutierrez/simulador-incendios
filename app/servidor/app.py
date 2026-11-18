@@ -19,6 +19,7 @@
     GET  /api/corridas/<id>/quemado.png?hora=N    huella para el mapa, hasta la hora simulada N (o completa);
                                                   con color=rrggbb, de un solo color (para comparar dos motores)
     GET  /api/corridas/<id>/perimetro.geojson?hora=N   contorno del área quemada hasta la hora N
+    GET  /api/corridas/<id>/viento?hora=N         flechas del viento que usó el motor en la hora N (cada ~1 km), en grados
     GET  /api/corridas/<id>/exportar              zip con corrida.json, los resultados del motor, los perímetros por hora,
                                                   bitacora.jsonl, cortafuegos.geojson, metricas_v31.json y, si existen,
                                                   los archivos para la corrida offline (intervenciones_v31/,
@@ -64,6 +65,8 @@
 
     GET  /                                        la pantalla del simulador (app/web/index.html)
     GET  /prueba                                  página mínima de prueba de la fase F2
+    GET  /formatos/formatos_de_carga.md           formatos de la carga manual (docs/formatos_de_carga.md) y, en
+                                                  /formatos/formatos_de_carga/<ejemplo_…>, sus archivos de ejemplo
 
 Seguridad: el servidor escucha solo en 127.0.0.1 y además rechaza los pedidos que no vengan de su propia página.
 """
@@ -87,7 +90,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response, StreamingRes
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 
-from . import VERSION, capas, datos, historicos, huella, trazos
+from . import VERSION, capas, datos, historicos, huella, trazos, viento
 from . import trabajos as mod_trabajos
 from .corridas import (ACTIVOS, ESPERA_INTERVENCION_S, FINALES, MOTORES_REALES, Gestor, Rechazo, escribir_json,
                        sha_congelado)
@@ -100,6 +103,7 @@ from datos import indices as d_indices
 from datos import meteo as d_meteo
 
 WEB = Path(__file__).resolve().parents[1] / "web"
+DOCS = Path(__file__).resolve().parents[2] / "docs"
 NOMBRES_LOCALES = {"127.0.0.1", "localhost"}
 
 
@@ -272,16 +276,24 @@ def _fecha(texto: str, campo: str) -> dt.date:
 
 
 async def _cuerpo_crudo(request: Request, maximo: int) -> bytes:
-    """El cuerpo del pedido sin pasar de `maximo` bytes (413 si pasa; 422 si está vacío)."""
+    """El cuerpo del pedido sin pasar de `maximo` bytes (413 si pasa; 422 si está vacío).
+
+    Si pasa por poco (hasta el doble), se lee y se descarta antes de contestar: si se rechaza sin leerlo, en Windows la
+    conexión se puede cortar antes de que llegue la respuesta y el cliente ve un error de red en vez del 413. Si pasa por
+    mucho, se corta de entrada para no leer un archivo enorme."""
+    error = HTTPException(413, f"el archivo pasa el máximo de {maximo // (1024 * 1024)} MB")
     largo = request.headers.get("content-length")
-    if largo and largo.isdigit() and int(largo) > maximo:
-        raise HTTPException(413, f"el archivo pasa el máximo de {maximo // (1024 * 1024)} MB")
+    if largo and largo.isdigit() and int(largo) > 2 * maximo:
+        raise error
     partes, total = [], 0
     async for parte in request.stream():
         total += len(parte)
-        if total > maximo:
-            raise HTTPException(413, f"el archivo pasa el máximo de {maximo // (1024 * 1024)} MB")
-        partes.append(parte)
+        if total > 2 * maximo:
+            raise error
+        if total <= maximo:
+            partes.append(parte)
+    if total > maximo:
+        raise error
     cuerpo = b"".join(partes)
     if not cuerpo:
         raise HTTPException(422, "el pedido no trae el archivo (va como cuerpo del pedido)")
@@ -564,6 +576,14 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
             raise HTTPException(404, "la corrida todavía no tiene huella")
         return JSONResponse(figura, media_type="application/geo+json")
 
+    @app.get("/api/corridas/{id_}/viento")
+    def viento_de_la_corrida(id_: str, hora: float | None = None):
+        """Flechas del campo de viento que usó el motor en la hora N (la última guardada que no la pase)."""
+        campo = viento.flechas(gestor.obtener(id_).carpeta, hora)
+        if campo is None:
+            raise HTTPException(404, "esta corrida no guardó el viento")
+        return JSONResponse(campo, headers={"Cache-Control": "no-store"})
+
     @app.get("/api/corridas/{id_}/exportar")
     def exportar(id_: str):
         """Zip con lo que deja la corrida: lo pedido y los resultados, las salidas del motor y los perímetros por hora."""
@@ -576,7 +596,7 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
                            historicos.ARCHIVO) + ARCHIVOS_OFFLINE:
                 if (c.carpeta / nombre).is_file():
                     z.write(c.carpeta / nombre, f"{id_}/{nombre}")
-            for sub in ("salida",) + CARPETAS_OFFLINE:
+            for sub in ("salida", viento.CARPETA) + CARPETAS_OFFLINE:
                 carpeta = c.carpeta / sub
                 if carpeta.is_dir():
                     for ruta in sorted(q for q in carpeta.rglob("*") if q.is_file()):
@@ -712,8 +732,10 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
 
     @app.post("/api/datos/meteo/archivo", status_code=201)
     async def meteo_desde_archivo(request: Request, nombre: str = "meteo.csv"):
-        n = _nombre_de_archivo(nombre, (".csv", ".txt"))
+        # primero se lee el cuerpo (con su tope) y después se valida el nombre: si se rechaza sin leerlo, en Windows la
+        # conexión se puede cortar antes de que llegue la respuesta y el navegador ve un error de red en vez del motivo
         cuerpo = await _cuerpo_crudo(request, MAX_CSV)
+        n = _nombre_de_archivo(nombre, (".csv", ".txt"))
         t = await asyncio.to_thread(gestor_datos.lanzar, "meteo_manual", {"archivo": "entrada.csv", "nombre": n},
                                     {"entrada.csv": cuerpo})
         return creado(t)
@@ -742,10 +764,10 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
 
     @app.post("/api/datos/indices/archivo", status_code=201)
     async def indice_desde_archivo(request: Request, banda: str, nombre: str | None = None):
+        cuerpo = await _cuerpo_crudo(request, MAX_TIF)          # antes de rechazar: ver meteo_desde_archivo
         if banda not in ("ndvi", "ndmi"):
             raise HTTPException(422, "banda: 'ndvi' o 'ndmi'")
         n = _nombre_de_archivo(nombre or f"{banda}.tif", (".tif", ".tiff"))
-        cuerpo = await _cuerpo_crudo(request, MAX_TIF)
         if cuerpo[:4] not in (b"II*\x00", b"MM\x00*", b"II+\x00", b"MM\x00+"):
             raise HTTPException(422, f"{n}: no es un GeoTIFF")
         espera = gestor_datos.espera
@@ -835,6 +857,19 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
     @app.get("/prueba")
     def pagina_de_prueba():
         return FileResponse(WEB / "prueba.html", media_type="text/html; charset=utf-8")
+
+    # formatos de la carga manual: el documento (como texto, para leerlo en el navegador) y sus archivos de ejemplo
+    @app.get("/formatos/formatos_de_carga.md")
+    def formatos_de_carga():
+        return FileResponse(DOCS / "formatos_de_carga.md", media_type="text/plain; charset=utf-8")
+
+    @app.get("/formatos/formatos_de_carga/{nombre}")
+    def ejemplo_de_carga(nombre: str):
+        ruta = DOCS / "formatos_de_carga" / nombre
+        if "/" in nombre or "\\" in nombre or not nombre.startswith("ejemplo_") or not ruta.is_file():
+            raise HTTPException(404, "no hay ese archivo de ejemplo")
+        tipo = "text/csv; charset=utf-8" if ruta.suffix == ".csv" else "image/tiff"
+        return FileResponse(ruta, media_type=tipo, filename=nombre)
 
     app.mount("/web", StaticFiles(directory=WEB), name="web")
 

@@ -2,7 +2,7 @@
 
     python app/motores/proceso_simulado.py --corrida resultados/app/<id>
 
-No simula nada: no hay viento, combustible ni relieve. Sirve para probar el servidor y la interfaz en segundos, sin cargar
+No simula nada: no hay viento, combustible ni relieve. Con varios focos de ignición, crece un círculo alrededor de cada uno. Sirve para probar el servidor y la interfaz en segundos, sin cargar
 datos ni motores. Recibe las mismas órdenes y manda los mismos avisos que `proceso.py` (contrato §3).
 
 `corrida.json`:
@@ -42,11 +42,11 @@ CENTRO_5345 = (3538140.0, 6392850.0)          # centro del dominio Las Lagunas�
 class FuegoDeJuguete:
     """El círculo que crece, con cortafuegos: las celdas del trazo no queman y el fuego no pasa del otro lado."""
 
-    def __init__(self, llegada_min: np.ndarray, grilla: dict, foco: tuple[int, int]):
+    def __init__(self, llegada_min: np.ndarray, grilla: dict, focos: list[tuple[int, int]]):
         self.base = llegada_min
         self.llegada = llegada_min.copy()
         self.grilla = grilla
-        self.foco = foco
+        self.focos = focos
         self.bloqueadas = np.zeros(llegada_min.shape, dtype=bool)
 
     def _celdas(self, xy: list) -> tuple[list[tuple[int, int, float]], float]:
@@ -81,7 +81,7 @@ class FuegoDeJuguete:
             self.bloqueadas[f, c] = True
         from scipy import ndimage
         etiquetas, _ = ndimage.label(~self.bloqueadas)           # 4-vecinos: una línea en diagonal también corta
-        alcanzable = etiquetas == etiquetas[self.foco]
+        alcanzable = np.isin(etiquetas, [etiquetas[f] for f in self.focos])
         nueva = np.where(alcanzable, self.base, np.nan).astype("float32")
         self.llegada = np.where(quemada, self.llegada, nueva).astype("float32")      # lo ya quemado no cambia
         indices = [f * cols + c for f, c in celdas]
@@ -103,7 +103,7 @@ def main() -> int:
     ruta_json = carpeta / "corrida.json"
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from control import Control, exigir_cortafuegos_iniciales, reemplazar
+    from control import Control, exigir_cortafuegos_iniciales, malla_viento, reemplazar
     avisos = os.fdopen(os.dup(1), "w", encoding="utf-8", newline="\n")
     try:
         ordenes = os.dup(0)
@@ -119,16 +119,23 @@ def main() -> int:
         lado = int(sim.get("lado") or 200)
         s_por_hora = float(sim.get("s_por_hora", 0.05))
         fallar_en_h = sim.get("fallar_en_h")
-        x, y = CENTRO_5345
+        xy = [CENTRO_5345]
         puntos = cfg.get("ignicion") or []
         if puntos:
             from pyproj import Transformer
-            x, y = Transformer.from_crs("EPSG:4326", "EPSG:5345", always_xy=True).transform(float(puntos[0]["lon"]), float(puntos[0]["lat"]))
-        xmin = round((x - lado * RES / 2) / RES) * RES
-        ymax = round((y + lado * RES / 2) / RES) * RES
-        grilla = {"crs": "EPSG:5345", "xmin": xmin, "ymax": ymax, "res": RES, "filas": lado, "cols": lado}
-        ff, cc = np.mgrid[0:lado, 0:lado]
-        distancia = np.hypot(ff - lado / 2, cc - lado / 2)
+            a_5345 = Transformer.from_crs("EPSG:4326", "EPSG:5345", always_xy=True)
+            xy = [a_5345.transform(float(p["lon"]), float(p["lat"])) for p in puntos]
+        # un círculo por foco; la grilla cubre todos los focos con medio `lado` de margen (con uno solo, `lado` × `lado`)
+        xs, ys = [p[0] for p in xy], [p[1] for p in xy]
+        xmin = round((min(xs) - lado * RES / 2) / RES) * RES
+        ymax = round((max(ys) + lado * RES / 2) / RES) * RES
+        cols = lado + int(round((max(xs) - min(xs)) / RES))
+        filas = lado + int(round((max(ys) - min(ys)) / RES))
+        grilla = {"crs": "EPSG:5345", "xmin": xmin, "ymax": ymax, "res": RES, "filas": filas, "cols": cols}
+        ff, cc = np.mgrid[0:filas, 0:cols]
+        centros = [(lado / 2 + (max(ys) - y) / RES, lado / 2 + (x - min(xs)) / RES) for x, y in xy]   # uno solo: (lado/2, lado/2)
+        focos = [(min(filas - 1, int(f)), min(cols - 1, int(c))) for f, c in centros]
+        distancia = np.min([np.hypot(ff - f, cc - c) for f, c in centros], axis=0)
         llegada_min = (distancia / CELDAS_POR_HORA * 60.0).astype("float32")
 
         intervenciones.revisar_t_inicio(cfg.get("t_inicio_utc"))
@@ -136,21 +143,42 @@ def main() -> int:
         if trazos:
             cfg["cortafuegos"] = trazos
         control.preparar(corrida)
-        fuego = FuegoDeJuguete(llegada_min, grilla, (lado // 2, lado // 2))
+        fuego = FuegoDeJuguete(llegada_min, grilla, focos)
         iniciales = []
         for d in trazos:                          # antes de iniciar: lo mismo que aplicarlo a t = 0
             r = fuego.cortafuego(d, 0.0)
             iniciales.append({"estado": r["estado"], "motivo": r["motivo"], **r["datos"]})
         exigir_cortafuegos_iniciales(iniciales)  # D-E3-31: uno rechazado corta la corrida antes de simular
         llegada_min = fuego.llegada
-        control.aplicar = lambda entrada, t: (fuego.cortafuego(entrada["datos"], t) if entrada["tipo"] == "cortafuego"
-                                              else {"estado": "aceptada", "t_vigor_min": t, "datos": {"efecto": "ninguno"},
-                                                    "motivo": "el motor simulado registra el viento sin efecto"})
+        viento_manual = {}
+
+        def aplicar(entrada, t):
+            if entrada["tipo"] == "cortafuego":
+                return fuego.cortafuego(entrada["datos"], t)
+            d = entrada["datos"] or {}
+            viento_manual.clear()
+            if d.get("modo") != "pronostico" and d.get("vel_kmh") is not None:
+                viento_manual.update(vel=float(d["vel_kmh"]), dir=float(d["dir_desde"]))
+            return {"estado": "aceptada", "t_vigor_min": t, "datos": {"efecto": "ninguno"},       # no mueve el fuego
+                    "motivo": "el motor simulado registra el viento sin efecto"}
+        control.aplicar = aplicar
+
+        # viento de prueba para el mapa: gira 15° por hora y varía un poco en el espacio (no mueve el fuego)
+        malla = malla_viento(grilla)
+        mf, mc = np.meshgrid(malla["filas"], malla["cols"], indexing="ij")
+
+        def viento_de_prueba(h):
+            vel = viento_manual.get("vel", 20.0 + 5.0 * np.sin(h / 3.0))
+            desde = viento_manual.get("dir", (300.0 + 15.0 * h) % 360.0)
+            v = vel * (1.0 + 0.2 * np.sin(mf / 40.0) * np.cos(mc / 40.0))
+            d = np.deg2rad(desde + 10.0 * np.cos(mf / 30.0))
+            return -v * np.sin(d), -v * np.cos(d)
 
         control.listo(cfg.get("t_inicio_utc") or "2026-01-01T12:00:00+00:00", grilla)
         detenida = False
         h = 0
         while True:
+            control.guardar_viento(h, *viento_de_prueba(h), malla, "viento de prueba del motor simulado (no mueve el fuego)")
             llegada_min = fuego.llegada
             huella = np.where(llegada_min <= h * 60.0, llegada_min, np.nan).astype("float32")
             n = int(np.count_nonzero(np.isfinite(huella)))

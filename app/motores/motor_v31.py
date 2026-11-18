@@ -22,7 +22,7 @@ from pathlib import Path
 import numpy as np
 
 import barreras_v31
-from control import Control, exigir_cortafuegos_iniciales
+from control import Control, exigir_cortafuegos_iniciales, malla_viento
 
 REPO = Path(__file__).resolve().parents[2]
 RAIZ = REPO / "src" / "v3.1"
@@ -131,7 +131,22 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control, var
     def huella_min(sim) -> np.ndarray:
         return np.where(np.isfinite(sim.t_arr), sim.t_arr / 60.0, np.nan).astype("float32")
 
+    malla = malla_viento(grilla, medio_paso=True)       # intercalada con la de v4.0 cuando se ven los dos
+
+    def guardar_viento(sim) -> None:
+        """Viento de la hora que terminó (el motor deja U10, V10 en m/s, hacia donde va, en `u10` y `v10`): solo se lee."""
+        k = estado["horas"] - 1
+        if k < 0:
+            return
+        try:
+            sel = np.ix_(malla["filas"], malla["cols"])
+            control.guardar_viento(k, sim.u10[sel] * 3.6, sim.v10[sel] * 3.6, malla,
+                                   "WindNinja (relieve) con la velocidad y la dirección de la hora", momento="intervalo")
+        except Exception as e:                       # el mapa del viento no corta la corrida
+            control.aviso("error", mensaje=f"viento para el mapa (hora {k}): {type(e).__name__}: {e}", fatal=False)
+
     def avisar_hora(sim) -> None:
+        guardar_viento(sim)
         control.listo(ent.t_inicio_utc, grilla)
         ha = float(np.count_nonzero(np.isfinite(sim.t_arr))) * area_celda_ha
         control.hora(estado["horas"], sim.t / 60.0, ha, int(sim.n_act[0]), huella_min(sim))

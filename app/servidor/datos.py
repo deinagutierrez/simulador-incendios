@@ -128,6 +128,8 @@ def _eventos_base(_firma: tuple) -> dict[str, dict]:
             e |= {"rotulos": list(insumos.get("rotulos") or []), "avisos": list(insumos.get("avisos") or []),
                   "creado_utc": insumos.get("creado_utc"), "t_inicio_por_defecto_utc": insumos.get("t_inicio_por_defecto_utc"),
                   "meteo": (insumos.get("meteo") or {}).get("id"), "indices": (insumos.get("indices") or {}).get("id"),
+                  # cuándo se bajó el pronóstico (si la meteorología es un CSV o un escenario, no hay descarga: None)
+                  "descargado_utc": (insumos.get("meteo") or {}).get("descargado_utc"),
                   "cobertura_anio": insumos.get("cobertura_anio")}
         else:
             e |= {"rotulos": [ROTULO_EJEMPLO], "avisos": [ADVERTENCIA_EJEMPLO]}
