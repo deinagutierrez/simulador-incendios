@@ -86,6 +86,7 @@ from fastapi import Body, FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
+from starlette.requests import ClientDisconnect
 
 from . import VERSION, capas, datos, historicos, huella, trazos
 from . import trabajos as mod_trabajos
@@ -271,17 +272,30 @@ def _fecha(texto: str, campo: str) -> dt.date:
         raise HTTPException(422, f"{campo}: una fecha AAAA-MM-DD")
 
 
+async def _descartar_cuerpo(request: Request) -> None:
+    """Lee el cuerpo del pedido hasta el final, sin guardarlo, antes de contestar un error.
+
+    Si el servidor contesta y cierra la conexión con parte del cuerpo todavía en camino, en Windows el cliente pierde la
+    respuesta («se ha anulado una conexión», WinError 10053) en vez de ver el código y el mensaje del error."""
+    try:
+        async for _ in request.stream():
+            pass
+    except ClientDisconnect:                # el cliente se fue: ya no hay a quién contestarle
+        pass
+
+
 async def _cuerpo_crudo(request: Request, maximo: int) -> bytes:
-    """El cuerpo del pedido sin pasar de `maximo` bytes (413 si pasa; 422 si está vacío)."""
-    largo = request.headers.get("content-length")
-    if largo and largo.isdigit() and int(largo) > maximo:
-        raise HTTPException(413, f"el archivo pasa el máximo de {maximo // (1024 * 1024)} MB")
+    """El cuerpo del pedido sin pasar de `maximo` bytes (413 si pasa; 422 si está vacío). Si pasa, se lee igual hasta el
+    final sin guardarlo (ver `_descartar_cuerpo`)."""
     partes, total = [], 0
     async for parte in request.stream():
         total += len(parte)
         if total > maximo:
-            raise HTTPException(413, f"el archivo pasa el máximo de {maximo // (1024 * 1024)} MB")
-        partes.append(parte)
+            partes.clear()
+        else:
+            partes.append(parte)
+    if total > maximo:
+        raise HTTPException(413, f"el archivo pasa el máximo de {maximo // (1024 * 1024)} MB")
     cuerpo = b"".join(partes)
     if not cuerpo:
         raise HTTPException(422, "el pedido no trae el archivo (va como cuerpo del pedido)")
@@ -427,6 +441,7 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
     async def solo_la_propia_pagina(request: Request, seguir):
         motivo = _pedido_ajeno(request)
         if motivo:
+            await _descartar_cuerpo(request)
             return JSONResponse({"detail": motivo}, status_code=403)
         return await seguir(request)
 
@@ -712,7 +727,11 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
 
     @app.post("/api/datos/meteo/archivo", status_code=201)
     async def meteo_desde_archivo(request: Request, nombre: str = "meteo.csv"):
-        n = _nombre_de_archivo(nombre, (".csv", ".txt"))
+        try:
+            n = _nombre_de_archivo(nombre, (".csv", ".txt"))
+        except HTTPException:
+            await _descartar_cuerpo(request)
+            raise
         cuerpo = await _cuerpo_crudo(request, MAX_CSV)
         t = await asyncio.to_thread(gestor_datos.lanzar, "meteo_manual", {"archivo": "entrada.csv", "nombre": n},
                                     {"entrada.csv": cuerpo})
@@ -742,9 +761,13 @@ def crear_app(carpeta_corridas: Path | None = None, permitir_simulado: bool = Fa
 
     @app.post("/api/datos/indices/archivo", status_code=201)
     async def indice_desde_archivo(request: Request, banda: str, nombre: str | None = None):
-        if banda not in ("ndvi", "ndmi"):
-            raise HTTPException(422, "banda: 'ndvi' o 'ndmi'")
-        n = _nombre_de_archivo(nombre or f"{banda}.tif", (".tif", ".tiff"))
+        try:
+            if banda not in ("ndvi", "ndmi"):
+                raise HTTPException(422, "banda: 'ndvi' o 'ndmi'")
+            n = _nombre_de_archivo(nombre or f"{banda}.tif", (".tif", ".tiff"))
+        except HTTPException:
+            await _descartar_cuerpo(request)
+            raise
         cuerpo = await _cuerpo_crudo(request, MAX_TIF)
         if cuerpo[:4] not in (b"II*\x00", b"MM\x00*", b"II+\x00", b"MM\x00+"):
             raise HTTPException(422, f"{n}: no es un GeoTIFF")
