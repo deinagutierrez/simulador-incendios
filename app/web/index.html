@@ -5,242 +5,354 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simulador de incendios — San Luis</title>
 <link rel="icon" href="data:,">
+<!-- Bootstrap 5.3.3 desde la CDN, con integridad. Sin internet, la misma versión copiada en vendor/bootstrap (mismo hash). -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"
+      onerror="this.onerror=null;this.href='/web/vendor/bootstrap/bootstrap.min.css'">
 <link rel="stylesheet" href="/web/vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="/web/estilo.css">
 </head>
 <body>
 <div id="pantalla">
-  <aside id="panel">
-    <header>
-      <h1>Simulador de incendios</h1>
-      <p>Las Lagunas – Potrerillos, San Luis</p>
+  <aside id="panel" aria-label="Panel del simulador">
+    <!-- ======================================== encabezado fijo -->
+    <header id="panel-cabeza" class="px-3 pt-3 pb-2 border-bottom">
+      <h1 class="h5 mb-0">Simulador de incendios</h1>
+      <p class="small text-body-secondary mb-2">Las Lagunas – Potrerillos, San Luis</p>
+      <span id="estado-datos" class="badge text-bg-secondary text-wrap text-start">Datos: leyendo…</span>
     </header>
 
-    <section id="sec-datos">
-      <h2>Datos del tiempo y de la vegetación</h2>
-      <div id="datos-avisos"></div>
+    <!-- ======================================== cuerpo desplazable -->
+    <div id="panel-cuerpo">
+      <div class="accordion accordion-flush" id="secciones">
 
-      <div class="bloque-datos">
-        <h3>Pronóstico del tiempo</h3>
-        <dl id="datos-pronostico" class="ficha"></dl>
-        <div class="botones"><button id="b-pronostico" class="lanza">Actualizar pronóstico</button></div>
-      </div>
-
-      <div class="bloque-datos">
-        <h3>Índices de vegetación <span id="en-prueba" class="rotulo prueba" hidden title="La vía de AWS está en prueba: el prerregistro E-E3-2 se cumplió para v3.1 y no para v4.0">en prueba</span></h3>
-        <dl id="datos-indices" class="ficha"></dl>
-        <div class="botones">
-          <button id="b-aws" class="lanza">Actualizar índices (AWS)</button>
-          <button id="b-gee" class="lanza">Actualizar índices (Earth Engine)</button>
-        </div>
-        <p class="nota" id="nota-gee" hidden></p>
-      </div>
-
-      <div id="trabajo" class="trabajo" hidden>
-        <div class="trabajo-titulo"><span id="trabajo-nombre"></span><span id="trabajo-estado" class="estado"></span></div>
-        <div class="avance"><div id="trabajo-barra"></div></div>
-        <p class="nota" id="trabajo-texto"></p>
-        <p class="error" id="trabajo-error" role="alert"></p>
-        <div id="trabajo-sin-red" hidden></div>
-      </div>
-      <p class="error" id="error-datos" role="alert"></p>
-
-      <div class="bloque-datos">
-        <h3>Armar un evento en tiempo real</h3>
-        <p class="nota">Junta una toma de meteorología y una de índices con el terreno del dominio. Después se elige en «Configurar».</p>
-        <label for="sel-meteo">Meteorología</label>
-        <select id="sel-meteo"></select>
-        <label for="sel-indices">Índices de vegetación</label>
-        <select id="sel-indices"></select>
-        <label for="nombre-rt">Nombre <span class="suave">(opcional)</span></label>
-        <input id="nombre-rt" maxlength="200" placeholder="Se arma solo con la fecha y las fuentes">
-        <button class="principal lanza" id="b-evento">Armar evento en tiempo real</button>
-      </div>
-
-      <details class="plegable">
-        <summary>Cargar datos a mano</summary>
-        <h3>Meteorología (CSV)</h3>
-        <p class="nota">Un CSV en el formato de v3.x o de v4.0 (hasta 20 MB). Pasa por el mismo control de calidad que el pronóstico.</p>
-        <input id="archivo-csv" type="file" accept=".csv,.txt,text/csv">
-        <div class="botones"><button id="b-csv" class="lanza">Cargar meteorología</button></div>
-
-        <h3>Índices (GeoTIFF)</h3>
-        <p class="nota">Dos TIF en la grilla exacta del dominio, en int16 × 10000, con nodata −32768 (hasta 60 MB cada uno).</p>
-        <label for="archivo-ndvi">NDVI</label>
-        <input id="archivo-ndvi" type="file" accept=".tif,.tiff,image/tiff">
-        <label for="archivo-ndmi">NDMI</label>
-        <input id="archivo-ndmi" type="file" accept=".tif,.tiff,image/tiff">
-        <div class="dos">
-          <div><label for="ventana-desde">Ventana: desde</label><input id="ventana-desde" type="date"></div>
-          <div><label for="ventana-hasta">hasta</label><input id="ventana-hasta" type="date"></div>
-        </div>
-        <label for="ndmi-nir">Banda del infrarrojo cercano del NDMI</label>
-        <select id="ndmi-nir">
-          <option value="B08">B08 (10 m): (B08 − B11) / (B08 + B11)</option>
-          <option value="B8A">B8A (20 m): (B8A − B11) / (B8A + B11)</option>
-        </select>
-        <label for="descripcion-tif">Descripción <span class="suave">(de dónde salen)</span></label>
-        <input id="descripcion-tif" maxlength="2000">
-        <div class="aviso"><b>La ventana y la fórmula las declarás vos.</b>El programa revisa la grilla, la escala y el rango, pero no puede comprobar de qué fechas son las imágenes ni con qué banda se calculó el NDMI. La corrida queda rotulada «índices cargados a mano».</div>
-        <div class="botones"><button id="b-tif" class="lanza">Cargar índices</button></div>
-      </details>
-
-      <details class="plegable">
-        <summary>Modo escenario (valores fijos)</summary>
-        <p class="nota">Viento, temperatura, humedad y lluvia constantes durante todo el período. No es un pronóstico: la toma queda rotulada «escenario manual». Después armá el evento eligiéndola.</p>
-        <div class="dos">
-          <div><label for="esc-fecha">Día de inicio</label><input id="esc-fecha" type="date"></div>
-          <div><label for="esc-hora">Hora <span class="suave">(Argentina)</span></label><select id="esc-hora"></select></div>
-        </div>
-        <div class="dos">
-          <div><label for="esc-horas">Horas</label><input id="esc-horas" type="number" min="1" max="240" value="48"></div>
-          <div><label for="esc-temp">Temperatura (°C)</label><input id="esc-temp" type="number" min="-40" max="50" step="0.5" value="32"></div>
-        </div>
-        <div class="dos">
-          <div><label for="esc-hr">Humedad relativa (%)</label><input id="esc-hr" type="number" min="0" max="100" value="15"></div>
-          <div><label for="esc-lluvia">Lluvia (mm/h)</label><input id="esc-lluvia" type="number" min="0" max="200" step="0.1" value="0"></div>
-        </div>
-        <div class="dos">
-          <div><label for="esc-viento">Viento (km/h)</label><input id="esc-viento" type="number" min="0" max="216" value="40"></div>
-          <div><label for="esc-dir">Viene del (grados)</label><input id="esc-dir" type="number" min="0" max="360" value="330" title="0 = norte, 90 = este, 180 = sur, 270 = oeste"></div>
-        </div>
-        <div class="botones"><button id="b-escenario" class="lanza">Armar el escenario</button></div>
-      </details>
-    </section>
-
-    <section id="sec-config">
-      <h2>1. Configurar</h2>
-      <label for="motor">Motor</label>
-      <select id="motor"></select>
-      <label for="evento">Datos del terreno y del tiempo</label>
-      <select id="evento"></select>
-      <div id="rotulos-evento"></div>
-      <p class="nota" id="nota-evento"></p>
-      <div id="avisos-evento"></div>
-      <button class="enlace" id="borrar-rt" hidden>Borrar este evento de tiempo real</button>
-      <label>Punto de ignición <span class="suave">(clic en el mapa)</span></label>
-      <div class="dos">
-        <input id="lat" inputmode="decimal" aria-label="Latitud" placeholder="Latitud">
-        <input id="lon" inputmode="decimal" aria-label="Longitud" placeholder="Longitud">
-      </div>
-      <div class="dos">
-        <div><label for="fecha">Día de inicio</label><input id="fecha" type="date"></div>
-        <div><label for="hora">Hora <span class="suave">(Argentina)</span></label><select id="hora" title="Las corridas empiezan en hora en punto"></select></div>
-      </div>
-      <label for="horas">Horas a simular</label>
-      <input id="horas" type="number" min="1" max="240" value="24">
-      <div id="lugar-trazos-config">
-        <div id="herr-cortafuegos" class="herramienta">
-          <h3>Cortafuegos <span class="suave" id="trazos-cuando">(opcional, desde la hora 0)</span></h3>
-          <div class="botones herramientas" role="group" aria-label="Herramientas de trazo">
-            <button id="b-dibujar" aria-pressed="false" title="Dibujá a mano alzada sobre el mapa: apretá, arrastrá y soltá">Dibujar</button>
-            <button id="b-borrador" aria-pressed="false" title="Tocá un trazo sin enviar para borrarlo">Borrador</button>
-            <button id="b-deshacer" disabled title="Deshace el último trazo o borrado (solo trazos sin enviar)">Deshacer</button>
-          </div>
-          <div class="dos">
-            <div><label for="ancho">Ancho del cortafuego</label><select id="ancho"></select></div>
-            <div><label class="casilla casilla-sola" title="Supuesto: el cortafuego deja el suelo desnudo, sin nada que pueda quemarse"><input type="checkbox" id="mineral"><span>a suelo mineral <span class="suave">(supuesto)</span></span></label></div>
-          </div>
-          <p class="nota" id="nota-trazos"></p>
-          <ol id="lista-trazos" class="lista-trazos"></ol>
-          <p class="error" id="error-trazos" role="alert"></p>
-          <button id="b-enviar-trazos" class="principal" hidden>Aplicar los trazos</button>
-        </div>
-      </div>
-      <button class="principal" id="iniciar">Iniciar simulación</button>
-      <p class="error" id="error" role="alert"></p>
-    </section>
-
-    <section id="sec-control" hidden>
-      <h2>2. Simulación</h2>
-      <div id="resumen-config" class="resumen"></div>
-      <div class="pausa-en" id="caja-pausar-en">
-        <label for="pausar-en">Pausar en la hora <span class="suave">(vacío: al terminar la hora en curso)</span></label>
-        <input id="pausar-en" type="number" min="0" max="240" step="1" inputmode="numeric" placeholder="la próxima">
-      </div>
-      <div class="botones">
-        <button id="pausar">Pausar</button>
-        <button id="reanudar" hidden>Reanudar</button>
-        <button id="detener">Detener</button>
-        <button id="nueva" hidden>Nueva simulación</button>
-      </div>
-      <p class="nota" id="nota-pausa"></p>
-      <p class="error" id="error-control" role="alert"></p>
-      <div id="intervenir" class="intervenir" hidden>
-        <h3>Intervenir en la hora <span id="hora-pausa"></span></h3>
-        <p class="nota" id="nota-intervenir">Lo que apliques acá rige desde la hora de la pausa y queda en la bitácora.</p>
-        <div id="lugar-trazos-pausa"></div>
-        <div class="bloque-viento">
-          <h3>Viento a mano</h3>
-          <div class="dos">
-            <div><label for="v-vel">Velocidad (km/h)</label><input id="v-vel" type="number" min="0" max="216" step="1" inputmode="decimal"></div>
-            <div><label for="v-dir">Viene del (grados)</label><input id="v-dir" type="number" min="0" max="359" step="1" inputmode="decimal" title="0 = norte, 90 = este, 180 = sur, 270 = oeste"></div>
-          </div>
-          <p class="nota" id="v-texto"></p>
-          <div class="aviso" id="aviso-v40" hidden><b>En v4.0 el viento gira de a poco.</b>El motor interpola entre horas: el viento nuevo rige del todo una hora después de la pausa; durante esa hora pasa gradualmente del pronóstico al valor que pongas.</div>
-          <div class="botones">
-            <button id="b-viento">Aplicar desde la hora <span id="v-hora"></span></button>
-            <button id="b-pronostico-viento">Volver al pronóstico</button>
+        <!-- ---------- Simulación (solo durante una corrida) -->
+        <div class="accordion-item" id="sec-simulacion" hidden>
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#c-simulacion" aria-expanded="true" aria-controls="c-simulacion">
+              Simulación <span id="estado-simulacion" class="badge text-bg-secondary ms-2"></span>
+            </button>
+          </h2>
+          <div id="c-simulacion" class="accordion-collapse collapse show">
+            <div class="accordion-body">
+              <div id="resumen-config" class="resumen small text-body-secondary"></div>
+              <p class="form-text nota" id="nota-pausa"></p>
+              <p class="text-danger small error" id="error-control" role="alert"></p>
+              <div id="intervenir" class="card card-body p-3 mt-2" hidden>
+                <h3 class="h6">Intervenir en la hora <span id="hora-pausa"></span></h3>
+                <p class="form-text nota mt-0" id="nota-intervenir">Lo que apliques acá rige desde la hora de la pausa y queda en la bitácora.</p>
+                <div id="lugar-trazos-pausa"></div>
+                <div class="border-top pt-2 mt-3">
+                  <h3 class="h6">Viento a mano</h3>
+                  <div class="row g-2">
+                    <div class="col"><label class="form-label small mb-1" for="v-vel">Velocidad (km/h)</label><input class="form-control form-control-sm" id="v-vel" type="number" min="0" max="216" step="1" inputmode="decimal"></div>
+                    <div class="col"><label class="form-label small mb-1" for="v-dir">Viene del (grados)</label><input class="form-control form-control-sm" id="v-dir" type="number" min="0" max="359" step="1" inputmode="decimal" title="0 = norte, 90 = este, 180 = sur, 270 = oeste"></div>
+                  </div>
+                  <p class="form-text nota" id="v-texto"></p>
+                  <div class="alert alert-warning aviso small py-2 px-3 mt-2 mb-0" id="aviso-v40" hidden><b>En v4.0 el viento gira de a poco.</b>El motor interpola entre horas: el viento nuevo rige del todo una hora después de la pausa; durante esa hora pasa gradualmente del pronóstico al valor que pongas.</div>
+                  <div class="d-flex flex-wrap gap-2 mt-2">
+                    <button class="btn btn-sm btn-outline-primary" id="b-viento">Aplicar desde la hora <span id="v-hora"></span></button>
+                    <button class="btn btn-sm btn-outline-secondary" id="b-pronostico-viento">Volver al pronóstico</button>
+                  </div>
+                </div>
+                <p class="text-danger small error" id="error-intervenir" role="alert"></p>
+                <ul id="respuestas" class="respuestas"></ul>
+              </div>
+              <div id="tarjetas"></div>
+              <div id="comparacion" class="card card-body p-3 mt-2 small" hidden></div>
+              <div id="sec-grafico" class="mt-3">
+                <h3 class="h6">Superficie quemada</h3>
+                <div id="grafico"></div>
+                <button class="btn btn-link btn-sm p-0" id="ver-tabla">Ver como tabla</button>
+                <div id="tabla" hidden></div>
+              </div>
+            </div>
           </div>
         </div>
-        <p class="error" id="error-intervenir" role="alert"></p>
-        <ul id="respuestas" class="respuestas"></ul>
-      </div>
-      <div id="tarjetas"></div>
-      <div id="comparacion" hidden></div>
-    </section>
 
-    <section id="sec-grafico" hidden>
-      <h2>Superficie quemada</h2>
-      <div id="grafico"></div>
-      <button class="enlace" id="ver-tabla">Ver como tabla</button>
-      <div id="tabla" hidden></div>
-    </section>
+        <!-- ---------- 1. Datos -->
+        <div class="accordion-item" id="sec-datos">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#c-datos" aria-expanded="true" aria-controls="c-datos">1. Datos</button>
+          </h2>
+          <div id="c-datos" class="accordion-collapse collapse show">
+            <div class="accordion-body">
+              <div id="datos-avisos"></div>
+              <div class="accordion" id="sub-datos">
 
-    <section id="sec-historico">
-      <h2>Modo histórico</h2>
-      <p class="nota">Corre un incendio histórico con la ignición recomendada de su ficha y lo compara con lo observado: la cicatriz y los focos VIIRS. Las métricas las calcula el evaluador de v3.1, sin cambios.</p>
-      <ul id="h-lista" class="h-lista" aria-label="Eventos históricos"></ul>
-      <p class="error" id="h-error-lista" role="alert"></p>
-      <div id="h-detalle" hidden>
-        <h3 id="h-titulo"></h3>
-        <div id="h-rotulos" class="h-rotulos"></div>
-        <div id="h-avisos"></div>
-        <dl id="h-ficha" class="ficha"></dl>
-        <div class="h-capas">
-          <label class="casilla"><input type="checkbox" id="h-ver-cicatriz"> Cicatriz observada</label>
-          <label class="casilla"><input type="checkbox" id="h-ver-focos"> Focos VIIRS <span class="suave" id="h-focos-de"></span></label>
+                <div class="accordion-item">
+                  <h3 class="accordion-header">
+                    <button class="accordion-button py-2" type="button" data-bs-toggle="collapse" data-bs-target="#c-actuales" aria-expanded="true" aria-controls="c-actuales">Datos actuales</button>
+                  </h3>
+                  <div id="c-actuales" class="accordion-collapse collapse show">
+                    <div class="accordion-body">
+                      <p class="form-text nota mt-0">Baja el pronóstico, los índices de vegetación y arma con ellos el evento de tiempo real, en ese orden.</p>
+                      <button class="btn btn-primary w-100 lanza" id="b-obtener">Obtener datos actuales</button>
+                      <ol id="pasos" class="list-group list-group-numbered small mt-2"></ol>
+                      <div id="lugar-trabajo-actual"></div>
+                      <div id="reintentar" class="alert alert-danger small py-2 px-3 mt-2 mb-0" role="alert" hidden>
+                        <div id="reintentar-texto"></div>
+                        <button class="btn btn-sm btn-danger mt-2" id="b-reintentar">Reintentar desde este paso</button>
+                      </div>
+                      <h4 class="h6 mt-3 mb-1">Datos vigentes</h4>
+                      <div class="small fw-semibold text-body-secondary">Pronóstico del tiempo</div>
+                      <dl id="datos-pronostico" class="ficha small"></dl>
+                      <div class="small fw-semibold text-body-secondary mt-2">Índices de vegetación</div>
+                      <dl id="datos-indices" class="ficha small"></dl>
+
+                      <details class="mt-3" id="avanzadas">
+                        <summary class="small fw-semibold">Opciones avanzadas</summary>
+                        <div class="pt-2">
+                          <h4 class="h6">Índices con Earth Engine</h4>
+                          <button class="btn btn-sm btn-outline-secondary lanza" id="b-gee">Bajar los índices (Earth Engine)</button>
+                          <p class="form-text nota" id="nota-gee" hidden></p>
+                          <h4 class="h6 mt-3">Armar un evento con tomas elegidas</h4>
+                          <p class="form-text nota mt-0">Para usar una toma cargada a mano, un escenario o una toma anterior.</p>
+                          <label class="form-label small mb-1" for="sel-meteo">Meteorología</label>
+                          <select class="form-select form-select-sm" id="sel-meteo"></select>
+                          <label class="form-label small mb-1 mt-2" for="sel-indices">Índices de vegetación</label>
+                          <select class="form-select form-select-sm" id="sel-indices"></select>
+                          <label class="form-label small mb-1 mt-2" for="nombre-rt">Nombre <span class="text-body-tertiary">(opcional)</span></label>
+                          <input class="form-control form-control-sm" id="nombre-rt" maxlength="200" placeholder="Se arma solo con la fecha y las fuentes">
+                          <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-evento">Armar evento en tiempo real</button>
+                        </div>
+                      </details>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="accordion-item">
+                  <h3 class="accordion-header">
+                    <button class="accordion-button py-2 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c-manual" aria-expanded="false" aria-controls="c-manual">Carga manual</button>
+                  </h3>
+                  <div id="c-manual" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                      <p class="form-text nota mt-0">Formatos completos y archivos de ejemplo: <a href="/formatos/formatos_de_carga.md" target="_blank" rel="noopener">formatos de carga</a>.</p>
+                      <h4 class="h6 mt-2">Meteorología (CSV)
+                        <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del CSV"
+                          title="Archivo .csv separado por comas, hasta 20 MB. Al menos 24 filas, una por hora en punto, en orden, sin horas repetidas ni celdas vacías (se rellenan huecos de hasta 2 h). Dos formatos: v4.0 → timestamp con huso horario (2026-11-13T09:00:00-03:00), temp_c (°C), hr_pct (%), viento_kmh (km/h), viento_dir_deg (grados de donde viene: 0 = norte), precip_mm (mm/h). v3.x → time_utc (UTC), temperature_2m (°C), relative_humidity_2m (%), wind_speed_10m (m/s), wind_direction_10m (grados), precipitation (mm/h).">ⓘ</button>
+                      </h4>
+                      <p class="form-text nota mt-0">Pasa por el mismo control de calidad que el pronóstico.</p>
+                      <input class="form-control form-control-sm" id="archivo-csv" type="file" accept=".csv,.txt,text/csv">
+                      <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-csv">Cargar meteorología</button>
+
+                      <h4 class="h6 mt-3">Índices (GeoTIFF)</h4>
+                      <label class="form-label small mb-1" for="archivo-ndvi">NDVI
+                        <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del TIF de NDVI"
+                          title="GeoTIFF (.tif) de una banda, en la grilla exacta del dominio: EPSG:5345, celdas de 30 m, 1672 columnas × 1671 filas, esquina noroeste en (3513060, 6417900). Tipo int16 con el índice × 10000 (−10000 a 10000). Nodata −32768. Hasta 60 MB.">ⓘ</button>
+                      </label>
+                      <input class="form-control form-control-sm" id="archivo-ndvi" type="file" accept=".tif,.tiff,image/tiff">
+                      <label class="form-label small mb-1 mt-2" for="archivo-ndmi">NDMI
+                        <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del TIF de NDMI"
+                          title="Igual que el NDVI: GeoTIFF de una banda, EPSG:5345, 30 m, 1672 × 1671 celdas, esquina noroeste en (3513060, 6417900), int16 × 10000, nodata −32768. NDMI = (NIR − B11) / (NIR + B11), con NIR = B08 o B8A (se elige abajo).">ⓘ</button>
+                      </label>
+                      <input class="form-control form-control-sm" id="archivo-ndmi" type="file" accept=".tif,.tiff,image/tiff">
+                      <div class="row g-2 mt-1">
+                        <div class="col"><label class="form-label small mb-1" for="ventana-desde">Ventana: desde</label><input class="form-control form-control-sm" id="ventana-desde" type="date"></div>
+                        <div class="col"><label class="form-label small mb-1" for="ventana-hasta">hasta</label><input class="form-control form-control-sm" id="ventana-hasta" type="date"></div>
+                      </div>
+                      <label class="form-label small mb-1 mt-2" for="ndmi-nir">Banda del infrarrojo cercano del NDMI</label>
+                      <select class="form-select form-select-sm" id="ndmi-nir">
+                        <option value="B08">B08 (10 m): (B08 − B11) / (B08 + B11)</option>
+                        <option value="B8A">B8A (20 m): (B8A − B11) / (B8A + B11)</option>
+                      </select>
+                      <label class="form-label small mb-1 mt-2" for="descripcion-tif">Descripción <span class="text-body-tertiary">(de dónde salen)</span></label>
+                      <input class="form-control form-control-sm" id="descripcion-tif" maxlength="2000">
+                      <div class="alert alert-warning aviso small py-2 px-3 mt-2 mb-0"><b>La ventana y la fórmula las declarás vos.</b>El programa revisa la grilla, la escala y el rango, pero no puede comprobar de qué fechas son las imágenes ni con qué banda se calculó el NDMI. La corrida queda rotulada «índices cargados a mano».</div>
+                      <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-tif">Cargar índices</button>
+                      <div id="lugar-trabajo-manual"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="accordion-item">
+                  <h3 class="accordion-header">
+                    <button class="accordion-button py-2 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c-escenario" aria-expanded="false" aria-controls="c-escenario">Modo escenario</button>
+                  </h3>
+                  <div id="c-escenario" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                      <p class="form-text nota mt-0">Viento, temperatura, humedad y lluvia constantes durante todo el período. No es un pronóstico: la toma queda rotulada «escenario manual». Después armá el evento eligiéndola.</p>
+                      <div class="row g-2">
+                        <div class="col"><label class="form-label small mb-1" for="esc-fecha">Día de inicio</label><input class="form-control form-control-sm" id="esc-fecha" type="date"></div>
+                        <div class="col"><label class="form-label small mb-1" for="esc-hora">Hora <span class="text-body-tertiary">(Argentina)</span></label><select class="form-select form-select-sm" id="esc-hora"></select></div>
+                      </div>
+                      <div class="row g-2 mt-0">
+                        <div class="col"><label class="form-label small mb-1" for="esc-horas">Horas</label><input class="form-control form-control-sm" id="esc-horas" type="number" min="1" max="240" value="48"></div>
+                        <div class="col"><label class="form-label small mb-1" for="esc-temp">Temperatura (°C)</label><input class="form-control form-control-sm" id="esc-temp" type="number" min="-40" max="50" step="0.5" value="32"></div>
+                      </div>
+                      <div class="row g-2 mt-0">
+                        <div class="col"><label class="form-label small mb-1" for="esc-hr">Humedad relativa (%)</label><input class="form-control form-control-sm" id="esc-hr" type="number" min="0" max="100" value="15"></div>
+                        <div class="col"><label class="form-label small mb-1" for="esc-lluvia">Lluvia (mm/h)</label><input class="form-control form-control-sm" id="esc-lluvia" type="number" min="0" max="200" step="0.1" value="0"></div>
+                      </div>
+                      <div class="row g-2 mt-0">
+                        <div class="col"><label class="form-label small mb-1" for="esc-viento">Viento (km/h)</label><input class="form-control form-control-sm" id="esc-viento" type="number" min="0" max="216" value="40"></div>
+                        <div class="col"><label class="form-label small mb-1" for="esc-dir">Viene del (grados)</label><input class="form-control form-control-sm" id="esc-dir" type="number" min="0" max="360" value="330" title="0 = norte, 90 = este, 180 = sur, 270 = oeste"></div>
+                      </div>
+                      <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-escenario">Armar el escenario</button>
+                      <div id="lugar-trabajo-escenario"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="trabajo" class="card card-body p-2 mt-2 small" hidden>
+                <div class="d-flex gap-2 fw-semibold"><span id="trabajo-nombre"></span><span id="trabajo-estado" class="ms-auto fw-normal text-body-secondary"></span></div>
+                <div class="progress mt-2" role="progressbar" aria-label="Avance del trabajo" style="height: .375rem"><div id="trabajo-barra" class="progress-bar"></div></div>
+                <p class="form-text nota mb-0" id="trabajo-texto"></p>
+                <p class="text-danger small error" id="trabajo-error" role="alert"></p>
+                <div id="trabajo-sin-red" hidden></div>
+              </div>
+              <p class="text-danger small error" id="error-datos" role="alert"></p>
+            </div>
+          </div>
         </div>
-        <div id="h-correr">
-          <label>Motores <span class="suave">(uno a tres; una corrida por motor)</span></label>
-          <div id="h-motores" class="h-motores"></div>
-          <label for="h-horas">Horas a simular <span class="suave" id="h-horas-nota"></span></label>
-          <input id="h-horas" type="number" min="1" step="1" inputmode="numeric">
-          <button class="principal" id="h-iniciar">Correr la ignición recomendada</button>
-          <p class="error" id="h-error" role="alert"></p>
+
+        <!-- ---------- 2. Configurar simulación -->
+        <div class="accordion-item" id="sec-config">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#c-config" aria-expanded="true" aria-controls="c-config">2. Configurar simulación</button>
+          </h2>
+          <div id="c-config" class="accordion-collapse collapse show">
+            <div class="accordion-body">
+              <p class="form-text nota mt-0" id="nota-config-fija" hidden>Durante la corrida la configuración queda fija. «Nueva simulación» la vuelve a habilitar.</p>
+              <fieldset id="config-campos">
+                <label class="form-label small mb-1" for="motor">Motor</label>
+                <select class="form-select form-select-sm" id="motor"></select>
+                <label class="form-label small mb-1 mt-2" for="evento">Datos del terreno y del tiempo</label>
+                <select class="form-select form-select-sm" id="evento"></select>
+                <div id="rotulos-evento" class="d-flex flex-wrap gap-1 mt-2"></div>
+                <p class="form-text nota" id="nota-evento"></p>
+                <div id="avisos-evento"></div>
+                <button class="btn btn-link btn-sm p-0" id="borrar-rt" hidden>Borrar este evento de tiempo real</button>
+
+                <label class="form-label small mb-1 mt-2">Focos de ignición <span class="text-body-tertiary">(cada clic en el mapa agrega uno)</span></label>
+                <ol id="lista-focos" class="list-group list-group-numbered small"></ol>
+                <p class="form-text nota mt-1" id="nota-focos"></p>
+                <div class="input-group input-group-sm mt-1">
+                  <input class="form-control" id="lat" inputmode="decimal" aria-label="Latitud" placeholder="Latitud">
+                  <input class="form-control" id="lon" inputmode="decimal" aria-label="Longitud" placeholder="Longitud">
+                  <button class="btn btn-outline-secondary" id="b-agregar-foco" type="button" title="Agrega un foco con estas coordenadas">Agregar</button>
+                </div>
+                <button class="btn btn-link btn-sm p-0 mt-1" id="b-quitar-focos" type="button" hidden>Quitar todos los focos</button>
+
+                <div class="row g-2 mt-1">
+                  <div class="col"><label class="form-label small mb-1" for="fecha">Día de inicio</label><input class="form-control form-control-sm" id="fecha" type="date"></div>
+                  <div class="col"><label class="form-label small mb-1" for="hora">Hora <span class="text-body-tertiary">(Argentina)</span></label><select class="form-select form-select-sm" id="hora" title="Las corridas empiezan en hora en punto"></select></div>
+                </div>
+                <label class="form-label small mb-1 mt-2" for="horas">Horas a simular</label>
+                <input class="form-control form-control-sm" id="horas" type="number" min="1" max="240" value="24">
+              </fieldset>
+              <div id="lugar-trazos-config">
+                <div id="herr-cortafuegos" class="herramienta border-top pt-2 mt-3">
+                  <h3 class="h6">Cortafuegos <span class="text-body-tertiary fw-normal" id="trazos-cuando">(opcional, desde la hora 0)</span></h3>
+                  <div class="btn-group btn-group-sm herramientas" role="group" aria-label="Herramientas de trazo">
+                    <button class="btn btn-outline-secondary" id="b-dibujar" aria-pressed="false" title="Dibujá a mano alzada sobre el mapa: apretá, arrastrá y soltá">Dibujar</button>
+                    <button class="btn btn-outline-secondary" id="b-borrador" aria-pressed="false" title="Tocá un trazo sin enviar para borrarlo">Borrador</button>
+                    <button class="btn btn-outline-secondary" id="b-deshacer" disabled title="Deshace el último trazo o borrado (solo trazos sin enviar)">Deshacer</button>
+                  </div>
+                  <div class="row g-2 mt-1 align-items-end">
+                    <div class="col"><label class="form-label small mb-1" for="ancho">Ancho del cortafuego</label><select class="form-select form-select-sm" id="ancho"></select></div>
+                    <div class="col"><label class="form-check small mb-1" title="Supuesto: el cortafuego deja el suelo desnudo, sin nada que pueda quemarse"><input class="form-check-input" type="checkbox" id="mineral"> a suelo mineral <span class="text-body-tertiary">(supuesto)</span></label></div>
+                  </div>
+                  <p class="form-text nota" id="nota-trazos"></p>
+                  <ol id="lista-trazos" class="lista-trazos small"></ol>
+                  <p class="text-danger small error" id="error-trazos" role="alert"></p>
+                  <button id="b-enviar-trazos" class="btn btn-sm btn-primary w-100 mt-2" hidden>Aplicar los trazos</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <details class="plegable" id="h-documentadas" hidden>
-          <summary>Cifras documentadas <span class="suave" id="h-doc-n"></span></summary>
-          <div id="h-doc-tabla"></div>
-        </details>
+
+        <!-- ---------- 3. Capas del mapa -->
+        <div class="accordion-item" id="sec-capas">
+          <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#c-capas" aria-expanded="true" aria-controls="c-capas">3. Capas del mapa</button>
+          </h2>
+          <div id="c-capas" class="accordion-collapse collapse show">
+            <div class="accordion-body">
+              <div id="capas"></div>
+              <label class="form-check small mt-2"><input class="form-check-input" type="checkbox" id="en-linea"> Mapa de calles en línea (OpenStreetMap, necesita internet)</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- 4. Simulaciones anteriores -->
+        <div class="accordion-item" id="sec-anteriores">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c-anteriores" aria-expanded="false" aria-controls="c-anteriores">4. Simulaciones anteriores</button>
+          </h2>
+          <div id="c-anteriores" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <label class="form-label small mb-1" for="anteriores">Abrir una simulación terminada</label>
+              <select class="form-select form-select-sm" id="anteriores"><option value="">Elegir…</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- 5. Modo histórico -->
+        <div class="accordion-item" id="sec-historico">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c-historico" aria-expanded="false" aria-controls="c-historico">5. Modo histórico</button>
+          </h2>
+          <div id="c-historico" class="accordion-collapse collapse">
+            <div class="accordion-body">
+              <p class="form-text nota mt-0">Corre un incendio histórico con la ignición recomendada de su ficha y lo compara con lo observado: la cicatriz y los focos VIIRS. Las métricas las calcula el evaluador de v3.1, sin cambios.</p>
+              <ul id="h-lista" class="h-lista" aria-label="Eventos históricos"></ul>
+              <p class="text-danger small error" id="h-error-lista" role="alert"></p>
+              <div id="h-detalle" hidden>
+                <h3 class="h6 mt-3" id="h-titulo"></h3>
+                <div id="h-rotulos" class="d-flex flex-wrap gap-1 mb-2"></div>
+                <div id="h-avisos"></div>
+                <dl id="h-ficha" class="ficha small mt-2"></dl>
+                <div class="mt-2">
+                  <label class="form-check small"><input class="form-check-input" type="checkbox" id="h-ver-cicatriz"> Cicatriz observada</label>
+                  <label class="form-check small"><input class="form-check-input" type="checkbox" id="h-ver-focos"> Focos VIIRS <span class="text-body-tertiary" id="h-focos-de"></span></label>
+                </div>
+                <div id="h-correr">
+                  <label class="form-label small mb-1 mt-2">Motores <span class="text-body-tertiary">(uno a tres; una corrida por motor)</span></label>
+                  <div id="h-motores" class="h-motores"></div>
+                  <label class="form-label small mb-1 mt-2" for="h-horas">Horas a simular <span class="text-body-tertiary" id="h-horas-nota"></span></label>
+                  <input class="form-control form-control-sm" id="h-horas" type="number" min="1" step="1" inputmode="numeric">
+                  <button class="btn btn-primary btn-sm w-100 mt-2" id="h-iniciar">Correr la ignición recomendada</button>
+                  <p class="text-danger small error" id="h-error" role="alert"></p>
+                </div>
+                <details class="mt-2" id="h-documentadas" hidden>
+                  <summary class="small fw-semibold">Cifras documentadas <span class="text-body-tertiary" id="h-doc-n"></span></summary>
+                  <div id="h-doc-tabla"></div>
+                </details>
+              </div>
+              <div id="h-resultados" hidden></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div id="h-resultados" hidden></div>
-    </section>
 
-    <section id="sec-capas">
-      <h2>Capas del mapa</h2>
-      <div id="capas"></div>
-      <label class="casilla"><input type="checkbox" id="en-linea"> Mapa de calles en línea (OpenStreetMap, necesita internet)</label>
-    </section>
+      <div id="notas-pie" class="px-3 py-3 small text-body-secondary">
+        <p><strong>Para leer bien el resultado.</strong> La simulación no incluye el combate del fuego. Los eventos de tiempo real usan un pronóstico (de un modelo, no observaciones) y los índices de vegetación más recientes; los EJEMPLO usan los datos de un incendio histórico con ficha. En el modo histórico, los eventos del lote X-49 (no vistos) son solo para mostrar: no se usan para ajustar el modelo. Los dos motores dan resultados distintos: no se promedian.</p>
+        <p class="creditos text-body-tertiary">Fuentes de los datos del mapa: relieve, Copernicus DEM · cobertura, MapBiomas · caminos, © colaboradores de OpenStreetMap e IGN · red de media tensión, EDESAL · cuarteles, Ministerio de Seguridad de San Luis · mapa en línea (opcional), © colaboradores de OpenStreetMap.</p>
+        <p id="version" class="text-body-tertiary mb-0"></p>
+      </div>
+    </div>
 
-    <section id="sec-anteriores">
-      <h2>Simulaciones anteriores</h2>
-      <select id="anteriores"><option value="">Elegir…</option></select>
-    </section>
-
-    <footer>
-      <p><strong>Para leer bien el resultado.</strong> La simulación no incluye el combate del fuego. Los eventos de tiempo real usan un pronóstico (de un modelo, no observaciones) y los índices de vegetación más recientes; los EJEMPLO usan los datos de un incendio histórico con ficha. En el modo histórico, los eventos del lote X-49 (no vistos) son solo para mostrar: no se usan para ajustar el modelo. Los dos motores dan resultados distintos: no se promedian.</p>
-      <p id="version"></p>
+    <!-- ======================================== pie fijo: la acción del momento -->
+    <footer id="panel-pie" class="px-3 py-2 border-top">
+      <div id="pie-configurar">
+        <button class="btn btn-primary w-100" id="iniciar">Iniciar simulación</button>
+        <p class="text-danger small error" id="error" role="alert"></p>
+      </div>
+      <div id="pie-corrida" hidden>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+          <div class="input-group input-group-sm w-auto" id="caja-pausar-en">
+            <button class="btn btn-primary" id="pausar">Pausar</button>
+            <input class="form-control" id="pausar-en" type="number" min="0" max="240" step="1" inputmode="numeric" placeholder="en la hora…"
+                   aria-label="Pausar en la hora (vacío: al terminar la hora en curso)" title="Vacío: pausa al terminar la hora en curso">
+          </div>
+          <button class="btn btn-sm btn-primary" id="reanudar" hidden>Reanudar</button>
+          <button class="btn btn-sm btn-outline-danger" id="detener">Detener</button>
+          <button class="btn btn-sm btn-primary flex-grow-1" id="nueva" hidden>Nueva simulación</button>
+        </div>
+      </div>
     </footer>
   </aside>
 
@@ -249,13 +361,17 @@
     <div id="leyenda" hidden></div>
     <div id="largo-trazo" aria-live="polite" hidden></div>
     <div id="tiempo" hidden>
-      <button id="reproducir" title="Reproducir" aria-label="Reproducir">▶</button>
-      <input id="deslizador" type="range" min="0" max="0" value="0" step="1" aria-label="Hora simulada">
+      <button id="reproducir" class="btn btn-sm btn-outline-secondary" title="Reproducir" aria-label="Reproducir">▶</button>
+      <input id="deslizador" class="form-range" type="range" min="0" max="0" value="0" step="1" aria-label="Hora simulada">
       <div id="rotulo-hora"></div>
-      <div id="progreso"><div id="barra"></div></div>
+      <label class="form-check mb-0" id="caja-viento" title="Flechas del viento que usó cada motor en la hora que se ve: apuntan hacia donde sopla y son más largas cuanto más fuerte"><input class="form-check-input" type="checkbox" id="ver-viento"> Viento</label>
+      <div id="progreso" class="progress" role="progressbar" aria-label="Horas simuladas"><div id="barra" class="progress-bar"></div></div>
     </div>
   </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>window.bootstrap || document.write('<script src="/web/vendor/bootstrap/bootstrap.bundle.min.js"><\/script>');</script>
 <script src="/web/vendor/leaflet/leaflet.js"></script>
 <script src="/web/app.js"></script>
 </body>

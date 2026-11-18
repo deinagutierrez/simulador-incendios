@@ -32,7 +32,7 @@ import time
 from pathlib import Path
 
 import barreras_v40 as bv
-from control import Control, Detenida, exigir_cortafuegos_iniciales
+from control import Control, Detenida, exigir_cortafuegos_iniciales, malla_viento
 
 REPO = Path(__file__).resolve().parents[2]
 RAIZ = REPO / "src" / "v4.0"
@@ -72,8 +72,29 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
         g = au.capas.grilla
         return {"crs": g.crs, "xmin": g.xmin, "ymax": g.ymax, "res": g.res, "filas": g.alto, "cols": g.ancho}
 
+    def guardar_viento(au, h: int) -> None:
+        """Viento del motor en el instante de la hora h, en los puntos de la malla del mapa: la serie de la corrida (con el
+        viento manual, si lo hubo) por el campo del autómata (factor topográfico en la configuración de la app). Usa las
+        mismas funciones que el paso de tiempo, sin guardar nada en el autómata."""
+        import numpy as np
+        if "malla" not in estado:
+            estado["malla"] = malla_viento(grilla_de(au))
+        m = estado["malla"]
+        ff, cc = np.meshgrid(m["filas"], m["cols"], indexing="ij")
+        met = au.meteo.en(au.t)
+        vel, desde = au.viento.velocidad_dir(ff.ravel(), cc.ravel(), met.viento_kmh, met.viento_dir_deg, int(h))
+        rad = np.deg2rad(np.asarray(desde, float))
+        vel = np.asarray(vel, float)
+        que = ("WindNinja (relieve)" if au.viento.biblioteca is not None else
+               "uniforme de la hora, con la velocidad ajustada por el relieve (la dirección es la misma en todo el dominio)")
+        control.guardar_viento(h, (-vel * np.sin(rad)).reshape(ff.shape), (-vel * np.cos(rad)).reshape(ff.shape), m, que)
+
     def hora_en_punto(au, h: int, t_min: float) -> None:
         """Estado al cumplirse la hora h. SIM ya escribió estado_hora_HH.json de esta hora."""
+        try:
+            guardar_viento(au, h)
+        except Exception as e:                       # el mapa del viento no corta la corrida
+            control.aviso("error", mensaje=f"viento para el mapa (hora {h}): {type(e).__name__}: {e}", fatal=False)
         control.listo(au.t0.tz_convert("UTC"), grilla_de(au))
         extra = {}
         p = salida / f"estado_hora_{h:02d}.json"
@@ -171,6 +192,10 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
     ind = res["indicadores"]
     if ind and int(ind[-1]["hora_indice"]) > estado["ultima_hora"]:      # la última hora no pasa por paso_tiempo
         d = ind[-1]
+        try:
+            guardar_viento(au, int(d["hora_indice"]))
+        except Exception as e:
+            control.aviso("error", mensaje=f"viento para el mapa (última hora): {type(e).__name__}: {e}", fatal=False)
         control.listo(au.t0.tz_convert("UTC"), grilla_de(au))
         control.hora(int(d["hora_indice"]), float(d["minutos_desde_t0"]), float(d["superficie"]["quemada_ha"]),
                      int((d.get("frente") or {}).get("celdas_activas", len(au.act))), au.t_llegada,

@@ -86,7 +86,8 @@ Prueba con red, opcional: `python herramientas/probar_red.py` (pronóstico, índ
 | `corridas.py` | gestor: carpeta de cada corrida, lanzamiento del proceso motor, lectura de avisos, órdenes, estado en disco, cierre ordenado |
 | `app.py` | pedidos HTTP, canal de avance en vivo, control de que el pedido venga de la propia página |
 | `huella.py` | pasa la huella a la proyección de los mapas web y la pinta como PNG; contorno en GeoJSON; comparación entre dos huellas |
-| `capas.py` | capas de fondo: relieve, pendiente, cobertura, arribo, índices, combustible, cicatriz y vectores; con caché en `datos/procesados/app/capas/` |
+| `viento.py` | flechas del viento que usó cada motor en cada hora (lee `<corrida>/viento/`, que deja el proceso motor cada ~1 km: WindNinja en v3.1, viento de la hora con ajuste por relieve en v4.0) |
+| `capas.py` | capas de fondo: relieve, pendiente, cobertura, arribo, índices, combustible de v3.1 (7 clases) y de v4.0 (SB40), cicatriz y vectores; con caché en `datos/procesados/app/capas/` |
 | `datos.py` | qué eventos tienen datos en el clon (con ficha = EJEMPLO, o generados `RT-…`), recuadro del dominio, bloque `insumos` de `corrida.json` (no carga motores) |
 | `trabajos.py` | gestor de trabajos de datos: lanza `app/datos/proceso_datos.py`, uno a la vez, lee sus avisos, estado en disco |
 | `../servir.py` | arranque: busca un puerto libre, levanta el servidor y abre el navegador |
@@ -95,8 +96,12 @@ Prueba con red, opcional: `python herramientas/probar_red.py` (pronóstico, índ
 
 | Archivo | Qué es |
 |---|---|
-| `index.html`, `app.js`, `estilo.css` | la pantalla del simulador, sin más bibliotecas que Leaflet |
+| `index.html`, `app.js`, `estilo.css` | la pantalla del simulador: panel con encabezado, secciones plegables (Datos, Configurar simulación, Capas del mapa, Simulaciones anteriores, Modo histórico) y pie con la acción del momento; mapa al lado. Usa Leaflet y Bootstrap 5.3.3 |
 | `vendor/leaflet/` | Leaflet 1.9.4 con su licencia, copiada acá para que funcione sin internet |
+| `vendor/bootstrap/` | Bootstrap 5.3.3 (CSS y JS) con su licencia: la página lo pide a la CDN con integridad (SRI) y, si no carga, usa esta copia, que tiene el mismo hash |
 | `prueba.html` | página mínima de prueba del servidor (fase F2) |
+
+Formatos de la carga manual (CSV de meteorología, TIF de índices) y archivos de ejemplo: `docs/formatos_de_carga.md`; la
+pantalla los enlaza en `/formatos/formatos_de_carga.md`.
 
 Reglas: no modificar `src/v3.1`, `src/v4.0` ni sus pruebas y escenarios; no instalar los motores con `pip install -e`.

@@ -30,6 +30,8 @@ import intervenciones as iv  # noqa: E402
 
 HUELLA = "t_llegada_parcial.npy"
 BITACORA = "bitacora.jsonl"
+VIENTO = "viento"                                 # carpeta con el campo de viento de cada hora, para el mapa
+PASO_VIENTO_M = 1000.0                            # separación de las flechas del mapa
 ESPERA_EN_PAUSA_S = 0.05
 # Reemplazo de archivos que otro proceso puede estar leyendo (la huella parcial la lee el servidor para el mapa): en Windows,
 # `os.replace` sobre un archivo abierto da PermissionError mientras dure la lectura. Se reintenta 20 veces cada 50 ms.
@@ -60,6 +62,21 @@ def exigir_cortafuegos_iniciales(informes: list[dict]) -> None:
             motivo = str(r.get("motivo") or "rechazado por el motor")
             raise ValueError(f"cortafuego {i + 1} de antes de iniciar rechazado ({motivo}); la corrida no se simula: "
                              "corregir o borrar ese trazo y volver a iniciar")
+
+
+def malla_viento(grilla: dict, paso_m: float = PASO_VIENTO_M, medio_paso: bool = False) -> dict:
+    """Puntos donde se muestrea el viento para el mapa: el centro de bloques de `paso_m` sobre la grilla de la corrida.
+    Con `medio_paso`, la malla se corre medio paso en fila y columna: v3.1 la usa así para que, con los dos motores en
+    pantalla, sus flechas queden intercaladas con las de v4.0 y no encima. Devuelve la malla (para `malla.json`) con los
+    índices de fila y columna de la grilla que le corresponden."""
+    res = float(grilla["res"])
+    n = max(1, int(round(paso_m / res)))
+    inicio = n // 2 + (n // 2 if medio_paso else 0)
+    filas = np.arange(inicio, int(grilla["filas"]), n)
+    cols = np.arange(inicio, int(grilla["cols"]), n)
+    return {"crs": grilla["crs"], "x0": float(grilla["xmin"]) + (cols[0] + 0.5) * res,
+            "y0": float(grilla["ymax"]) - (filas[0] + 0.5) * res, "paso_m": n * res, "ny": len(filas), "nx": len(cols),
+            "filas": filas, "cols": cols}
 
 
 class Detenida(Exception):
@@ -200,6 +217,30 @@ class Control:
             except OSError:
                 pass
             self.aviso("error", mensaje=f"no se pudo actualizar {HUELLA} (¿abierto por otro proceso?): {e}", fatal=False)
+            return False
+
+    def guardar_viento(self, intervalo: int, u_kmh: np.ndarray, v_kmh: np.ndarray, malla: dict, que: str,
+                       momento: str = "instante") -> bool:
+        """Deja en `viento/` el campo de viento que usó el motor, muestreado en `malla` (ver `malla_viento`), para que el
+        mapa dibuje flechas. `u_kmh`, `v_kmh`: componentes hacia donde va el viento (este, norte), en km/h, con la forma de
+        la malla. `momento`: "instante" (el viento en la hora k en punto; v4.0 lo interpola entre horas) o "intervalo" (el
+        viento fijo que rige entre la hora k y la k+1; v3.1). `que` describe qué campo es (lo muestra la pantalla). Solo
+        lee lo que el motor ya calculó: no cambia la corrida. Un error se avisa y no la corta."""
+        carpeta = self.carpeta / VIENTO
+        try:
+            carpeta.mkdir(exist_ok=True)
+            meta = carpeta / "malla.json"
+            if not meta.exists():
+                datos = {k: v for k, v in malla.items() if k not in ("filas", "cols")} | {"campo": que, "momento": momento}
+                meta.write_text(json.dumps(datos, ensure_ascii=False), encoding="utf-8")
+            destino = carpeta / f"h{int(intervalo):04d}.npy"
+            tmp = destino.with_suffix(".tmp")
+            with open(tmp, "wb") as f:
+                np.save(f, np.stack([np.asarray(u_kmh, "float32"), np.asarray(v_kmh, "float32")]).astype("float16"))
+            reemplazar(tmp, destino)
+            return True
+        except (OSError, ValueError) as e:
+            self.aviso("error", mensaje=f"no se pudo guardar el viento de la hora {intervalo} para el mapa: {e}", fatal=False)
             return False
 
     # ------------------------------------------------------------------ bitácora y reproducción

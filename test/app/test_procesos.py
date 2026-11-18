@@ -287,6 +287,69 @@ def test_ignicion_en_un_punto_y_una_hora_elegidos(caso, tmp_path):
     assert abs(ign["usada"][0]["lon"] - lon) < 1e-3 and abs(ign["usada"][0]["lat"] - lat) < 1e-3
 
 
+def _celdas_de_pastizal_separadas(n: int = 2, separacion_m: float = 9000.0) -> list[tuple[int, int, float, float]]:
+    """`n` celdas (fila, columna, lon, lat) de pastizal rodeado de pastizal, que también queman en el combustible de v4.0,
+    separadas entre sí por más de `separacion_m`, para que sus fuegos no se junten en pocas horas."""
+    import rasterio
+    from pyproj import Transformer
+    from scipy.ndimage import minimum_filter
+    base = REPO / "datos" / "inputSimulacion"
+    with rasterio.open(base / "combustibles" / "SL-2024-LASLAGUNAS" / "combustible_clase_SL-2024-LASLAGUNAS.tif") as s:
+        clase, tr, crs = s.read(1), s.transform, s.crs
+    sb40 = REPO / "datos" / "procesados" / "v4.0" / "SL-2024-LASLAGUNAS" / "combustible_pre_evento_33b.tif"
+    if not sb40.exists():
+        sb40 = base / "sim_v4" / "estaticos" / "combustible" / "sb40_2023.tif"
+    with rasterio.open(sb40) as s:
+        quema_v40 = s.read(1) >= 101
+    homogeneo = minimum_filter(((clase == 1) & quema_v40).astype(np.uint8), size=9) == 1
+    ff, cc = np.nonzero(homogeneo)
+    centro = np.array(clase.shape) / 2
+    orden = np.argsort((ff - centro[0]) ** 2 + (cc - centro[1]) ** 2)
+    elegidas: list[tuple[int, int]] = []
+    for k in orden:
+        f, c = int(ff[k]), int(cc[k])
+        if all(np.hypot(f - f2, c - c2) * 30.0 > separacion_m for f2, c2 in elegidas):
+            elegidas.append((f, c))
+            if len(elegidas) == n:
+                break
+    assert len(elegidas) == n, "no hay celdas de pastizal tan separadas"
+    a_grados = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+    out = []
+    for f, c in elegidas:
+        x, y = tr * (c + 0.5, f + 0.5)
+        lon, lat = a_grados.transform(x, y)
+        out.append((f, c, float(lon), float(lat)))
+    return out
+
+
+@pytest.mark.parametrize("motor", sorted(MOTORES))
+def test_varios_focos_encienden_todos(tmp_path, motor):
+    """Varios focos elegidos en el simulador (`configuracion.ignicion` con dos puntos): cada motor enciende los dos, a la
+    hora pedida, y el fuego crece alrededor de cada uno."""
+    focos = _celdas_de_pastizal_separadas(2)
+    carpeta = _carpeta(tmp_path / "focos", motor, {"evento": "SL-2024-LASLAGUNAS", "validar": False, "figuras": False},
+                       {"ignicion": [{"lon": lon, "lat": lat} for _, _, lon, lat in focos], "t_inicio_utc": "2024-09-19T16:00:00Z",
+                        "horas": 2})
+    p = _lanzar(carpeta)
+    avisos = _avisos(p)
+    assert p.returncode == 0 and avisos[-1]["aviso"] == "final", [a for a in avisos if a["aviso"] == "error"]
+    ign = json.loads((carpeta / "corrida.json").read_text(encoding="utf-8"))["resultados"]["ignicion"]
+    assert len(ign["usada"]) == 2, ign
+    for u, (_, _, lon, lat) in zip(ign["usada"], focos):
+        assert "desplazada_m" not in u and abs(u["lon"] - lon) < 1e-3 and abs(u["lat"] - lat) < 1e-3, u
+    t = _raster_del_proceso(carpeta, motor).astype("float64")
+    if motor.startswith("v3.1"):
+        t = np.where(t >= 0, t, np.nan)
+    quemadas = np.argwhere(~np.isnan(t))
+    for f, c, _, _ in focos:
+        assert t[f, c] == 0.0, f"el foco en ({f}, {c}) no se encendió al inicio"
+        cerca = np.hypot(quemadas[:, 0] - f, quemadas[:, 1] - c) * 30.0 < 3000.0
+        assert cerca.sum() > 1, f"el fuego no creció alrededor del foco en ({f}, {c})"
+    # todo lo quemado está cerca de alguno de los dos focos
+    lejos = np.min([np.hypot(quemadas[:, 0] - f, quemadas[:, 1] - c) for f, c, _, _ in focos], axis=0) * 30.0
+    assert float(lejos.max()) < 4000.0
+
+
 def test_ignicion_fuera_del_dominio_se_rechaza(tmp_path):
     carpeta = _carpeta(tmp_path / "fuera", "v4.0", {"evento": "SL-2024-LASLAGUNAS", "horas": 3, "validar": False, "figuras": False},
                        {"ignicion": [{"lon": -64.0, "lat": -32.6}]})

@@ -58,9 +58,78 @@ RASTERES = {
              "índice", True),
     "combustible": ("Combustible, 7 clases (v3.1)", "Vegetación", "combustibles/{evento}/combustible_clase_{evento}.tif",
                     _categorica(COLOR_CLASE, NOMBRE_CLASE), None, True),
+    "sb40": ("Combustible SB40 (v4.0)", "Vegetación", "__sb40__", "__sb40__", None, True),
     "cicatriz": ("Cicatriz observada del incendio histórico", "Histórico", "eventos/{evento}/cicatriz_referencia_{evento}.tif",
                  _categorica({1: (60, 60, 60)}, {1: "Área quemada observada"}, alfa=110), None, True),
 }
+
+# ---- combustible de v4.0: modelos de Scott y Burgan (SB40)
+# Del evento, el que arma v4.0 al correrlo (`datos/procesados/v4.0/<evento>/combustible_pre_evento_33b.tif`: MapBiomas del
+# año anterior + relieve + índices). Si v4.0 todavía no corrió ese evento, el mapa base del año anterior al evento
+# (`sim_v4/estaticos/combustible/sb40_<año>.tif`), sin los índices del evento. Los nombres salen de `parametros_sb40.csv`.
+SB40_DIR = ENTRADAS / "sim_v4" / "estaticos" / "combustible"
+SB40_PROCESADO = REPO / "datos" / "procesados" / "v4.0"
+# familia: (primer código, último código, color claro, color oscuro)
+_FAMILIAS_SB40 = [(101, 109, (255, 240, 165), (214, 170, 20)),     # GR pasto
+                  (121, 124, (236, 206, 140), (186, 140, 70)),     # GS pasto-arbusto
+                  (141, 149, (214, 168, 120), (120, 72, 32)),      # SH arbustal
+                  (161, 165, (160, 205, 135), (38, 112, 62)),      # TU bosque con sotobosque
+                  (181, 189, (110, 160, 125), (20, 72, 52)),       # TL hojarasca
+                  (201, 204, (200, 160, 210), (112, 60, 132))]     # SB restos
+_NB_SB40 = {91: (150, 150, 150), 92: (240, 240, 240), 93: (222, 170, 200), 98: (59, 125, 216), 99: (200, 185, 166)}
+
+
+def _sb40_ruta(evento: str | None) -> Path | None:
+    if not evento:
+        return None
+    propio = SB40_PROCESADO / evento / "combustible_pre_evento_33b.tif"
+    if propio.exists():
+        return propio
+    import re
+    anios = {int(m.group(1)): p for p in SB40_DIR.glob("sb40_*.tif") if (m := re.match(r"sb40_(\d{4})$", p.stem))}
+    if not anios:
+        return None
+    m = re.search(r"(20\d{2})", evento)
+    if not m:
+        return anios[max(anios)]
+    previos = [a for a in anios if a <= int(m.group(1)) - 1]          # como v4.0: la cobertura del año anterior
+    return anios[max(previos)] if previos else anios[min(anios)]
+
+
+@lru_cache(maxsize=1)
+def _nombres_sb40() -> dict[int, str]:
+    import csv
+    try:
+        with open(SB40_DIR / "parametros_sb40.csv", encoding="utf-8") as f:
+            return {int(r["codigo"]): f'{r["clave"]} · {r["descripcion"]}' for r in csv.DictReader(f)}
+    except (OSError, KeyError, ValueError):
+        return {}
+
+
+def _colores_sb40() -> dict[int, tuple]:
+    colores = dict(_NB_SB40)
+    for a, b, claro, oscuro in _FAMILIAS_SB40:
+        for k in range(a, b + 1):
+            t = (k - a) / max(1, b - a)
+            colores[k] = tuple(int(round(claro[i] + (oscuro[i] - claro[i]) * t)) for i in range(3))
+    return colores
+
+
+@lru_cache(maxsize=16)
+def _presentes(ruta: str, mtime: float) -> tuple[int, ...]:
+    import rasterio
+    with rasterio.open(ruta) as s:
+        a = s.read(1)
+        nodata = s.nodata
+    valores = np.unique(a)
+    return tuple(int(v) for v in valores if nodata is None or v != nodata)
+
+
+def _estilo_sb40(ruta: Path) -> dict:
+    """Estilo categórico con solo las clases que aparecen en el archivo (la leyenda queda corta)."""
+    nombres, colores = _nombres_sb40(), _colores_sb40()
+    presentes = [k for k in _presentes(str(ruta), ruta.stat().st_mtime) if k in colores]
+    return _categorica({k: colores[k] for k in presentes}, {k: nombres.get(k, f"modelo {k}") for k in presentes}, alfa=200)
 
 # id: (título, grupo, archivo, columnas que se conservan, tipo de geometría para dibujar)
 VECTORES = {
@@ -73,6 +142,8 @@ VECTORES = {
 
 
 def _archivo(patron: str, evento: str | None) -> Path | None:
+    if patron == "__sb40__":
+        return _sb40_ruta(evento)
     if "{evento}" in patron:
         if not evento:
             return None
@@ -114,9 +185,21 @@ def lista(evento: str | None = None) -> list[dict]:
         ruta = _archivo(patron, evento)
         if ruta is None:
             continue
+        if estilo == "__sb40__":
+            estilo = _estilo_sb40(ruta)
+            if ruta.parent.parent == SB40_PROCESADO:
+                nota = "El que arma v4.0 para este evento (cobertura, relieve e índices de vegetación)."
+            else:
+                nota = (f"Mapa base {ruta.stem.split('_')[-1]}, sin los índices de este evento: v4.0 arma el suyo la "
+                        "primera vez que corre el evento.")
+        else:
+            nota = None
         url = f"/api/capas/{id_}.png" + (f"?evento={evento}" if por_evento else "")
+        leyenda = _leyenda(estilo, unidad)
+        if leyenda is not None and nota:
+            leyenda["nota"] = nota
         out.append({"id": id_, "titulo": titulo, "grupo": grupo, "tipo": "imagen", "url": url, "por_evento": por_evento,
-                    "limites": _destino(str(ruta))[3], "leyenda": _leyenda(estilo, unidad), "archivo": ruta.name})
+                    "limites": _destino(str(ruta))[3], "leyenda": leyenda, "archivo": ruta.name})
     for id_, (titulo, grupo, archivo, _, forma) in VECTORES.items():
         out.append({"id": id_, "titulo": titulo, "grupo": grupo, "tipo": "vector", "forma": forma,
                     "url": f"/api/vectores/{id_}.geojson", "por_evento": False, "leyenda": None})
@@ -162,7 +245,10 @@ def png(id_: str, evento: str | None = None) -> bytes | None:
     ruta = _archivo(patron, evento)
     if ruta is None:
         return None
-    guardado = CACHE / (f"{id_}__{evento}.png" if por_evento else f"{id_}__{ruta.stem}.png")
+    if estilo == "__sb40__":
+        estilo = _estilo_sb40(ruta)
+    guardado = CACHE / (f"{id_}__{evento}__{ruta.stem}.png" if id_ == "sb40" else
+                        f"{id_}__{evento}.png" if por_evento else f"{id_}__{ruta.stem}.png")
     if guardado.exists() and guardado.stat().st_mtime >= ruta.stat().st_mtime:
         return guardado.read_bytes()
 

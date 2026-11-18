@@ -148,6 +148,9 @@ def cache(tmp_path_factory):
     with pytest.MonkeyPatch.context() as mp:
         mp.setattr(comun, "CACHE", base / "cache")
         mp.setattr(comun, "ENTRADAS", base / "entradas")
+        # Con ENTRADAS en la carpeta temporal y las fichas en la real (escenarios/), el barrido que hace el servidor al
+        # arrancar vería los eventos RT-… reales del usuario sin sus insumos y les borraría la ficha. Acá no se barre.
+        mp.setattr(mod_app.d_evento_rt, "barrer_incompletos", lambda: [])
         yield base
 
 
