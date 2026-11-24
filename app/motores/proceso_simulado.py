@@ -19,6 +19,12 @@ fuego todavía no alcanzó: el resto se recorta) y el fuego ya no llega a las ce
 cortafuegos; el ancho y el suelo mineral no cambian nada. El viento manual se acepta y no tiene efecto. Los cortafuegos de
 `configuracion.cortafuegos` se aplican igual, antes de la hora 0 (uno rechazado corta la corrida con error, D-E3-31). La
 bitácora y la reproducción son las de `control.py`.
+
+Combate (contrato 1.6): el método es el de verdad (`combate.py`, el mismo de los dos motores), sobre el fuego de juguete por
+medio de `AdaptadorDeJuguete`: todas las celdas del borde arden con la misma intensidad (`INTENSIDAD_KW_M`, sostenible), una
+celda frenada (o bloqueada por una descarga) corta el paso como un cortafuego y el fuego no llega a lo que queda separado de
+lo que arde. La hora del día, para las descargas, sale de `configuracion.t_inicio_utc` (sin ella, la corrida empieza a las
+12 UTC).
 """
 from __future__ import annotations
 
@@ -32,9 +38,11 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import combate as cb  # noqa: E402
 import intervenciones  # noqa: E402
 
 CELDAS_POR_HORA = 3.0
+INTENSIDAD_KW_M = 500.0                       # la del borde del fuego de juguete: siempre sostenible, nunca escapa
 RES = 30.0
 CENTRO_5345 = (3538140.0, 6392850.0)          # centro del dominio Las Lagunas–Potrerillos, por si no se da un punto
 
@@ -48,6 +56,19 @@ class FuegoDeJuguete:
         self.grilla = grilla
         self.focos = focos
         self.bloqueadas = np.zeros(llegada_min.shape, dtype=bool)
+        self.frenadas = np.zeros(llegada_min.shape, dtype=bool)       # celdas del borde con línea de combate
+        self.mojadas = np.zeros(llegada_min.shape, dtype=bool)        # celdas sin quemar bloqueadas por una descarga
+
+    def recalcular(self, t: float) -> None:
+        """Con línea de combate: lo que todavía no ardió en `t` solo arde (a su hora de siempre) si sigue conectado, sin
+        pasar por cortafuegos ni por celdas frenadas, con algo que arde y no está frenado."""
+        from scipy import ndimage
+        quemada = np.isfinite(self.llegada) & (self.llegada <= t)
+        pasable = ~self.bloqueadas & ~self.frenadas & ~self.mojadas
+        etiquetas, _ = ndimage.label(pasable)                        # 4-vecinos: una línea en diagonal también corta
+        vivas = np.unique(etiquetas[quemada & pasable])
+        alcanzable = np.isin(etiquetas, vivas[vivas > 0])
+        self.llegada = np.where(quemada, self.llegada, np.where(alcanzable, self.base, np.nan)).astype("float32")
 
     def _celdas(self, xy: list) -> tuple[list[tuple[int, int, float]], float]:
         """Celdas (fila, columna, metros del trazo en ella) que toca la polilínea, muestreada cada 1/8 de celda."""
@@ -80,10 +101,13 @@ class FuegoDeJuguete:
         for f, c in celdas:
             self.bloqueadas[f, c] = True
         from scipy import ndimage
-        etiquetas, _ = ndimage.label(~self.bloqueadas)           # 4-vecinos: una línea en diagonal también corta
-        alcanzable = np.isin(etiquetas, [etiquetas[f] for f in self.focos])
-        nueva = np.where(alcanzable, self.base, np.nan).astype("float32")
-        self.llegada = np.where(quemada, self.llegada, nueva).astype("float32")      # lo ya quemado no cambia
+        if self.frenadas.any() or self.mojadas.any():
+            self.recalcular(t)
+        else:
+            etiquetas, _ = ndimage.label(~self.bloqueadas)       # 4-vecinos: una línea en diagonal también corta
+            alcanzable = np.isin(etiquetas, [etiquetas[f] for f in self.focos])
+            nueva = np.where(alcanzable, self.base, np.nan).astype("float32")
+            self.llegada = np.where(quemada, self.llegada, nueva).astype("float32")  # lo ya quemado no cambia
         indices = [f * cols + c for f, c in celdas]
         recortado = recortadas > 0 or afuera
         motivo = []
@@ -94,6 +118,67 @@ class FuegoDeJuguete:
         return {"estado": "recortada" if recortado else "aceptada", "t_vigor_min": t, "motivo": "; ".join(motivo),
                 "datos": {"longitud_aplicada_m": round(sum(m for _, _, m in quedan), 2), "celdas": len(celdas),
                           "celdas_recortadas": recortadas, "celdas_sha256": intervenciones.sha256_indices(indices)}}
+
+
+class AdaptadorDeJuguete:
+    """El fuego de juguete visto por el combate común (ver `combate.py`): `t` es la hora simulada en curso, en minutos."""
+    df = np.array([-1, -1, 0, 1, 1, 1, 0, -1])
+    dc = np.array([0, 1, 1, 1, 0, -1, -1, -1])
+
+    def __init__(self, fuego: FuegoDeJuguete, hora_inicio_utc: int = 12):
+        self.fuego = fuego
+        self.forma = fuego.llegada.shape
+        self.res = float(fuego.grilla["res"])
+        self.t = 0.0
+        self.combate = None
+        self.hora_inicio_utc = int(hora_inicio_utc)
+
+    def hora_utc(self, t_min: float) -> int:
+        return int((self.hora_inicio_utc + float(t_min) // 60) % 24)
+
+    def rc(self, xy):
+        g = self.fuego.grilla
+        xy = np.asarray(xy, "float64")
+        return (g["ymax"] - xy[:, 1]) / g["res"], (xy[:, 0] - g["xmin"]) / g["res"]
+
+    def bloquear(self, idx: np.ndarray, t_min: float) -> None:
+        self.fuego.mojadas.ravel()[np.asarray(idx, np.int64)] = True
+        self.fuego.recalcular(float(t_min))
+
+    def desbloquear(self, idx: np.ndarray, t_min: float) -> None:
+        self.fuego.mojadas.ravel()[np.asarray(idx, np.int64)] = False
+        self.fuego.recalcular(float(t_min))
+
+    def habilitar(self) -> None:
+        pass
+
+    def sincronizar(self, n_linea: int) -> None:
+        pass
+
+    def afectada(self) -> np.ndarray:
+        return np.isfinite(self.fuego.llegada) & (self.fuego.llegada <= self.t)
+
+    def combustible(self) -> np.ndarray:
+        return ~self.afectada() & ~self.fuego.bloqueadas & ~self.fuego.mojadas
+
+    def activas(self) -> np.ndarray:
+        ardio, libre = self.afectada(), self.combustible()
+        con_vecina = np.zeros(self.forma, dtype=bool)
+        H, W = self.forma
+        for a, b in zip(self.df.tolist(), self.dc.tolist()):
+            con_vecina[max(0, -a):H - max(0, a), max(0, -b):W - max(0, b)] |= libre[max(0, a):H + min(0, a), max(0, b):W + min(0, b)]
+        return np.flatnonzero((ardio & con_vecina & ~self.fuego.frenadas).ravel())
+
+    def intensidad(self, idx: np.ndarray) -> np.ndarray:
+        return np.full((len(idx), len(self.df)), INTENSIDAD_KW_M)
+
+    def frenar(self, idx: np.ndarray, t_min: float) -> None:
+        self.fuego.frenadas.ravel()[np.asarray(idx, np.int64)] = True
+        self.fuego.recalcular(float(t_min))
+
+    def reavivar(self, idx: np.ndarray, t_min: float) -> None:
+        self.fuego.frenadas.ravel()[np.asarray(idx, np.int64)] = False
+        self.fuego.recalcular(float(t_min))
 
 
 def main() -> int:
@@ -142,6 +227,9 @@ def main() -> int:
         trazos = intervenciones.validar_cortafuegos(cfg["cortafuegos"]) if cfg.get("cortafuegos") else []
         if trazos:
             cfg["cortafuegos"] = trazos
+        dotaciones = intervenciones.validar_dotaciones(cfg["dotaciones"]) if cfg.get("dotaciones") else []
+        if dotaciones:
+            cfg["dotaciones"] = dotaciones
         control.preparar(corrida)
         fuego = FuegoDeJuguete(llegada_min, grilla, focos)
         iniciales = []
@@ -151,10 +239,27 @@ def main() -> int:
         exigir_cortafuegos_iniciales(iniciales)  # D-E3-31: uno rechazado corta la corrida antes de simular
         llegada_min = fuego.llegada
         viento_manual = {}
+        import datetime as dt
+        t_inicio = str(cfg.get("t_inicio_utc") or "2026-01-01T12:00:00+00:00")
+        momento = dt.datetime.fromisoformat(t_inicio[:-1] + "+00:00" if t_inicio.endswith(("Z", "z")) else t_inicio)
+        if momento.tzinfo is not None:
+            momento = momento.astimezone(dt.timezone.utc)
+        adaptador = AdaptadorDeJuguete(fuego, momento.hour)
+        combate = adaptador.combate = cb.Combate(adaptador)
+        for i, d in enumerate(dotaciones):        # antes de iniciar: lo mismo que despacharlas en la pausa de t = 0
+            r = combate.intervenir({"tipo": "dotacion", "datos": d}, 0.0)
+            if r["estado"] == "rechazada":
+                raise ValueError(f"dotación {i + 1} de antes de iniciar rechazada ({r['motivo']}); la corrida no se simula")
 
         def aplicar(entrada, t):
             if entrada["tipo"] == "cortafuego":
                 return fuego.cortafuego(entrada["datos"], t)
+            if entrada["tipo"] in intervenciones.TIPOS_COMBATE:
+                adaptador.t = float(t)
+                r = combate.intervenir(entrada, t)
+                if r["estado"] != "rechazada":
+                    control.guardar_combate(combate.capas())
+                return r
             d = entrada["datos"] or {}
             viento_manual.clear()
             if d.get("modo") != "pronostico" and d.get("vel_kmh") is not None:
@@ -192,6 +297,8 @@ def main() -> int:
             if control.atender(h * 60.0):
                 detenida = True
                 break
+            adaptador.t = h * 60.0               # combate común: después de las órdenes de la hora, antes de avanzar
+            control.combate(combate.paso_hora(h * 60.0), combate.capas())
             time.sleep(s_por_hora)
             h += 1
     except Exception as e:
@@ -206,6 +313,8 @@ def main() -> int:
            "horas_avisadas": control.horas_avisadas}
     if iniciales:
         res["cortafuegos_iniciales"] = iniciales
+    if combate.informe():
+        res["combate"] = combate.informe()
     reproduccion = control.cerrar(corrida)
     if reproduccion is not None:
         res["reproduccion"] = reproduccion

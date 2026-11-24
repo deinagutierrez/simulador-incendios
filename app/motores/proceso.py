@@ -17,7 +17,9 @@ Con `definicion` se puede agregar `configuracion`, lo que elige el usuario en la
 El evento de `definicion` sigue aportando la meteorología, los índices y la cobertura. `t_inicio_utc` tiene que caer en hora
 en punto (con minutos o segundos se rechaza). Desde la F5, `configuracion.cortafuegos` trae los trazos dibujados antes de
 iniciar (`[{"ancho_m": 10, "suelo_mineral": false, "xy_5345": [[x, y], ...]}]`): el proceso los valida y normaliza
-(`intervenciones.py`) y se los pasa al conductor en `configuracion["cortafuegos"]`.
+(`intervenciones.py`) y se los pasa al conductor en `configuracion["cortafuegos"]`. Desde la 1.6,
+`configuracion.dotaciones` trae los bomberos despachados antes de iniciar (`[{"bomberos": 12, "llegada_min": 45,
+"prioridad": "flancos"}]`), con el mismo trato; el combate es el de `combate.py`, común a los dos motores.
 
 Bitácora (F5): cada pausa, reanudación, detención e intervención aceptada o recortada entra con un hash encadenado desde la
 raíz (la configuración inicial); se escribe en el acto en `bitacora.jsonl` y al final en `corrida.json` (`bitacora`,
@@ -41,7 +43,7 @@ import traceback
 from pathlib import Path
 
 MOTORES = {"v4.0": ("v4.0", "barreras"), "v3.1-libre": ("v3.1", "libre"), "v3.1-librev2": ("v3.1", "libre_v2")}
-CLAVES_CONFIGURACION = ("ignicion", "t_inicio_utc", "horas", "cortafuegos")
+CLAVES_CONFIGURACION = ("ignicion", "t_inicio_utc", "horas", "cortafuegos", "dotaciones")
 
 
 def main() -> int:
@@ -93,6 +95,9 @@ def main() -> int:
         if configuracion.get("cortafuegos"):
             configuracion["cortafuegos"] = intervenciones.validar_cortafuegos(configuracion["cortafuegos"])
             corrida["configuracion"]["cortafuegos"] = configuracion["cortafuegos"]
+        if configuracion.get("dotaciones"):
+            configuracion["dotaciones"] = intervenciones.validar_dotaciones(configuracion["dotaciones"])
+            corrida["configuracion"]["dotaciones"] = configuracion["dotaciones"]
         control.preparar(corrida)
         version, variante = MOTORES[motor]
         print(f"proceso motor {motor} · corrida {carpeta.name}", flush=True)

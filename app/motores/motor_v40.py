@@ -22,6 +22,14 @@ Intervenciones (F5, contrato 1.5; el detalle está en barreras_v40.py):
   `meteo_editada.csv` (si hubo viento manual), listados en `resultados.archivos_offline`: van en el YAML como
   `mitigacion.barreras_extra`, `mitigacion.modificador_combustible` y `parche.meteo` (esta, con ruta absoluta dentro del
   repositorio, porque una relativa se busca en la carpeta del evento).
+
+Combate (decisión D-E3-36; el método está en combate.py y es el mismo que en v3.1): las intervenciones de combate
+(`intervenciones.TIPOS_COMBATE`) van al objeto `Combate`, que trabaja sobre el autómata por medio de `combate_v40.py`. En
+cada hora en punto, después de atender las órdenes y antes de avanzar, corre `Combate.paso_hora`; el resultado se avisa
+(`combate`) y la línea queda en `combate_parcial.npy` para el mapa. `configuracion.dotaciones` se despacha al crearse el
+autómata (igual que en la pausa de t = 0). La contención propia de v4.0 sigue apagada. Sin intervenciones de combate el
+autómata no se toca. El combate no tiene corrida offline equivalente (el motor offline no lo conoce): su garantía es la
+reproducción desde la bitácora (comparación A).
 """
 from __future__ import annotations
 
@@ -32,6 +40,9 @@ import time
 from pathlib import Path
 
 import barreras_v40 as bv
+import combate as cb
+import combate_v40
+import intervenciones as iv
 from control import Control, Detenida, exigir_cortafuegos_iniciales, malla_viento
 
 REPO = Path(__file__).resolve().parents[2]
@@ -60,7 +71,8 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
     salida = carpeta / "salida"
     salida.mkdir(parents=True, exist_ok=True)
     iniciales = list(configuracion.get("cortafuegos") or [])
-    estado = {"au": None, "ultima_hora": -1}
+    dotaciones = list(configuracion.get("dotaciones") or [])
+    estado = {"au": None, "ultima_hora": -1, "combate": None}
     # v4.0 solo admite insumos dentro del repositorio o de la carpeta de datos. Los de las intervenciones están en la carpeta
     # de la corrida, que en la app ya está en el repositorio (resultados/app/<id>); si se la puso en otro lado (pruebas), se
     # la suma a las raíces permitidas solo dentro de este proceso.
@@ -114,6 +126,12 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
             interv.au = self
             if iniciales:                    # D-E3-31: un trazo inicial rechazado corta la corrida antes del primer paso
                 exigir_cortafuegos_iniciales(interv.informe_iniciales())
+            adaptador = combate_v40.AdaptadorV40(self)
+            estado["combate"] = adaptador.combate = cb.Combate(adaptador)
+            for i, d in enumerate(dotaciones):           # antes de iniciar: lo mismo que despacharlas en la pausa de t = 0
+                r = estado["combate"].intervenir({"tipo": "dotacion", "datos": d}, 0.0)
+                if r["estado"] == "rechazada":
+                    raise ValueError(f"dotación {i + 1} de antes de iniciar rechazada ({r['motivo']}); la corrida no se simula")
 
         def paso_tiempo(self):
             t_min = self.minutos(self.t)
@@ -122,19 +140,38 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
                 hora_en_punto(self, h, t_min)
                 if control.atender(t_min):
                     raise Detenida()
+                co = estado["combate"]           # combate común: después de las órdenes de la hora, antes de avanzar
+                control.combate(co.paso_hora(t_min), co.capas())
             return super().paso_tiempo()
 
     corrida_mod.Automata = AutomataControlado
 
     interv = bv.Intervenciones(carpeta, iniciales)
-    control.aplicar = interv.aplicar
+
+    def aplicar(entrada: dict, t: float) -> dict:
+        if entrada["tipo"] not in iv.TIPOS_COMBATE:
+            return interv.aplicar(entrada, t)
+        co = estado["combate"]
+        if co is None:
+            return {"estado": "rechazada", "t_vigor_min": float(t), "motivo": "el motor todavía no creó el autómata", "datos": {}}
+        r = co.intervenir(entrada, t)
+        if r["estado"] != "rechazada":
+            control.guardar_combate(co.capas())
+        print(f"intervención {entrada['tipo']} en t = {float(t):g} min: {r['estado']}, {r['motivo']}", flush=True)
+        return r
+
+    def informe_combate() -> dict:
+        inf = estado["combate"].informe() if estado["combate"] is not None else None
+        return {"combate": inf} if inf else {}
+
+    control.aplicar = aplicar
 
     # --- escenario: uno existente o una definición propia (se escribe como YAML y se carga igual que offline)
     pedido = {}
     if base.get("escenario"):
-        if any(k != "cortafuegos" for k in configuracion):
+        if any(k not in ("cortafuegos", "dotaciones") for k in configuracion):
             raise ValueError("`configuracion` solo se combina con `base.definicion`; `base.escenario` se corre tal cual "
-                             "(salvo `cortafuegos`)")
+                             "(salvo `cortafuegos` y `dotaciones`)")
         esc, ruta, nombre = escenario.cargar_corrida(str(base["escenario"]), None)
         if iniciales:
             esc = interv.preparar_iniciales(esc, raiz_datos(), Path(ruta).parent)
@@ -172,7 +209,7 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
         t_min = au.minutos(au.t)
         return {"motivo_fin": "detenida", "motivo_fin_texto": "Detenida por el usuario.", "ha_final": round(au.area_quemada_ha(), 2),
                 "t_simulado_min": round(t_min, 3), "salida": "salida", "completa": False,
-                "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign | interv.informe()
+                "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign | interv.informe() | informe_combate()
 
     segundos = time.time() - t_reloj
     shutil.copy(ruta, salida / f"escenario_{nombre}.yaml")
@@ -205,4 +242,4 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control) -> 
     t_min = float(ind[-1]["minutos_desde_t0"]) if ind else 0.0
     return {"motivo_fin": au.motivo_fin, "motivo_fin_texto": au.motivo_fin_texto, "ha_final": round(au.area_quemada_ha(), 2),
             "t_simulado_min": round(t_min, 3), "salida": "salida", "completa": True,
-            "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign | interv.informe()
+            "archivos": sorted(p.name for p in salida.iterdir() if p.is_file())} | ign | interv.informe() | informe_combate()

@@ -44,6 +44,7 @@ LIMITE_ACTIVAS = 2
 FORMATO = "incendios_sl.corrida/1.2"
 ESPERA_INTERVENCION_S = 30.0              # el trazo de v3.1 tarda unos 5 s (D-E3-28, punto 21)
 AVISOS_CON_ENTRADA = ("pausado", "reanudado", "intervencion", "detenido")
+COMBATE = "combate_parcial.npy"           # la línea de combate para el mapa; la escribe el proceso motor (contrato 1.6)
 # lo que una reproducción copia tal cual de la corrida original (contrato §1.3); `simulado` y `advertencias` también, para
 # que el motor simulado use la misma grilla y la pantalla muestre los mismos rótulos
 COPIA_REPRODUCCION = ("formato", "motor", "base", "configuracion", "insumos", "programa", "simulado", "advertencias")
@@ -181,7 +182,15 @@ class Corrida:
         d["bitacora_integra"] = iv.verificar_cadena(raiz, bitacora)[0] if raiz else None
         if c is not None:
             d["cortafuegos_iniciales"] = list((c.get("configuracion") or {}).get("cortafuegos") or [])
+            d["dotaciones_iniciales"] = list((c.get("configuracion") or {}).get("dotaciones") or [])
+        d["combate"] = self.combate()
         return d
+
+    def combate(self) -> list[dict]:
+        """Los pasos de combate avisados hasta ahora (uno por hora simulada desde el primer despacho), sin los campos del
+        aviso que no son del paso."""
+        return [{k: v for k, v in e.items() if k not in ("aviso", "n", "archivo", "recibido_utc")} for e in self.eventos
+                if e.get("aviso") == "combate"]
 
 
 class Gestor:
@@ -259,7 +268,7 @@ class Gestor:
         id_ = f"{momento:%Y%m%d-%H%M%S}-{CORTO[motor]}-{secrets.token_hex(2)}"
         carpeta = self.carpeta / id_
         carpeta.mkdir(parents=True)
-        configuracion = {k: pedido[k] for k in ("ignicion", "t_inicio_utc", "horas", "cortafuegos")
+        configuracion = {k: pedido[k] for k in ("ignicion", "t_inicio_utc", "horas", "cortafuegos", "dotaciones")
                          if pedido.get(k) not in (None, [], "")}
         corrida = {"formato": FORMATO, "id": id_, "creada_utc": ahora(), "grupo": grupo,
                    "programa": {"version": VERSION, "congelado_sha256": sha_congelado()}, "motor": motor}

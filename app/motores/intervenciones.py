@@ -3,7 +3,9 @@
 Lo comparten los procesos motor (`control.py`, los conductores) y, si lo necesita, el servidor. No importa ningún motor:
 solo la biblioteca estándar, numpy y (para la longitud) shapely.
 
-- `validar_entrada(entrada)`: revisa y normaliza una intervención `{tipo, datos}` (cortafuego o viento manual).
+- `validar_entrada(entrada)`: revisa y normaliza una intervención `{tipo, datos}` (cortafuego, viento manual y, desde el
+  contrato 1.6, las de combate: `dotacion` y `descarga`, que aplica `combate.py`).
+- `validar_dotaciones(lista)`: las dotaciones de `configuracion.dotaciones` (bomberos despachados antes de iniciar).
 - `validar_cortafuego(datos)` / `validar_cortafuegos(lista)`: lo mismo para los trazos de `configuracion.cortafuegos`.
 - `revisar_t_inicio(t)`: las corridas empiezan en hora en punto UTC (punto 6).
 - `canon(x)`: JSON canónico sobre el que se calculan los hash.
@@ -21,8 +23,16 @@ import hashlib
 import json
 import math
 
-TIPOS = ("cortafuego", "viento_manual")
+TIPOS = ("cortafuego", "viento_manual", "dotacion", "descarga")
+TIPOS_COMBATE = ("dotacion", "descarga")       # los que aplica el combate común (app/motores/combate.py)
+MEDIOS_AEREOS = ("avion", "helicoptero")
+PRODUCTOS = ("agua", "retardante")
+MIN_RUMBO_M = 1.0                   # separación mínima entre los dos puntos de una descarga (para que tenga dirección)
 ANCHOS_M = (3, 6, 10, 15, 25)
+MAX_BOMBEROS = 500                  # por despacho
+MAX_LLEGADA_MIN = 1440              # una dotación llega, a lo sumo, un día después de despachada
+MAX_DOTACIONES_INICIALES = 20       # `configuracion.dotaciones`
+PRIORIDADES = ("flancos", "cabeza")
 VEL_MAX_KMH = 216.0                 # el mismo tope que el escenario manual del servidor
 MAX_PUNTOS = 10000
 MAX_CORTAFUEGOS = 100
@@ -78,6 +88,8 @@ def configuracion_inicial(corrida: dict) -> dict:
     cfg = _sin_vacios(dict(corrida.get("configuracion") or {}))
     if cfg.get("cortafuegos"):
         cfg["cortafuegos"] = validar_cortafuegos(cfg["cortafuegos"])
+    if cfg.get("dotaciones"):
+        cfg["dotaciones"] = validar_dotaciones(cfg["dotaciones"])
     return {"formato": corrida.get("formato"), "motor": corrida.get("motor"), "base": corrida.get("base"),
             "configuracion": cfg, "insumos": corrida.get("insumos"),
             "congelado_sha256": (corrida.get("programa") or {}).get("congelado_sha256")}
@@ -199,7 +211,83 @@ def validar_entrada(entrada) -> dict:
     datos = entrada.get("datos")
     if datos is None:
         raise ValueError("falta `datos` en la intervención")
-    return {"tipo": tipo, "datos": validar_cortafuego(datos) if tipo == "cortafuego" else validar_viento(datos)}
+    return {"tipo": tipo, "datos": VALIDADORES[tipo](datos)}
+
+
+def _entero(v, nombre: str, minimo: int, maximo: int) -> int:
+    n = _numero(v, nombre)
+    if not n.is_integer():
+        raise ValueError(f"`{nombre}` tiene que ser un número entero")
+    if not minimo <= n <= maximo:
+        raise ValueError(f"`{nombre}` tiene que estar entre {minimo} y {maximo}")
+    return int(n)
+
+
+def validar_dotacion(datos) -> dict:
+    """Despacho de bomberos: `{bomberos, llegada_min, prioridad}` (personas; minutos desde el despacho hasta que empiezan a
+    trabajar, 0 = ya están; `flancos` o `cabeza`), o `{retirar: true}` (se retiran todas las dotaciones). Lo que agrega el
+    motor al aplicarla (tasa, hora de inicio…) se descarta."""
+    if not isinstance(datos, dict):
+        raise ValueError("la dotación tiene que ser un objeto {bomberos, llegada_min, prioridad} o {retirar: true}")
+    if datos.get("retirar") not in (None, False):
+        if datos.get("retirar") is not True:
+            raise ValueError("`retirar` tiene que ser verdadero (o no ir)")
+        if any(k in datos for k in ("bomberos", "llegada_min", "prioridad")):
+            raise ValueError("con `retirar` no van `bomberos`, `llegada_min` ni `prioridad`")
+        return {"retirar": True}
+    bomberos = _entero(datos.get("bomberos"), "bomberos", 1, MAX_BOMBEROS)
+    llegada = _entero(datos.get("llegada_min", 0), "llegada_min", 0, MAX_LLEGADA_MIN)
+    prioridad = datos.get("prioridad", "flancos")
+    if prioridad not in PRIORIDADES:
+        raise ValueError(f"`prioridad` tiene que ser una de {', '.join(PRIORIDADES)}")
+    return {"bomberos": bomberos, "llegada_min": llegada, "prioridad": prioridad}
+
+
+def validar_dotaciones(lista) -> list[dict]:
+    """Las dotaciones de `configuracion.dotaciones` (despachadas antes de iniciar): no admite `retirar`."""
+    if not isinstance(lista, (list, tuple)):
+        raise ValueError("`configuracion.dotaciones` tiene que ser una lista de despachos")
+    if len(lista) > MAX_DOTACIONES_INICIALES:
+        raise ValueError(f"hay {len(lista)} dotaciones; el máximo antes de iniciar es {MAX_DOTACIONES_INICIALES}")
+    out = []
+    for i, d in enumerate(lista):
+        try:
+            norm = validar_dotacion(d)
+            if norm.get("retirar"):
+                raise ValueError("antes de iniciar no hay nada que retirar")
+        except ValueError as e:
+            raise ValueError(f"dotación {i + 1}: {e}") from None
+        out.append(norm)
+    return out
+
+
+def validar_descarga(datos) -> dict:
+    """Descarga aérea: `{medio, producto, xy_5345: [[x0, y0], [x1, y1]]}`. `medio`: `avion` o `helicoptero`; `producto`:
+    `agua` (por defecto) o `retardante`; el primer punto es donde empieza la franja y el segundo marca hacia dónde va (el largo
+    y el ancho los pone el método de combate según el medio). Lo que agrega el motor al aplicarla se descarta."""
+    if not isinstance(datos, dict):
+        raise ValueError("la descarga tiene que ser un objeto {medio, producto, xy_5345}")
+    medio = datos.get("medio")
+    if medio not in MEDIOS_AEREOS:
+        raise ValueError(f"`medio` tiene que ser uno de {', '.join(MEDIOS_AEREOS)}")
+    producto = datos.get("producto", "agua")
+    if producto not in PRODUCTOS:
+        raise ValueError(f"`producto` tiene que ser uno de {', '.join(PRODUCTOS)}")
+    xy = datos.get("xy_5345")
+    if not isinstance(xy, (list, tuple)) or len(xy) != 2:
+        raise ValueError("`xy_5345` tiene que ser dos puntos [x, y] en EPSG:5345: dónde empieza la descarga y hacia dónde va")
+    puntos = []
+    for i, p in enumerate(xy):
+        if not isinstance(p, (list, tuple)) or len(p) != 2:
+            raise ValueError(f"`xy_5345`: el punto {i + 1} no es un par [x, y]")
+        puntos.append([round(_numero(p[0], "x"), 2), round(_numero(p[1], "y"), 2)])
+    if math.hypot(puntos[1][0] - puntos[0][0], puntos[1][1] - puntos[0][1]) < MIN_RUMBO_M:
+        raise ValueError("los dos puntos de la descarga están en el mismo lugar: no marcan una dirección")
+    return {"medio": medio, "producto": producto, "xy_5345": puntos}
+
+
+VALIDADORES = {"cortafuego": validar_cortafuego, "viento_manual": validar_viento, "dotacion": validar_dotacion,
+               "descarga": validar_descarga}
 
 
 # ------------------------------------------------------------------------------------------------ hora de inicio
