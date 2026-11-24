@@ -34,8 +34,6 @@ body { background: var(--fondo); color: var(--texto); }
 #panel-cuerpo { flex: 1 1 auto; overflow-y: auto; min-height: 0; }
 #panel-pie { box-shadow: 0 -.25rem .75rem rgba(28, 27, 25, .06); }
 #panel .accordion-button { font-weight: 600; font-size: .9rem; }
-#sub-datos .accordion-button { font-size: .85rem; }
-#sub-datos .accordion-body { padding: .75rem; }
 #estado-datos { font-weight: 500; line-height: 1.35; }
 #notas-pie p { margin-bottom: .5rem; }
 #config-campos { min-width: 0; }
