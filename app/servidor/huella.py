@@ -20,6 +20,9 @@ from pathlib import Path
 import numpy as np
 
 HUELLA = "t_llegada_parcial.npy"
+COMBATE = "combate_parcial.npy"    # (3, filas, cols): desde, hasta (NaN = en pie) y clase de cada celda de línea
+# clase de la línea de combate → color (app/motores/combate.py): 1 línea de bomberos, 2 agua, 3 retardante
+COLORES_LINEA = {1: (17, 17, 17), 2: (21, 101, 192), 3: (216, 27, 96)}
 # rampa: fracción del tiempo transcurrido → color
 RAMPA = np.array([[0.0, 255, 237, 160], [0.35, 254, 178, 76], [0.65, 240, 59, 32], [1.0, 128, 0, 38]], dtype="float64")
 INTENTOS_LECTURA = 5
@@ -100,6 +103,67 @@ def png(carpeta: Path, grilla: dict, hora: float | None = None, color: tuple[int
         for canal in range(3):
             rgba[..., canal][quemado] = np.interp(fraccion, RAMPA[:, 0], RAMPA[:, canal + 1]).astype("uint8")
         rgba[..., 3][quemado] = 200
+    memoria = io.BytesIO()
+    Image.fromarray(rgba, "RGBA").save(memoria, format="PNG", optimize=False)
+    return memoria.getvalue()
+
+
+def leer_combate(ruta: Path, forma: tuple[int, int]) -> np.ndarray | None:
+    """Las capas de la línea de combate (3, filas, cols), o None si no hay. Como `leer`: reintenta si el proceso motor la
+    está reemplazando y, si sigue fallando, devuelve la última que se leyó bien."""
+    ruta = Path(ruta)
+    clave = str(ruta.resolve())
+    for i in range(INTENTOS_LECTURA):
+        if not ruta.exists():
+            return None
+        try:
+            a = np.load(ruta, allow_pickle=False).astype("float32")
+            if a.ndim == 3 and a.shape == (3,) + tuple(forma):
+                with _cerrojo:
+                    _guardadas[clave] = a
+                    _guardadas.move_to_end(clave)
+                    while len(_guardadas) > MAX_GUARDADAS:
+                        _guardadas.popitem(last=False)
+                return a
+        except (OSError, ValueError, EOFError):
+            pass
+        if i < INTENTOS_LECTURA - 1:
+            time.sleep(ESPERA_LECTURA_S)
+    with _cerrojo:
+        return _guardadas.get(clave)
+
+
+def linea_en_pie(capas: np.ndarray, hora: float | None) -> np.ndarray:
+    """Clase (uint8, 0 = nada) de las celdas que son línea en la hora `hora` (o las que siguen en pie, sin hora)."""
+    desde, hasta, clase = capas
+    if hora is None:
+        en_pie = np.isfinite(desde) & np.isnan(hasta)
+    else:
+        t = float(hora) * 60.0
+        en_pie = np.isfinite(desde) & (desde <= t + 1e-6) & (np.isnan(hasta) | (hasta > t + 1e-6))
+    return np.where(en_pie, clase, 0).astype("uint8")
+
+
+def linea_png(carpeta: Path, grilla: dict, hora: float | None = None) -> bytes | None:
+    """PNG de la línea de combate en la hora `hora`: una celda de color por celda de línea (negro la de los bomberos).
+    None si la corrida no tiene combate."""
+    capas = leer_combate(Path(carpeta) / COMBATE, (int(grilla["filas"]), int(grilla["cols"])))
+    if capas is None:
+        return None
+    from PIL import Image
+    from rasterio.warp import Resampling, reproject
+    clase = linea_en_pie(capas, hora)
+    origen, destino, ancho, alto, _ = _destino(str(grilla["crs"]), float(grilla["xmin"]), float(grilla["ymax"]),
+                                              float(grilla["res"]), int(grilla["filas"]), int(grilla["cols"]))
+    salida = np.zeros((alto, ancho), dtype="uint8")
+    reproject(clase, salida, src_transform=origen, src_crs=str(grilla["crs"]), src_nodata=0,
+              dst_transform=destino, dst_crs="EPSG:3857", dst_nodata=0, resampling=Resampling.nearest)
+    rgba = np.zeros((alto, ancho, 4), dtype="uint8")
+    for valor, color in COLORES_LINEA.items():
+        m = salida == valor
+        if m.any():
+            rgba[m, :3] = color
+            rgba[..., 3][m] = 255
     memoria = io.BytesIO()
     Image.fromarray(rgba, "RGBA").save(memoria, format="PNG", optimize=False)
     return memoria.getvalue()

@@ -10,6 +10,13 @@ aplican antes de ejecutar (igual que a t = 0; si el motor rechaza alguno, la cor
 D-E3-31) y `control.aplicar` aplica cortafuegos y viento manual con la corrida en
 pausa, dentro de `_tablas_hora`, antes de la hora que empieza. Todo está en barreras_v31.py.
 
+Combate (decisión D-E3-36; el método está en combate.py y es el mismo que en v4.0): las intervenciones de combate
+(`intervenciones.TIPOS_COMBATE`) van al objeto `Combate`, que trabaja sobre la simulación por medio de `combate_v31.py`. El
+paso horario del combate corre en `_contener_hora`, que el motor llama en cada cambio de hora desde que el adaptador enciende
+la contención (la primera vez que hay combate); la contención propia de v3.1 no corre nunca. `configuracion.dotaciones` se
+despacha antes de ejecutar. Sin intervenciones de combate la simulación no se toca. El combate no tiene corrida offline
+equivalente: su garantía es la reproducción desde la bitácora (comparación A).
+
 Regla de cruce de los cortafuegos (D-E3-35): las dos variantes de la app corren con el cruce de barreras en modo `umbral`
 (ver `cruce_por_umbral`). Como arrancan sin barreras de caminos, solo afecta a los cortafuegos dibujados.
 """
@@ -22,6 +29,8 @@ from pathlib import Path
 import numpy as np
 
 import barreras_v31
+import combate as cb
+import intervenciones as iv
 from control import Control, exigir_cortafuegos_iniciales, malla_viento
 
 REPO = Path(__file__).resolve().parents[2]
@@ -74,9 +83,9 @@ def cargar(base: dict, configuracion: dict, carpeta: Path, variante_por_defecto:
 
     pedido = {}
     if base.get("escenario"):
-        if any(k != "cortafuegos" for k in configuracion):
+        if any(k not in ("cortafuegos", "dotaciones") for k in configuracion):
             raise ValueError("`configuracion` solo se combina con `base.definicion`; `base.escenario` se corre tal cual "
-                             "(salvo `cortafuegos`)")
+                             "(salvo `cortafuegos` y `dotaciones`)")
         nombre = str(base["escenario"])
         esc = cfgmod.cargar_corrida(nombre)
         ruta = cfgmod.dir_escenarios() / "corridas" / f"{nombre}.yaml"
@@ -160,15 +169,40 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control, var
                 self.c.max_pasos = 0          # el bucle del motor corta al terminar el paso en curso y guarda normalmente
             return super()._tablas_hora(*a, **k)
 
+        def _contener_hora(self, hora_idx, fraccion=1.0):
+            """El motor lo llama en cada cambio de hora cuando la contención está encendida (la enciende el adaptador la
+            primera vez que hay combate), ya con las tablas, el viento y las velocidades de la hora nueva. Acá no corre la
+            contención de v3.1 sino el paso del combate común (combate.py)."""
+            if not combate.habilitado:        # la corrida trae la contención propia del motor encendida: es la que corre
+                return super()._contener_hora(hora_idx, fraccion)
+            if not estado["detenida"]:
+                control.combate(combate.paso_hora(self.t / 60.0), combate.capas())
+
     sim = SimulacionControlada(ent, cfg)
     interv = barreras_v31.IntervencionesV31(sim, cfg, g, c["dom"], carpeta)
     interv.habilitar_barreras()
+    import combate_v31                        # importa el motor: recién ahora está en sys.path
+    adaptador = combate_v31.AdaptadorV31(sim, g)
+    combate = adaptador.combate = cb.Combate(adaptador)
+    for i, d in enumerate(configuracion.get("dotaciones") or []):   # antes de iniciar: igual que en la pausa de t = 0
+        r = combate.intervenir({"tipo": "dotacion", "datos": d}, 0.0)
+        if r["estado"] == "rechazada":
+            raise ValueError(f"dotación {i + 1} de antes de iniciar rechazada ({r['motivo']}); la corrida no se simula")
+
+    def aplicar(entrada: dict, t: float) -> dict:
+        if entrada["tipo"] not in iv.TIPOS_COMBATE:
+            return interv.aplicar(entrada, t)
+        r = combate.intervenir(entrada, t)
+        if r["estado"] != "rechazada":
+            control.guardar_combate(combate.capas())
+        print(f"intervención {entrada['tipo']} en t = {float(t):g} min: {r['estado']}, {r['motivo']}", flush=True)
+        return r
     iniciales = []
     for d in trazos_iniciales:                # antes de iniciar: lo mismo que aplicarlos en la pausa de t = 0
         r = interv.cortafuego(d, 0.0, inicial=True)
         iniciales.append({"estado": r["estado"], "motivo": r["motivo"], **d, **r["datos"]})
     exigir_cortafuegos_iniciales(iniciales)   # D-E3-31: uno rechazado corta la corrida antes de simular
-    control.aplicar = interv.aplicar
+    control.aplicar = aplicar
     sim.ejecutar()
     if not estado["detenida"]:
         avisar_hora(sim)                      # estado final: el motor no vuelve a llamar a _tablas_hora al terminar
@@ -191,4 +225,6 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control, var
         res["cortafuegos_iniciales"] = iniciales
     if resumen_interv:
         res["intervenciones_v31"] = resumen_interv
+    if combate.informe():
+        res["combate"] = combate.informe()
     return res

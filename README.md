@@ -100,7 +100,9 @@ Los resultados quedan en `resultados/`, que no se sube al repositorio.
 
 ## Límites del modelo
 
-Los motores simulan propagación libre y barreras. **No simulan el combate del fuego.** En los incendios usados para validar,
+Los motores simulan propagación libre y barreras. El combate del fuego (bomberos que construyen línea y descargas de medios
+aéreos) lo suma el simulador con un método propio, igual para los dos motores y **sin calibrar**: sirve para comparar
+alternativas, no para planificar un operativo (`docs/etapa3/F8_combate.md`). En los incendios usados para validar,
 la coincidencia de forma con la cicatriz real (IoU) estuvo entre 0,36 y 0,48, v3.1 tiende a adelantarse y v4.0 a atrasarse.
 Es una herramienta de apoyo para explorar escenarios, no un pronóstico oficial. El detalle está en
 `docs/v4.0/INFORME_TECNICO_MOTOR_V4.md` §7 y en `docs/v4.0/31_eventos_no_vistos_X49.md`.

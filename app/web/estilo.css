@@ -159,8 +159,17 @@ path.trazo-vivo { filter: drop-shadow(0 0 1px rgba(28,27,25,.9)); }
 .bitacora .que { font-variant-numeric: tabular-nums; }
 .bitacora .marca-cf { display: inline-block; width: .875rem; height: 3px; background: repeating-linear-gradient(90deg, #1d6fd6 0 5px, transparent 5px 8px); vertical-align: 3px; margin-right: .3rem; }
 .bitacora .marca-cf.recortado { background: repeating-linear-gradient(90deg, #8a877f 0 4px, transparent 4px 8px); }
+.bitacora .marca-linea { display: inline-block; width: .875rem; height: 4px; background: #111; vertical-align: 3px; margin-right: .3rem; }
+.bitacora .marca-linea.agua { background: #1565c0; }
+.bitacora .marca-linea.retardante { background: #d81b60; }
 .bitacora .integra { color: var(--suave); }
 .bitacora .integra.mal { color: var(--error); font-weight: 600; }
+
+/* ------------------------------------------------------------ combate: línea sobre el mapa (una celda de color por celda) */
+img.linea-combate { image-rendering: pixelated; image-rendering: crisp-edges; filter: drop-shadow(0 0 1px rgba(255,255,255,.9)); }
+#mapa.marcando, #mapa.marcando .leaflet-interactive { cursor: crosshair; }
+.tarjeta .combate { margin: .375rem 0 0; padding: .375rem 0 0; border-top: 1px solid var(--grilla); }
+.tarjeta .combate h4 { font-size: .8rem; font-weight: 600; margin: 0 0 .125rem; }
 
 /* ------------------------------------------------------------ viento sobre el mapa */
 .capa-viento { pointer-events: none; }

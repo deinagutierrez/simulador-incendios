@@ -30,7 +30,8 @@ import intervenciones as iv  # noqa: E402
 
 HUELLA = "t_llegada_parcial.npy"
 BITACORA = "bitacora.jsonl"
-VIENTO = "viento"                                 # carpeta con el campo de viento de cada hora, para el mapa
+COMBATE = "combate_parcial.npy"                   # línea de combate para el mapa (el mismo nombre que combate.ARCHIVO)
+VIENTO = "viento"                               # carpeta con el campo de viento de cada hora, para el mapa
 PASO_VIENTO_M = 1000.0                            # separación de las flechas del mapa
 ESPERA_EN_PAUSA_S = 0.05
 # Reemplazo de archivos que otro proceso puede estar leyendo (la huella parcial la lee el servidor para el mapa): en Windows,
@@ -242,6 +243,31 @@ class Control:
         except (OSError, ValueError) as e:
             self.aviso("error", mensaje=f"no se pudo guardar el viento de la hora {intervalo} para el mapa: {e}", fatal=False)
             return False
+
+    def guardar_combate(self, capas: np.ndarray) -> bool:
+        """Deja en disco (escritura atómica, como la huella) las capas de la línea de combate para el mapa:
+        (3, filas, cols) float32 = desde, hasta y clase (`combate.Combate.capas`). Un error se avisa y no corta la corrida."""
+        tmp = self.carpeta / (COMBATE + ".tmp")
+        try:
+            with open(tmp, "wb") as f:
+                np.save(f, np.asarray(capas, dtype="float32"))
+            reemplazar(tmp, self.carpeta / COMBATE)
+            return True
+        except OSError as e:
+            try:
+                tmp.unlink()
+            except OSError:
+                pass
+            self.aviso("error", mensaje=f"no se pudo actualizar {COMBATE}: {e}", fatal=False)
+            return False
+
+    def combate(self, resumen: dict | None, capas: np.ndarray) -> None:
+        """Avisa el paso de combate de una hora (`combate.Combate.paso_hora`) y deja la línea en disco. Sin combate
+        (`resumen` None) no hace nada."""
+        if resumen is None:
+            return
+        self.guardar_combate(capas)
+        self.aviso("combate", archivo=COMBATE, **resumen)
 
     # ------------------------------------------------------------------ bitácora y reproducción
     def preparar(self, corrida: dict) -> None:

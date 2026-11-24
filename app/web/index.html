@@ -42,6 +42,19 @@
                 <h3 class="h6">Intervenir en la hora <span id="hora-pausa"></span></h3>
                 <p class="form-text nota mt-0" id="nota-intervenir">Lo que apliques acá rige desde la hora de la pausa y queda en la bitácora.</p>
                 <div id="lugar-trazos-pausa"></div>
+                <div id="lugar-combate-pausa"></div>
+                <div id="herr-aereos" class="herramienta border-top pt-2 mt-3">
+                  <h3 class="h6">Combate: medios aéreos</h3>
+                  <div class="row g-2">
+                    <div class="col"><label class="form-label small mb-1" for="a-medio">Medio</label><select class="form-select form-select-sm" id="a-medio"></select></div>
+                    <div class="col"><label class="form-label small mb-1" for="a-producto">Descarga</label><select class="form-select form-select-sm" id="a-producto"></select></div>
+                  </div>
+                  <p class="form-text nota" id="nota-aereos"></p>
+                  <button class="btn btn-sm btn-outline-secondary" id="a-marcar" type="button" aria-pressed="false" title="Apretá donde empieza la descarga, arrastrá hacia donde va y soltá">Marcar descargas</button>
+                  <ol id="lista-descargas" class="lista-trazos small"></ol>
+                  <p class="text-danger small error" id="error-aereos" role="alert"></p>
+                  <button id="a-lanzar" class="btn btn-sm btn-primary w-100 mt-2" type="button" hidden>Lanzar las descargas</button>
+                </div>
                 <div class="border-top pt-2 mt-3">
                   <h3 class="h6">Viento a mano</h3>
                   <div class="row g-2">
@@ -260,6 +273,29 @@
                   <button id="b-enviar-trazos" class="btn btn-sm btn-primary w-100 mt-2" hidden>Aplicar los trazos</button>
                 </div>
               </div>
+              <div id="lugar-combate-config">
+                <div id="herr-bomberos" class="herramienta border-top pt-2 mt-3">
+                  <h3 class="h6">Combate: bomberos <span class="text-body-tertiary fw-normal" id="bomberos-cuando">(opcional, desde la hora 0)</span></h3>
+                  <div class="row g-2">
+                    <div class="col"><label class="form-label small mb-1" for="b-cantidad">Bomberos</label><input class="form-control form-control-sm" id="b-cantidad" type="number" min="1" max="500" step="1" value="12" inputmode="numeric"></div>
+                    <div class="col"><label class="form-label small mb-1" for="b-llegada" title="Minutos desde el despacho hasta que empiezan a trabajar; 0 = ya están en el lugar">Llegan en (min)</label><input class="form-control form-control-sm" id="b-llegada" type="number" min="0" max="1440" step="5" value="0" inputmode="numeric"></div>
+                  </div>
+                  <label class="form-label small mb-1 mt-2" for="b-cuartel">Estimar la llegada por la red vial</label>
+                  <select class="form-select form-select-sm" id="b-cuartel" title="Viaje desde el cuartel hasta el foco, más el aviso y el alistamiento"><option value="">A mano (sin estimar)</option></select>
+                  <label class="form-label small mb-1 mt-2" for="b-prioridad">Dónde trabajan</label>
+                  <select class="form-select form-select-sm" id="b-prioridad">
+                    <option value="flancos">Flancos: anclan en la cola y avanzan por los costados</option>
+                    <option value="cabeza">Cabeza: lo más intenso que se pueda sostener</option>
+                  </select>
+                  <p class="form-text nota" id="nota-bomberos"></p>
+                  <ol id="lista-dotaciones" class="lista-trazos small"></ol>
+                  <p class="text-danger small error" id="error-bomberos" role="alert"></p>
+                  <div class="d-flex flex-wrap gap-2 mt-2">
+                    <button class="btn btn-sm btn-outline-primary" id="b-despachar" type="button">Sumar a la corrida</button>
+                    <button class="btn btn-sm btn-outline-secondary" id="b-retirar" type="button" hidden>Retirar a todos</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -329,7 +365,7 @@
       </div>
 
       <div id="notas-pie" class="px-3 py-3 small text-body-secondary">
-        <p><strong>Para leer bien el resultado.</strong> La simulación no incluye el combate del fuego. Los eventos de tiempo real usan un pronóstico (de un modelo, no observaciones) y los índices de vegetación más recientes; los EJEMPLO usan los datos de un incendio histórico con ficha. En el modo histórico, los eventos del lote X-49 (no vistos) son solo para mostrar: no se usan para ajustar el modelo. Los dos motores dan resultados distintos: no se promedian.</p>
+        <p><strong>Para leer bien el resultado.</strong> Sin dotaciones despachadas, la simulación no incluye el combate del fuego. El combate que se puede sumar es un supuesto simplificado (metros de línea por bombero y por hora, ataque directo solo donde la intensidad lo permite, descargas que mojan una franja y vencen, todo una vez por hora) y no está calibrado: sirve para comparar alternativas, no para planificar un operativo. Los eventos de tiempo real usan un pronóstico (de un modelo, no observaciones) y los índices de vegetación más recientes; los EJEMPLO usan los datos de un incendio histórico con ficha. En el modo histórico, los eventos del lote X-49 (no vistos) son solo para mostrar: no se usan para ajustar el modelo. Los dos motores dan resultados distintos: no se promedian.</p>
         <p class="creditos text-body-tertiary">Fuentes de los datos del mapa: relieve, Copernicus DEM · cobertura, MapBiomas · caminos, © colaboradores de OpenStreetMap e IGN · red de media tensión, EDESAL · cuarteles, Ministerio de Seguridad de San Luis · mapa en línea (opcional), © colaboradores de OpenStreetMap.</p>
         <p id="version" class="text-body-tertiary mb-0"></p>
       </div>

@@ -1,4 +1,4 @@
-# Contrato entre los dos frentes — versión 1.5
+# Contrato entre los dos frentes — versión 1.6
 
 Es el único punto donde se tocan el frente A (motores y datos) y el frente B (servidor e interfaz). Se cambia solo por pedido
 de integración aprobado por las dos personas, subiendo el número de versión.
@@ -33,6 +33,13 @@ proceso motor (`reproduccion`), orden `pausar` con hora objetivo, órdenes de un
 cada intervención, avisos `reanudado` y `detenido`, pedidos `/reproducir`, `/intervenciones`, `/cortafuegos.geojson` y de
 grupo (`/api/grupos/<grupo>/pausar` e `/intervenciones`), `pausar` con cuerpo `{en_t_sim_min}` (§4.2).
 
+**Cambios de la 1.5 a la 1.6** (fase F8, 2026-11-24, rama `combate`; decisión D-E3-36; **propuestos, pendientes de aprobación
+de la otra persona**): combate del fuego con un método común a los dos motores (`app/motores/combate.py`, §2.2). Dos tipos
+de intervención nuevos, `dotacion` (bomberos) y `descarga` (medios aéreos); `configuracion.dotaciones` (bomberos despachados
+antes de iniciar); aviso `combate` con el paso de cada hora; `combate_parcial.npy` con la línea para el mapa;
+`resultados.combate`; pedidos `/combate.png`, `/descargas.geojson` y `/api/arribo`; `combate` en `GET /api/estado`. Sin
+intervenciones de combate nada cambia: ni los avisos, ni los archivos, ni el resultado.
+
 ## 1. Paquete de corrida
 
 El archivo `corrida.json` vive en la carpeta de la corrida, `resultados/app/<id>/`. Su forma completa está en el Anexo C de
@@ -54,6 +61,7 @@ D-E3-01: en v4.0, `variante: barreras` y `parar_en_cicatriz: off`; en v3.1, `var
 | `configuracion.ignicion` | lista de puntos `{lon, lat}` en grados (WGS84), opcionalmente con `nombre`. Reemplaza a los puntos de la ficha del evento |
 | `configuracion.t_inicio_utc` | hora de inicio con huso, por ejemplo `2024-09-19T16:00:00Z`. Reemplaza a la hora de la ficha. **Tiene que caer en hora en punto UTC** (desde la 1.5): con minutos o segundos el proceso la rechaza con un `error` fatal, porque el viento manual de v4.0 cambiaría la parte de la hora ya simulada |
 | `configuracion.horas` | duración; pisa a `base.definicion.horas` |
+| `configuracion.dotaciones` | (desde la 1.6) bomberos despachados antes de iniciar: `[{"bomberos": 12, "llegada_min": 45, "prioridad": "flancos"}]` (§2.2). Da lo mismo que despacharlos en la pausa de t = 0. Con `base.escenario` también se acepta (como `cortafuegos`) |
 | `configuracion.cortafuegos` | (desde la 1.5) trazos dibujados antes de iniciar: `[{"ancho_m": 10, "suelo_mineral": false, "xy_5345": [[x, y], …]}]`. `ancho_m` ∈ {3, 6, 10, 15, 25}; `suelo_mineral` (supuesto, por defecto `false`); `xy_5345`: polilínea en EPSG:5345 (metros), al menos dos puntos distintos. El proceso la normaliza (§2.1) y le agrega `longitud_dibujada_m`. Un trazo antes de iniciar da lo mismo que el mismo trazo aplicado en pausa a t = 0 |
 
 El evento de `base.definicion` sigue aportando la meteorología, los índices y la cobertura; la hora de inicio tiene que caer
@@ -111,14 +119,15 @@ Cada entrada es `{n, t_sim_min, t_vigor_min, tipo, datos, hash}`:
 | `n` | 1, 2, 3… sin huecos |
 | `t_sim_min` | minuto simulado en que se anotó (la hora de la pausa), float |
 | `t_vigor_min` | desde cuándo rige; igual a `t_sim_min` salvo que el motor diga otra cosa |
-| `tipo` | `pausa`, `reanudacion`, `detencion`, `cortafuego` o `viento_manual` |
+| `tipo` | `pausa`, `reanudacion`, `detencion`, `cortafuego`, `viento_manual` y, desde la 1.6, `dotacion` y `descarga` |
 | `datos` | `{}` en pausa, reanudación y detención; en una intervención, los datos normalizados de la entrada (§2.1) más lo que agrega el motor al aplicarla |
 | `hash` | sha256 de `{anterior, n, t_sim_min, t_vigor_min, tipo, datos}` en JSON canónico; `anterior` es el `hash` de la entrada previa o, en la primera, la **raíz** |
 
 - Entran las pausas, las reanudaciones, la detención y las intervenciones `aceptada` o `recortada`. Las `rechazada` quedan
   solo como aviso (y en `eventos.jsonl` del servidor).
 - **Raíz** = sha256 del JSON canónico de `{"configuracion_inicial": {formato, motor, base, configuracion, insumos,
-  congelado_sha256}}`, con `configuracion` completa (sin claves vacías; los cortafuegos normalizados) y `congelado_sha256` =
+  congelado_sha256}}`, con `configuracion` completa (sin claves vacías; los cortafuegos y, desde la 1.6, las dotaciones
+  normalizados) y `congelado_sha256` =
   `programa.congelado_sha256`. Quedan fuera `id`, `creada_utc`, `grupo`, `advertencias`, `bitacora`, `resultados` y
   `reproduccion`, que cambian al reproducir o son derivados. En modo "ambos" cada corrida tiene su raíz (el motor es otro).
 - **JSON canónico**: claves ordenadas, separadores `,` y `:` sin espacios, UTF-8 sin escapar, sin NaN ni infinito, y todo
@@ -186,6 +195,7 @@ misma hora y les manda la misma intervención.
 | `reanudado` | (1.5) `t_sim_min`, `entrada` (la entrada `reanudacion`), `reproduccion?` |
 | `intervencion` | `ref` (el de la orden), `n` (de la bitácora; `null` si rechazada), `estado` (`aceptada`, `recortada`, `rechazada`), `t_vigor_min`, `pleno_min` (opcional: desde cuándo rige del todo; v4.0 viento), `motivo`, `entrada` (la entrada de la bitácora completa, con `hash`; `null` si rechazada) |
 | `detenido` | (1.5) `t_sim_min`, `entrada` (la entrada `detencion`). Llega antes de `final` |
+| `combate` | (1.6) el paso de combate de una hora en punto (§2.2): `h`, `t_sim_min`, `archivo` (`combate_parcial.npy`) y el resumen del paso. Llega después de la `hora` del mismo `h` y de las intervenciones de esa pausa, una vez por hora desde la primera intervención de combate; sin combate no llega nunca |
 | `final` | `motivo`, `texto`, `ha`, `t_sim_min`, `s_computo`, `memoria_pico_mb`, `completa` (falso si se detuvo), `salida`. Es el último aviso; el proceso termina con código 0 |
 | `error` | `mensaje`, `fatal`. Con `fatal: true` el proceso termina con código 1 |
 
@@ -245,6 +255,48 @@ hora de forma atómica, así que siempre se puede leer entera.
 `escenario_base.yaml` si la corrida vino por `definicion`; (1.5) `bitacora.jsonl` (§1.2) y lo que cada conductor escriba
 para los cortafuegos (siempre dentro de la carpeta de la corrida: nunca en `datos/` ni en otro insumo compartido).
 
+### 2.2 Combate (desde la 1.6)
+
+El combate lo decide `app/motores/combate.py`, **el mismo módulo para los dos motores** (decisión D-E3-36; el método, los
+parámetros y sus límites están en `F8_combate.md`). No importa ningún motor; cada conductor le da un adaptador
+(`combate_v40.py`, `combate_v31.py`, y el del motor simulado). La contención propia de v3.1 y de v4.0 sigue apagada, y ningún
+archivo de `src/` cambia.
+
+**Entradas** (`intervenciones.TIPOS_COMBATE`):
+
+| `tipo` | `datos` que manda el servidor | `datos` normalizados | lo que agrega el motor |
+|---|---|---|---|
+| `dotacion` | `{bomberos, llegada_min?, prioridad?}` o `{retirar: true}` | `{bomberos: 1-500, llegada_min: 0-1440 (0), prioridad: flancos \| cabeza (flancos)}` o `{retirar: true}` | `dotacion` (número), `tasa_m_h`, `desde_min`; con `retirar`: `dotaciones_retiradas`, `bomberos_retirados` |
+| `descarga` | `{medio, producto?, xy_5345: [[x0, y0], [x1, y1]]}` | `{medio: avion \| helicoptero, producto: agua \| retardante (agua), xy_5345}`: dónde empieza la franja y un punto que marca hacia dónde va (a más de 1 m), redondeados a 0,01 m | `descarga` (número), `largo_m`, `ancho_m`, `xy_fin_5345` (dónde termina la franja), `celdas_mojadas`, `celdas_frenadas`, `celdas_renovadas`, `celdas_intensas`, `vence_min` (`null` si no vence), `celdas_sha256` |
+
+`t_vigor_min`: en una dotación, el minuto en que empieza a trabajar (`t_sim_min` + `llegada_min`); en una descarga,
+`t_sim_min`. Estados de una descarga: `aceptada`; `recortada` si parte del fuego que toca es demasiado intenso y no lo frena;
+`rechazada` (no entra en la bitácora) si es de noche, si ya se llegó al tope de la hora para ese medio, si cae fuera de la
+zona simulada, o si no toca fuego ni combustible sin quemar. Si la corrida ya trae encendida la contención propia del motor,
+toda intervención de combate se rechaza.
+
+**Cuándo corre.** En cada hora simulada en punto, después de atender las órdenes de esa hora (pausa e intervenciones) y antes
+de que el fuego avance: v4.0 en `AutomataControlado.paso_tiempo`, v3.1 en `SimulacionControlada._contener_hora` (que el motor
+llama al cambio de hora, ya con las tablas y el viento de la hora nueva), el simulado en su bucle. El paso se avisa con
+`combate` y la línea queda en `combate_parcial.npy`. La última hora de la corrida no tiene paso (el fuego ya no avanza).
+
+**Resumen del paso** (campos del aviso `combate`, y `resultados.combate.horas`): `linea_m_hora`, `celdas_nuevas`,
+`consolidadas_hora`, `vencidas_hora`, `escapes_hora`, `brechas_hora`, `bomberos` y `tasa_m_h` (los que trabajaron esa hora),
+`frente_celdas` y `frente_sostenible` (celdas del borde exterior del fuego y cuántas admiten ataque directo; `null` si
+nadie tenía con qué construir), `linea_m` (construida en total), `celdas_linea`, `linea_en_pie_m`, `celdas_agua`,
+`descargas`, `escapes`, `banco_m`.
+
+**`combate_parcial.npy`**: `float32` de forma `(3, filas, cols)`, en la grilla del aviso `listo`: minuto desde el que la celda
+es línea, minuto en que dejó de serlo (`NaN` = sigue en pie) y clase (0 nunca fue línea, 1 línea de bomberos, 2 agua,
+3 retardante). Se reescribe de forma atómica en cada paso y después de cada intervención de combate aceptada.
+
+**`resultados.combate`** (solo si hubo combate): `parametros`, `dotaciones`, `descargas`, `linea_m`, `celdas_linea_final`,
+`celdas_linea_sha256`, `escapes`, `brechas`, `vencidas`, `consolidadas`, `horas` y `archivo`.
+
+**Reproducibilidad.** El combate no tiene corrida offline equivalente (comparación B): el motor offline no conoce este método.
+Su garantía es la reproducción desde la bitácora (comparación A, §1.3): misma cadena de hash y 0 celdas distintas en la huella
+y en `combate_parcial.npy`. Todo sorteo del combate es un hash de la celda y la hora.
+
 ## 3. Motor simulado
 
 `app/motores/proceso_simulado.py` cumple este contrato con un fuego de mentira: un círculo que crece tres celdas por hora, sin
@@ -266,6 +318,11 @@ mineral no cambian nada. Agrega a `datos` `longitud_aplicada_m`, `celdas`, `celd
 manual se acepta sin efecto. `configuracion.cortafuegos` se aplica antes de la hora 0 y se informa en
 `resultados.cortafuegos_iniciales`. Bitácora y reproducción, como los motores reales.
 
+Desde la 1.6 acepta el combate (§2.2) con el método común de verdad sobre el fuego de juguete: todo el borde arde con la
+misma intensidad (500 kW/m, siempre sostenible), una celda con línea corta el paso como un cortafuego y el fuego no llega a
+lo que queda separado de lo que arde. La hora del día, para las descargas, sale de `configuracion.t_inicio_utc` (sin ella, la
+corrida empieza a las 12 UTC).
+
 ## 4. Interfaz del servidor
 
 `python app/servir.py` levanta el servidor en `http://127.0.0.1:8000` (o el puerto libre siguiente). Solo atiende pedidos de
@@ -279,7 +336,10 @@ su propia página: los que traen otro origen se rechazan con 403.
 | `GET /api/corridas/<id>` | estado, última hora avisada, recuadro de la huella, bitácora (1.5: también en marcha, §4.2); al terminar, resultados |
 | `POST /api/corridas/<id>/{iniciar,pausar,reanudar,detener}` | control. Contesta 409 si la orden no corresponde al estado |
 | `POST /api/corridas/<id>/pausar` | (1.5) cuerpo opcional `{en_t_sim_min}`: pausa al llegar a esa hora simulada, redondeada hacia arriba a la hora en punto (§4.2) |
-| `POST /api/corridas/<id>/intervenciones` | solo en pausa; devuelve el aviso `intervencion` del motor (§4.2) |
+| `POST /api/corridas/<id>/intervenciones` | solo en pausa; devuelve el aviso `intervencion` del motor (§4.2; 1.6: también `dotacion` y `descarga`, §4.3) |
+| `GET /api/corridas/<id>/combate.png?hora=N` | (1.6) la línea de combate en pie en la hora N, sobre el mismo recuadro que la huella: una celda de color por celda (negro línea de bomberos, azul agua, magenta retardante). 404 si la corrida no tiene combate (§4.3) |
+| `GET /api/corridas/<id>/descargas.geojson` | (1.6) las franjas de las descargas aéreas de la bitácora, en grados (§4.3) |
+| `GET /api/arribo?lat=&lon=` | (1.6) los cuarteles que llegan antes a ese punto por la red vial, con su viaje en minutos (§4.3) |
 | `POST /api/corridas/<id>/reproducir` | (1.5) crea una corrida que reproduce a esta desde su bitácora (§4.2) |
 | `GET /api/corridas/<id>/cortafuegos.geojson` | (1.5) cortafuegos de la corrida en grados: los iniciales y los de la bitácora (§4.2) |
 | `POST /api/grupos/<grupo>/pausar` | (1.5) pausa las dos corridas de un modo "ambos" en la misma hora simulada (§4.2) |
@@ -384,6 +444,25 @@ Detalle de lo que implementa el servidor:
 - `cortafuegos.geojson`: una `LineString` en grados por trazo, con `properties` `origen` (`inicial` | `intervencion`),
   `ancho_m`, `suelo_mineral`, `longitud_dibujada_m`, `t_sim_min`, `t_vigor_min`, y lo que agregó el motor (por ejemplo
   `longitud_aplicada_m`, `estado`); los iniciales llevan `i`, los de la bitácora `n`.
+
+### 4.3 Combate (desde la 1.6)
+
+- **`GET /api/estado`** trae `combate`: `max_bomberos`, `max_llegada_min`, `max_dotaciones_iniciales`, `prioridades`, `medios`,
+  `productos` y `parametros` (los del método: producción por bombero, umbrales, y por medio aéreo `largo_m`, `ancho_m`,
+  `max_por_hora`; por producto `dura_h`; `horas_vuelo_utc`). La pantalla saca de ahí las cuentas que muestra.
+- **`POST /api/corridas`** acepta `dotaciones: [{bomberos, llegada_min?, prioridad?}]` (hasta 20; sin `retirar`) y las deja
+  normalizadas en `configuracion.dotaciones`. 422 con el motivo si no sirven.
+- **`POST …/intervenciones`** con `tipo: "dotacion"` o `"descarga"`. La descarga lleva sus dos puntos en grados (`lonlat`)
+  o en EPSG:5345 (`xy_5345`); el servidor los pasa a EPSG:5345 y rechaza con 422 la que empieza fuera del dominio. En un
+  grupo "ambos" cada motor contesta por su cuenta: la misma descarga puede aplicarse en uno y rechazarse en el otro (por
+  ejemplo, si en uno esas celdas ya se quemaron).
+- **`GET /api/corridas/<id>`** suma `dotaciones_iniciales` y `combate` (los pasos avisados hasta ahora).
+- **`descargas.geojson`**: un `Polygon` por descarga aplicada (el rectángulo de la franja, del punto de inicio a
+  `xy_fin_5345`, con su ancho), con `properties` `n`, `t_sim_min`, `medio`, `producto`, `estado` y lo que agregó el motor.
+- **`/api/arribo`**: `{aviso_min: 30, alistamiento_min: 15, cuarteles: [{nombre, viaje_min}]}` (hasta 5, del más rápido al
+  más lento), leído de `infraestructura/arribo_<dominio>.npz`. La pantalla suma aviso + alistamiento + viaje antes de
+  iniciar, y alistamiento + viaje en una pausa. 404 fuera del dominio.
+- **Exportación**: el zip suma `combate_parcial.npy` y `descargas.geojson` (si hubo).
 
 ## 5. Advertencia para quien escriba el servidor o las pruebas
 

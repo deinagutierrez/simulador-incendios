@@ -108,7 +108,7 @@ async function arrancar() {
     S.mapa.createPane(nombre).style.zIndex = z;
   }
   S.mapa.fitBounds([[sur, oeste], [norte, este]]);
-  for (const [nombre, z] of [["cortafuegos", 430], ["trazos", 440]]) S.mapa.createPane(nombre).style.zIndex = z;
+  for (const [nombre, z] of [["linea", 385], ["cortafuegos", 430], ["trazos", 440]]) S.mapa.createPane(nombre).style.zIndex = z;
   S.mapa.on("click", e => { if (S.modo === "configurar" && !T.modo) agregarFoco(e.latlng.lat, e.latlng.lng); });
   for (const id of ["hora", "esc-hora"]) $(id).innerHTML = Array.from({length: 24}, (_, h) => `<option value="${dos(h)}:00">${dos(h)}:00</option>`).join("");
 
@@ -141,6 +141,8 @@ async function arrancar() {
   prepararCapaViento();
   prepararTrazos();
   prepararViento();
+  prepararBomberos();
+  prepararDescargas();
   prepararHistorico();
 
   proponerEvento();
@@ -288,6 +290,7 @@ function pintarFocosIgnicion() {
   $("b-quitar-focos").hidden = !editable || S.focos.length < 2;
   $("nota-focos").textContent = !S.focos.length ? "Marcá al menos un foco con un clic en el mapa."
     : S.focos.length >= MAX_FOCOS ? `Llegaste al máximo de ${MAX_FOCOS} focos.` : "";
+  cargarCuarteles();                                                 // la llegada estimada de los bomberos sale de los focos
 }
 
 // ---------------------------------------------------------------- capas de fondo
@@ -368,6 +371,12 @@ function dibujarLeyenda() {
       (recortes ? '<div class="item"><span class="linea-cf recortado"></span>recortado (ya quemado o fuera de la zona simulada)</div>' : "") +
       (T.borradores.length ? '<div class="item"><span class="linea-cf borrador"></span>dibujado, sin enviar</div>' : ""));
   }
+  if (S.corridas.some(c => c.capaLinea && c.visible) || D.borradores.length) {
+    const hay = p => D.borradores.some(b => b.producto === p) || S.corridas.some(c => (c.descargas || []).some(f => f.properties.producto === p));
+    bloques.push(`<h3>Combate</h3><div class="item"><i style="background:${COLOR_LINEA}"></i>línea de los bomberos</div>` +
+      (hay("agua") ? `<div class="item"><i style="background:${COLOR_PRODUCTO.agua}"></i>agua de una descarga (se seca)</div>` : "") +
+      (hay("retardante") ? `<div class="item"><i style="background:${COLOR_PRODUCTO.retardante}"></i>retardante</div>` : ""));
+  }
   for (const id of Object.keys(S.enMapa)) {
     const c = S.capas[id], l = c?.leyenda;
     if (!l) continue;
@@ -403,10 +412,12 @@ async function iniciar() {
                   ignicion: S.focos.map(f => ({lat: Number(f.lat.toFixed(6)), lon: Number(f.lon.toFixed(6))})),
                   t_inicio_utc: aUTC($("fecha").value, $("hora").value)};
   if (T.borradores.length) pedido.cortafuegos = T.borradores.map(cuerpoTrazo);
+  if (B.iniciales.length) pedido.dotaciones = B.iniciales.map(d => ({...d}));
   $("iniciar").disabled = true;
   try {
     const r = await pedir("/api/corridas", pedido);
     S.pedido = pedido;
+    B.iniciales = [];
     vaciarBorradores();
     seguir(r.corridas, pedido);
   } catch (e) { $("error").textContent = e.message; }
@@ -420,6 +431,7 @@ function seguir(resumenes, pedido) {
                                          pedido: r.pedido || pedido, t0: null, limites: null, capa: null, cargando: false, pendiente: null, detalle: null, error: null,
                                          grupo: r.grupo || null, reproduccionDe: r.reproduccion_de || null, pausaT: r.pausa_t_sim_min ?? null, pausaEn: r.pausa_en_t_sim_min ?? null,
                                          bitacora: [], integra: null, cortafuegos: [], capaCf: null, mascaras: {},
+                                         combate: [], capaLinea: null, urlLinea: null, vLinea: 0, descargas: [], capaDescargas: null,
                                          visible: true, viento: null, vientos: {}, sinViento: false, pidiendoViento: null}));
   const otros = ["#159e8a", "#7c3aed"];                    // v3.1 libre y librev2 comparten color: si van juntas, otro
   S.corridas.forEach((c, i) => { if (S.corridas.slice(0, i).some(x => x.color === c.color)) c.color = otros.shift() || c.color; });
@@ -436,6 +448,7 @@ function seguir(resumenes, pedido) {
       : ign.length > 1 ? `${ign.length} focos de ignición: ${ign.map((x, i) => `${i + 1}) ${num(x.lat, 4)}, ${num(x.lon, 4)}`).join(" · ")}<br>` : "") +
     ((p.t_inicio_utc || hist?.t_inicio_utc) ? `Inicio: ${aLocal(p.t_inicio_utc || hist.t_inicio_utc).texto} (hora argentina)<br>` : "") + `Duración pedida: ${num(horasDe(p))} h` +
     ((p.cortafuegos || []).length ? `<br>Cortafuegos desde el inicio: ${p.cortafuegos.length}` : "") +
+    ((p.dotaciones || []).length ? `<br>Bomberos despachados desde el inicio: ${num(p.dotaciones.reduce((s, d) => s + (d.bomberos || 0), 0))}` : "") +
     (S.corridas[0].reproduccionDe ? `<br><b>Reproducción</b> de la corrida ${esc(S.corridas[0].reproduccionDe)}: aplica su bitácora, sin intervenciones nuevas` : "");
   for (const c of S.corridas) { escuchar(c); vigilarMetricas(c); }
   pintarTodo();
@@ -454,12 +467,15 @@ function escuchar(c) {
     }
     else if (e.aviso === "listo") {
       c.t0 = normalizarUTC(e.t0_utc);
-      pedir(`/api/corridas/${c.id}`).then(d => { c.limites = d.huella?.limites; tomarBitacora(c, d); actualizarHuella(c); refrescarCortafuegos(c); pintarTodo(); });
+      pedir(`/api/corridas/${c.id}`).then(d => { c.limites = d.huella?.limites; tomarBitacora(c, d); actualizarHuella(c); actualizarLinea(c); refrescarCortafuegos(c); refrescarDescargas(c); pintarTodo(); });
     }
     else if (AVISOS_BITACORA.includes(e.aviso)) {
       if (e.entrada) sumarEntrada(c, e.entrada);
       if (e.aviso === "intervencion" && e.entrada?.tipo === "cortafuego") refrescarCortafuegos(c);
+      if (e.aviso === "intervencion" && TIPOS_COMBATE.includes(e.entrada?.tipo)) { c.vLinea++; actualizarLinea(c); }
+      if (e.aviso === "intervencion" && e.entrada?.tipo === "descarga") refrescarDescargas(c);
     }
+    else if (e.aviso === "combate") { c.combate[e.h] = e; c.vLinea++; actualizarLinea(c); }
     else if (e.aviso === "hora") {
       c.horas[e.h] = {h: e.h, ha: e.ha, activas: e.activas, s: e.s_computo, meteo: e.meteo, exposicion: e.exposicion};
       if (S.enVivo) S.horaVista = horaMaxima();
@@ -474,7 +490,7 @@ function escuchar(c) {
 
 async function alTerminar(c) {
   try { c.detalle = await pedir(`/api/corridas/${c.id}`); tomarBitacora(c, c.detalle); } catch (e) { /* queda sin detalle */ }
-  refrescarCortafuegos(c);
+  refrescarCortafuegos(c); refrescarDescargas(c);
   const usada = c.detalle?.resultados?.ignicion?.usada || [];
   for (const u of usada) if (u.desplazada_m) {
     S.usados.push(L.marker([u.lat, u.lon], {icon: L.divIcon({className: "", html: '<div class="punto-usado"></div>', iconSize: [12, 12], iconAnchor: [6, 6]})})
@@ -506,7 +522,8 @@ async function ordenar(orden) {
 
 function limpiarCorridas() {
   detenerReproduccion();
-  for (const c of S.corridas) { if (c.canal) c.canal.close(); if (c.capa) c.capa.remove(); if (c.capaCf) c.capaCf.remove(); }
+  for (const c of S.corridas) { if (c.canal) c.canal.close(); if (c.capa) c.capa.remove(); if (c.capaCf) c.capaCf.remove(); if (c.capaLinea) c.capaLinea.remove(); if (c.capaDescargas) c.capaDescargas.remove(); }
+  vaciarDescargas();
   for (const m of S.usados) m.remove();
   S.usados = []; S.corridas = []; S.comparacion = null;
   pintarViento();
@@ -528,6 +545,7 @@ function nuevaSimulacion() {
   S.modo = "configurar";
   arrastrarFocos(true); pintarFocosIgnicion();
   panelEnCorrida(false);
+  B.iniciales = [];
   vaciarBorradores(); ponerHerramienta("config");
   $("anteriores").value = "";
   if (H.focosDe) { H.focosDe = null; pintarFocos(); }
@@ -561,13 +579,14 @@ function actualizarHuellaCon(c, url) { c.cargando = true; c.url = url; c.capa.se
 const OPACIDAD_HUELLA = 0.85;
 function mostrarCorrida(c) {
   if (c.capa) c.capa.setOpacity(c.visible ? OPACIDAD_HUELLA : 0);
+  if (c.capaLinea) c.capaLinea.setOpacity(c.visible ? 1 : 0);
   pintarViento(); dibujarLeyenda();
 }
 
 function verHora(h, delUsuario) {
   S.horaVista = h;
   if (delUsuario) { detenerReproduccion(); S.enVivo = h >= horaMaxima(); }
-  for (const c of S.corridas) { actualizarHuella(c); actualizarViento(c); }
+  for (const c of S.corridas) { actualizarHuella(c); actualizarLinea(c); dibujarDescargas(c); actualizarViento(c); }
   pintarTarjetas(); pintarTiempo(); pintarGrafico();
 }
 function reproducir() {
@@ -641,6 +660,7 @@ function pintarTarjetas() {
     }
     h += "</dl>";
     if (u && !u.exposicion && c.motor.startsWith("v3.1")) h += `<p class="linea">v3.1 no informa viviendas, red eléctrica ni caminos alcanzados.</p>`;
+    h += htmlCombate(c);
     h += htmlBitacora(c);
     if (FINALES.includes(c.estado)) {
       h += `<p class="linea">${motivo(c)}${fin ? ` Tiempo simulado: ${num(fin.t_simulado_h, 0)} h.` : ""}</p>`;
@@ -771,11 +791,16 @@ const trazosHabilitados = () => !T.ocupado && (S.modo === "configurar" ? !$("con
 function ponerHerramienta(donde) {
   $(donde === "config" ? "lugar-trazos-config" : "lugar-trazos-pausa").appendChild($("herr-cortafuegos"));
   $("trazos-cuando").textContent = donde === "config" ? "(opcional, desde la hora 0)" : "";
+  $(donde === "config" ? "lugar-combate-config" : "lugar-combate-pausa").appendChild($("herr-bomberos"));
+  $("bomberos-cuando").textContent = donde === "config" ? "(opcional, desde la hora 0)" : "";
+  $("error-bomberos").textContent = "";
   elegirHerramienta(null);
+  pintarBomberos();
 }
 
 function elegirHerramienta(modo) {
   if (modo && !trazosHabilitados()) modo = null;
+  if (modo && D.modo) marcarDescargas(false);                         // una herramienta de dibujo a la vez
   if (!modo && T.puntero != null) cancelarTrazo();
   T.modo = modo;
   const cont = S.mapa.getContainer();
@@ -905,10 +930,10 @@ function vaciarBorradores() {
 
 // Antes de reanudar, abrir otra corrida…: los trazos sin enviar se pierden; se pregunta.
 function descartarBorradores(accion) {
-  if (!T.borradores.length) return true;
-  const n = T.borradores.length;
-  if (!confirm(`Hay ${n} ${n === 1 ? "trazo dibujado que no se aplicó" : "trazos dibujados que no se aplicaron"}. Si seguís (${accion}), se ${n === 1 ? "descarta" : "descartan"}.`)) return false;
-  vaciarBorradores();
+  const n = T.borradores.length + D.borradores.length;
+  if (!n) return true;
+  if (!confirm(`Hay ${n} ${n === 1 ? "dibujo (trazo o descarga) que no se aplicó" : "dibujos (trazos o descargas) que no se aplicaron"}. Si seguís (${accion}), se ${n === 1 ? "descarta" : "descartan"}.`)) return false;
+  vaciarBorradores(); vaciarDescargas();
   return true;
 }
 
@@ -984,7 +1009,7 @@ function pintarIntervenir() {
     $("nota-pausa").textContent = "Es una reproducción: aplica la bitácora original y no acepta intervenciones nuevas.";
   const antes = !$("intervenir").hidden;
   $("intervenir").hidden = !si;
-  if (!si) { if (antes || T.modo) elegirHerramienta(null); return; }
+  if (!si) { if (antes || T.modo) elegirHerramienta(null); if (D.modo || D.borradores.length) vaciarDescargas(); return; }
   $("hora-pausa").textContent = num(t / 60);
   $("v-hora").textContent = num(t / 60);
   $("aviso-v40").hidden = !cs.some(c => c.motor === "v4.0");
@@ -996,6 +1021,8 @@ function pintarIntervenir() {
     textoDelViento();
   }
   pintarTrazos();
+  pintarBomberos();
+  pintarDescargas();
   for (const b of ["b-viento", "b-pronostico-viento"]) $(b).disabled = T.ocupado;
 }
 
@@ -1028,7 +1055,7 @@ function anotarRespuestas(titulo, respuestas) {
   while ($("respuestas").children.length > 8) $("respuestas").lastElementChild.remove();
 }
 
-function ocupar(si) { T.ocupado = si; pintarIntervenir(); pintarTrazos(); }
+function ocupar(si) { T.ocupado = si; pintarIntervenir(); pintarTrazos(); pintarBomberos(); pintarDescargas(); }
 
 async function enviarTrazos() {
   if (!puedeIntervenir() || !T.borradores.length || T.ocupado) return;
@@ -1088,6 +1115,356 @@ async function aplicarViento(pronostico) {
   pintarTarjetas();
 }
 
+// ---------------------------------------------------------------- combate (contrato 1.6): dotaciones de bomberos y línea
+// El método es el mismo para los dos motores (app/motores/combate.py): cada despacho suma bomberos que, desde que llegan,
+// construyen metros de línea por hora; la línea de cada hora se coloca al cumplirse, sobre el borde del fuego de ese momento
+// y solo donde la intensidad permite el ataque directo. Antes de iniciar, las dotaciones van con el pedido de la corrida; en
+// pausa son una intervención más (tipo `dotacion`), que queda en la bitácora.
+const B = {iniciales: [], cuarteles: null, clave: null};
+const TIPOS_COMBATE = ["dotacion", "descarga"];
+const COLOR_LINEA = "#111111";
+const PRIORIDAD = {flancos: "por los flancos", cabeza: "por la cabeza"};
+const tasaDe = n => n * (S.estado?.combate?.parametros?.m_h_por_bombero || 20);
+
+function prepararBomberos() {
+  const lim = S.estado.combate || {};
+  $("b-cantidad").max = lim.max_bomberos || 500;
+  $("b-llegada").max = lim.max_llegada_min || 1440;
+  $("b-cantidad").oninput = $("b-prioridad").onchange = pintarBomberos;
+  $("b-llegada").oninput = () => { $("b-cuartel").value = ""; pintarBomberos(); };       // escrita a mano: ya no es la estimada
+  $("b-cuartel").onchange = () => {
+    const q = B.cuarteles?.cuarteles?.[Number($("b-cuartel").value)];
+    if ($("b-cuartel").value !== "" && q) $("b-llegada").value = llegadaDesde(q);
+    pintarBomberos();
+  };
+  $("b-despachar").onclick = despachar;
+  $("b-retirar").onclick = retirarDotaciones;
+  $("lista-dotaciones").addEventListener("click", e => {
+    const b = e.target.closest("[data-quitar]");
+    if (b) { B.iniciales.splice(Number(b.dataset.quitar), 1); pintarBomberos(); }
+  });
+  pintarBomberos();
+}
+
+// Llegada estimada por la red vial: desde los cuarteles más cercanos al centro de los focos de ignición. Antes de iniciar
+// cuenta el aviso, el alistamiento y el viaje; en una pausa el despacho se decide en el momento: alistamiento y viaje.
+function puntoDeReferencia() {
+  const pts = S.modo === "configurar" ? S.focos : (S.corridas[0]?.pedido?.ignicion || []);
+  if (!pts.length) return null;
+  return {lat: pts.reduce((s, p) => s + Number(p.lat), 0) / pts.length, lon: pts.reduce((s, p) => s + Number(p.lon), 0) / pts.length};
+}
+const llegadaDesde = q => (S.modo === "configurar" ? B.cuarteles.aviso_min : 0) + B.cuarteles.alistamiento_min + q.viaje_min;
+async function cargarCuarteles() {
+  const p = puntoDeReferencia(), clave = `${S.modo === "configurar" ? "c" : "p"}:` + (p ? `${p.lat.toFixed(3)},${p.lon.toFixed(3)}` : "");
+  if (clave === B.clave) return;
+  B.clave = clave; B.cuarteles = null;
+  if (p) { try { B.cuarteles = await pedir(`/api/arribo?lat=${p.lat.toFixed(5)}&lon=${p.lon.toFixed(5)}`); } catch (e) { B.cuarteles = null; } }
+  if (clave !== B.clave) return;                                     // cambió mientras se esperaba la respuesta
+  $("b-cuartel").innerHTML = '<option value="">A mano (sin estimar)</option>' +
+    (B.cuarteles?.cuarteles || []).map((q, i) => `<option value="${i}">${esc(q.nombre)} · llega en ${num(llegadaDesde(q))} min</option>`).join("");
+}
+
+function datosDotacion() {
+  const n = Number($("b-cantidad").value), ll = Number($("b-llegada").value || 0);
+  const max = Number($("b-cantidad").max) || 500, maxLl = Number($("b-llegada").max) || 1440;
+  if ($("b-cantidad").value === "" || !Number.isInteger(n) || n < 1 || n > max) return {error: `Los bomberos van de 1 a ${num(max)} (número entero).`};
+  if (!Number.isInteger(ll) || ll < 0 || ll > maxLl) return {error: `La llegada va de 0 a ${num(maxLl)} minutos (número entero).`};
+  return {datos: {bomberos: n, llegada_min: ll, prioridad: $("b-prioridad").value}};
+}
+const textoDotacion = d => `${num(d.bomberos)} bomberos (${num(tasaDe(d.bomberos))} m/h), ` +
+  `${d.llegada_min ? `llegan en ${num(d.llegada_min)} min` : "ya en el lugar"}, ${PRIORIDAD[d.prioridad] || ""}`;
+function textoDespacho(e) {
+  const d = e.datos || {};
+  if (d.retirar) return `<span class="marca-linea"></span>Se retiran las dotaciones${d.bomberos_retirados ? ` (${num(d.bomberos_retirados)} bomberos)` : ""}`;
+  const desde = d.desde_min ?? ((e.t_sim_min || 0) + (d.llegada_min || 0));
+  return `<span class="marca-linea"></span>Despacho de ${num(d.bomberos)} bomberos (${num(d.tasa_m_h ?? tasaDe(d.bomberos))} m/h): trabajan desde la ${horaDe(desde)}, ${PRIORIDAD[d.prioridad] || ""}`;
+}
+// ¿Queda alguna dotación despachada y sin retirar? (de la bitácora y del pedido inicial)
+function hayDotaciones() {
+  return S.corridas.some(c => {
+    let n = (c.pedido?.dotaciones || []).length;
+    for (const e of c.bitacora) if (e.tipo === "dotacion") n = e.datos?.retirar ? 0 : n + 1;
+    return n > 0;
+  });
+}
+
+function pintarBomberos() {
+  if (!S.estado || !S.mapa) return;
+  const pausa = S.modo !== "configurar";
+  const si = pausa ? puedeIntervenir() && !T.ocupado : !$("config-campos").disabled;
+  for (const id of ["b-cantidad", "b-llegada", "b-cuartel", "b-prioridad", "b-despachar", "b-retirar"]) $(id).disabled = !si;
+  const r = datosDotacion(), t = horaDePausa();
+  $("b-despachar").textContent = pausa ? `Despachar en la hora ${t != null ? num(t / 60) : ""}` : "Sumar a la corrida";
+  $("b-retirar").hidden = !pausa || !hayDotaciones();
+  $("nota-bomberos").textContent = r.error ? r.error
+    : `${num(r.datos.bomberos)} bomberos construyen ${num(tasaDe(r.datos.bomberos))} m de línea por hora (${num(tasaDe(1))} m cada uno, supuesto). ` +
+      (pausa && t != null ? `Trabajan desde la ${horaDe(t + r.datos.llegada_min)}. ` : "") +
+      "La línea de cada hora se coloca al cumplirse, sobre el borde que tenga el fuego y solo donde la intensidad lo permite.";
+  $("lista-dotaciones").innerHTML = pausa ? "" : B.iniciales.map((d, i) => `<li><div class="fila"><span>${textoDotacion(d)}</span>` +
+    `<button class="btn btn-sm btn-outline-secondary py-0" data-quitar="${i}" aria-label="Quitar la dotación ${i + 1}" title="Quitar esta dotación"${si ? "" : " disabled"}>×</button></div></li>`).join("");
+  cargarCuarteles();
+}
+
+async function despachar() {
+  const r = datosDotacion();
+  $("error-bomberos").textContent = "";
+  if (r.error) return void pintarBomberos();
+  if (S.modo === "configurar") {
+    const max = S.estado.combate?.max_dotaciones_iniciales || 20;
+    if (B.iniciales.length >= max) return void ($("error-bomberos").textContent = `Antes de iniciar se pueden sumar hasta ${max} dotaciones.`);
+    B.iniciales.push(r.datos);
+    return void pintarBomberos();
+  }
+  await intervenirCombate(`Despacho de ${textoDotacion(r.datos)}`, {tipo: "dotacion", datos: r.datos});
+}
+const retirarDotaciones = () => intervenirCombate("Retiro de las dotaciones", {tipo: "dotacion", datos: {retirar: true}});
+async function intervenirCombate(titulo, cuerpo) {
+  if (!puedeIntervenir() || T.ocupado) return;
+  $("error-bomberos").textContent = "";
+  ocupar(true);
+  try { anotarRespuestas(titulo, await intervenir(cuerpo)); }
+  catch (e) { $("error-bomberos").textContent = e.message; }
+  finally { ocupar(false); }
+  pintarTarjetas();
+}
+
+// Línea de combate en el mapa: una imagen con una celda de color por celda de línea en pie en la hora que se mira.
+function actualizarLinea(c) {
+  if (!c.limites || !(c.combate.length || c.vLinea)) return;
+  const h = Math.min(S.horaVista, horaMaxima(c));
+  const url = `/api/corridas/${c.id}/combate.png?hora=${h}&v=${c.vLinea}`;
+  if (c.urlLinea === url) return;
+  c.urlLinea = url;
+  if (c.capaLinea) return void c.capaLinea.setUrl(url);
+  c.capaLinea = L.imageOverlay(url, c.limites, {pane: "linea", opacity: c.visible ? 1 : 0, className: "linea-combate", interactive: false}).addTo(S.mapa);
+  dibujarLeyenda();
+}
+
+// Combate en la tarjeta: el último paso de combate hasta la hora que se mira.
+function htmlCombate(c) {
+  let x = null;
+  for (let i = Math.min(S.horaVista, horaMaxima(c), c.combate.length - 1); i >= 0 && !x; i--) x = c.combate[i] || null;
+  if (!x) return "";
+  const sinLinea = x.frente_celdas != null ? x.frente_celdas - (x.celdas_nuevas || 0) : null;
+  const intensas = x.frente_celdas != null ? x.frente_celdas - x.frente_sostenible : 0;
+  return `<div class="combate"><h4>Combate <span class="suave fw-normal">· hora ${x.h}</span></h4><dl class="mt-0">` +
+    `<dt>Línea en pie</dt><dd>${num((x.linea_en_pie_m || 0) / 1000, 2)} km</dd>` +
+    `<dt>Construida en la hora</dt><dd>${num(x.linea_m_hora)} m</dd>` +
+    `<dt>Bomberos trabajando</dt><dd>${num(x.bomberos)}${x.bomberos ? ` (${num(x.tasa_m_h)} m/h)` : ""}</dd>` +
+    (sinLinea != null ? `<dt>Borde del fuego sin línea</dt><dd>${num(sinLinea)} celdas${intensas ? ` · ${num(intensas)} demasiado intensas` : ""}</dd>` : "") +
+    (x.descargas ? `<dt>Descargas · agua en pie</dt><dd>${num(x.descargas)} · ${num(x.celdas_agua)} celdas</dd>` : "") +
+    (x.consolidadas_hora ? `<dt>Agua asegurada por los bomberos</dt><dd>${num(x.consolidadas_hora)} celdas en la hora</dd>` : "") +
+    (x.vencidas_hora || x.brechas_hora ? `<dt>Agua que se secó · línea que cedió</dt><dd>${num(x.vencidas_hora || 0)} · ${num(x.brechas_hora || 0)} celdas en la hora</dd>` : "") +
+    `<dt>Escapes</dt><dd>${num(x.escapes)}${x.escapes_hora ? ` (${num(x.escapes_hora)} en la hora)` : ""}</dd></dl></div>`;
+}
+
+// ---------------------------------------------------------------- combate: descargas aéreas (contrato 1.6)
+// Solo en pausa. Cada descarga es una franja recta: se aprieta donde empieza, se arrastra hacia donde va y se suelta; el
+// largo y el ancho son los del medio elegido (los informa el servidor). Lo marcado queda sin enviar hasta «Lanzar»: cada
+// franja va como una intervención `descarga` y queda en la bitácora. Las franjas aplicadas se dibujan con el contorno del
+// color del producto; las celdas que quedaron mojadas o frenadas salen en la imagen de la línea de combate, hora por hora.
+const D = {modo: false, borradores: [], puntero: null, inicio: null, vivo: null, capa: null, siguiente: 1};
+const COLOR_PRODUCTO = {agua: "#1565c0", retardante: "#d81b60"};
+const NOMBRE_MEDIO = {avion: "Avión hidrante", helicoptero: "Helicóptero"};
+const NOMBRE_PRODUCTO = {agua: "agua", retardante: "retardante"};
+const medios = () => S.estado?.combate?.parametros?.medios || {};
+const productos = () => S.estado?.combate?.parametros?.productos || {};
+
+function prepararDescargas() {
+  $("a-medio").innerHTML = Object.keys(medios()).map(k => `<option value="${esc(k)}">${esc(NOMBRE_MEDIO[k] || k)}</option>`).join("");
+  $("a-producto").innerHTML = Object.entries(productos()).map(([k, p]) =>
+    `<option value="${esc(k)}">${esc(k === "agua" ? `Agua (dura ${num(p.dura_h)} h)` : "Retardante (no vence)")}</option>`).join("");
+  D.capa = L.layerGroup().addTo(S.mapa);
+  $("a-medio").onchange = $("a-producto").onchange = pintarDescargas;
+  $("a-marcar").onclick = () => marcarDescargas(!D.modo);
+  $("a-lanzar").onclick = lanzarDescargas;
+  $("lista-descargas").addEventListener("click", e => { const b = e.target.closest("[data-quitar-descarga]"); if (b) quitarDescarga(Number(b.dataset.quitarDescarga)); });
+  const cont = S.mapa.getContainer();
+  cont.addEventListener("pointerdown", empezarDescarga, true);          // en captura, como los trazos: el mapa no se mueve
+  cont.addEventListener("pointermove", seguirDescarga, true);
+  cont.addEventListener("pointerup", terminarDescarga, true);
+  cont.addEventListener("pointercancel", terminarDescarga, true);
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && D.modo) marcarDescargas(false); });
+  pintarDescargas();
+}
+
+// Franja de una descarga en el mapa: rectángulo de `largo` × `ancho` metros que sale de `a` hacia `b` (aproximación plana
+// alrededor de `a`; la franja oficial la calcula el motor en EPSG:5345). Devuelve las esquinas y el punto final.
+function franja(a, b, largo, ancho) {
+  const kLat = 111320, kLon = 111320 * Math.cos(a.lat * Math.PI / 180);
+  let ux = (b.lng - a.lng) * kLon, uy = (b.lat - a.lat) * kLat;
+  const d = Math.hypot(ux, uy) || 1;
+  ux /= d; uy /= d;
+  const p = (x, y) => L.latLng(a.lat + y / kLat, a.lng + x / kLon), nx = -uy * ancho / 2, ny = ux * ancho / 2;
+  return {fin: p(ux * largo, uy * largo), esquinas: [p(nx, ny), p(ux * largo + nx, uy * largo + ny), p(ux * largo - nx, uy * largo - ny), p(-nx, -ny)]};
+}
+
+// Hora UTC del día en la pausa, para saber si los medios aéreos vuelan (de día).
+function horaUTCDeLaPausa() {
+  const t = horaDePausa(), t0 = S.corridas.find(c => c.t0)?.t0;
+  return t == null || !t0 ? null : new Date(new Date(t0).getTime() + t * 60e3).getUTCHours();
+}
+function hechasEnLaHora(medio) {                                        // descargas de ese medio ya aplicadas en esta pausa
+  const t = horaDePausa();
+  return Math.max(0, ...S.corridas.map(c => c.bitacora.filter(e => e.tipo === "descarga" && e.datos?.medio === medio && Math.abs(e.t_sim_min - t) < 1e-6).length));
+}
+function cupo(medio) {
+  const m = medios()[medio];
+  return m ? m.max_por_hora - hechasEnLaHora(medio) - D.borradores.filter(b => b.medio === medio).length : 0;
+}
+function deDia() {
+  const h = horaUTCDeLaPausa(), [a, b] = S.estado?.combate?.parametros?.horas_vuelo_utc || [11, 22];
+  return h == null || (h >= a && h < b);
+}
+
+function marcarDescargas(si) {
+  if (si && (!puedeIntervenir() || T.ocupado || !deDia() || cupo($("a-medio").value) <= 0)) si = false;
+  if (si && T.modo) elegirHerramienta(null);                            // una herramienta de dibujo a la vez
+  if (!si && D.puntero != null) cancelarDescarga();
+  D.modo = si;
+  const cont = S.mapa.getContainer();
+  cont.classList.toggle("marcando", si);
+  if (!T.modo) for (const h of ["dragging", "doubleClickZoom", "boxZoom", "touchZoom"]) if (S.mapa[h]) si ? S.mapa[h].disable() : S.mapa[h].enable();
+  pintarDescargas();
+}
+
+function empezarDescarga(e) {
+  if (!D.modo || D.puntero != null || (e.pointerType === "mouse" && e.button !== 0)) return;
+  if (e.target.closest && e.target.closest(".leaflet-control-container")) return;
+  e.preventDefault(); e.stopPropagation();
+  try { S.mapa.getContainer().setPointerCapture(e.pointerId); } catch (x) { /* sin captura igual se marca */ }
+  D.puntero = e.pointerId;
+  S.mapa.scrollWheelZoom.disable();
+  D.inicio = S.mapa.mouseEventToLatLng(e);
+  D.xy = [e.clientX, e.clientY];
+  $("error-aereos").textContent = "";
+}
+function seguirDescarga(e) {
+  if (D.puntero == null || e.pointerId !== D.puntero) return;
+  e.preventDefault(); e.stopPropagation();
+  const m = medios()[$("a-medio").value];
+  const f = franja(D.inicio, S.mapa.mouseEventToLatLng(e), m.largo_m, m.ancho_m);
+  if (D.vivo) D.vivo.setLatLngs(f.esquinas);
+  else D.vivo = L.polygon(f.esquinas, {pane: "trazos", color: COLOR_PRODUCTO[$("a-producto").value], weight: 2, fillOpacity: 0.35, interactive: false}).addTo(D.capa);
+}
+function cancelarDescarga() {
+  if (D.vivo) D.vivo.remove();
+  D.vivo = D.inicio = D.puntero = null;
+  S.mapa.scrollWheelZoom.enable();
+}
+function terminarDescarga(e) {
+  if (D.puntero == null || e.pointerId !== D.puntero) return;
+  e.preventDefault(); e.stopPropagation();
+  try { S.mapa.getContainer().releasePointerCapture(e.pointerId); } catch (x) { /* ya estaba suelta */ }
+  const inicio = D.inicio, movido = Math.hypot(e.clientX - D.xy[0], e.clientY - D.xy[1]), hacia = S.mapa.mouseEventToLatLng(e);
+  cancelarDescarga();
+  if (e.type === "pointercancel" || !inicio) return;
+  const medio = $("a-medio").value, producto = $("a-producto").value, m = medios()[medio];
+  const [[sur, oeste], [norte, este]] = S.estado.dominio.limites;
+  const fallo = movido < 6 ? "Apretá donde empieza la descarga y arrastrá hacia donde va: así se marca la dirección."
+    : !(inicio.lat >= sur && inicio.lat <= norte && inicio.lng >= oeste && inicio.lng <= este) ? "La descarga empieza fuera del dominio."
+    : cupo(medio) <= 0 ? `No quedan descargas de ${(NOMBRE_MEDIO[medio] || medio).toLowerCase()} en esta hora.` : "";
+  if (fallo) return void ($("error-aereos").textContent = fallo);
+  const f = franja(inicio, hacia, m.largo_m, m.ancho_m);
+  const b = {id: D.siguiente++, medio, producto, esquinas: f.esquinas, capa: null, error: "",
+             lonlat: [inicio, f.fin].map(p => [Number(p.lng.toFixed(7)), Number(p.lat.toFixed(7))])};
+  b.capa = L.polygon(f.esquinas, {pane: "trazos", color: COLOR_PRODUCTO[producto], weight: 2, dashArray: "5 4", fillOpacity: 0.3})
+    .bindTooltip(() => `Descarga ${D.borradores.indexOf(b) + 1} sin lanzar · ${NOMBRE_MEDIO[medio]} con ${NOMBRE_PRODUCTO[producto]}`, {sticky: true}).addTo(D.capa);
+  D.borradores.push(b);
+  if (cupo(medio) <= 0) marcarDescargas(false); else pintarDescargas();
+}
+function quitarDescarga(id) {
+  if (T.ocupado) return;
+  const i = D.borradores.findIndex(b => b.id === id);
+  if (i < 0) return;
+  D.borradores[i].capa?.remove();
+  D.borradores.splice(i, 1);
+  pintarDescargas();
+}
+function vaciarDescargas() {
+  for (const b of D.borradores) b.capa?.remove();
+  D.borradores = [];
+  if ($("error-aereos")) $("error-aereos").textContent = "";
+  if (S.mapa && D.capa) marcarDescargas(false);
+}
+
+function pintarDescargas() {
+  if (!S.estado || !D.capa) return;
+  const si = puedeIntervenir() && !T.ocupado, dia = deDia(), medio = $("a-medio").value, m = medios()[medio], quedan = cupo(medio);
+  if (D.modo && (!si || !dia)) return void marcarDescargas(false);
+  for (const id of ["a-medio", "a-producto"]) $(id).disabled = !si || !dia;
+  $("a-marcar").disabled = !si || !dia || (quedan <= 0 && !D.modo);
+  $("a-marcar").textContent = D.modo ? "Marcando… (Esc para salir)" : "Marcar descargas";
+  $("a-marcar").classList.toggle("active", D.modo); $("a-marcar").setAttribute("aria-pressed", String(D.modo));
+  $("nota-aereos").textContent = !m ? "" : !dia ? "Los medios aéreos operan de día (de 8 a 19 h): en esta hora no se puede descargar."
+    : D.modo ? "Apretá donde empieza la descarga, arrastrá hacia donde va y soltá. El mapa no se mueve mientras marcás."
+    : `Cada descarga moja una franja de ${num(m.largo_m)} × ${num(m.ancho_m)} m (${m.detalle}). Frena el fuego que toca si no es demasiado intenso y no deja ` +
+      `entrar al que llega. ${$("a-producto").value === "agua" ? "El agua da tiempo, no apaga: al secarse el fuego puede seguir, salvo que los bomberos aseguren esa franja. " : ""}` +
+      `Quedan ${num(Math.max(0, quedan))} en esta hora.`;
+  $("lista-descargas").innerHTML = D.borradores.map((b, i) => `<li><div class="fila"><span>${esc(NOMBRE_MEDIO[b.medio] || b.medio)} con ${esc(NOMBRE_PRODUCTO[b.producto] || b.producto)}</span>` +
+    `<button class="btn btn-sm btn-outline-secondary py-0" data-quitar-descarga="${b.id}" aria-label="Quitar la descarga ${i + 1}" title="Quitar esta descarga"${T.ocupado ? " disabled" : ""}>×</button></div>` +
+    (b.error ? `<p class="text-danger small error">${esc(b.error)}</p>` : "") + "</li>").join("");
+  const t = horaDePausa();
+  $("a-lanzar").hidden = !D.borradores.length;
+  $("a-lanzar").disabled = !si;
+  $("a-lanzar").textContent = D.borradores.length === 1 ? `Lanzar la descarga en la hora ${t != null ? num(t / 60) : ""}` : `Lanzar las ${D.borradores.length} descargas en la hora ${t != null ? num(t / 60) : ""}`;
+  dibujarLeyenda();
+}
+
+async function lanzarDescargas() {
+  if (!puedeIntervenir() || !D.borradores.length || T.ocupado) return;
+  marcarDescargas(false);
+  $("error-aereos").textContent = "";
+  ocupar(true);
+  try {
+    for (const b of [...D.borradores]) {
+      b.error = "";
+      try {
+        const rs = await intervenir({tipo: "descarga", datos: {medio: b.medio, producto: b.producto, lonlat: b.lonlat}});
+        anotarRespuestas(`Descarga de ${(NOMBRE_MEDIO[b.medio] || b.medio).toLowerCase()} con ${NOMBRE_PRODUCTO[b.producto] || b.producto}`, rs);
+        if (rs.some(x => x.aviso && x.aviso.estado !== "rechazada")) { b.capa?.remove(); D.borradores.splice(D.borradores.indexOf(b), 1); }
+        else b.error = rs.map(x => x.aviso?.motivo || x.error).filter(Boolean).join("; ") || "El motor no la aplicó.";
+      } catch (e) {
+        b.error = e.message;
+        if (!puedeIntervenir()) break;
+      }
+    }
+  } finally { ocupar(false); }
+  for (const c of S.corridas) refrescarDescargas(c);
+  pintarTarjetas();
+}
+
+// Franjas aplicadas (de la bitácora), por corrida: se ven desde la hora en que se lanzaron.
+async function refrescarDescargas(c) {
+  let fc;
+  try { fc = await pedir(`/api/corridas/${c.id}/descargas.geojson`); } catch (e) { return; }
+  if (!S.corridas.includes(c)) return;
+  c.descargas = fc.features || [];
+  dibujarDescargas(c);
+}
+function dibujarDescargas(c) {
+  if (c.capaDescargas) { c.capaDescargas.remove(); c.capaDescargas = null; }
+  const t = S.horaVista * 60, visibles = (c.descargas || []).filter(f => (f.properties.t_sim_min ?? 0) <= t + 1e-6);
+  if (visibles.length) {
+    c.capaDescargas = L.layerGroup(visibles.map(f => {
+      const p = f.properties, anillo = f.geometry.coordinates[0].map(([lon, lat]) => [lat, lon]);
+      const vencida = p.vence_min != null && p.vence_min <= t + 1e-6;
+      return L.polygon(anillo, {pane: "cortafuegos", color: COLOR_PRODUCTO[p.producto] || "#555", weight: 1.5, opacity: vencida ? 0.45 : 0.95,
+                                dashArray: vencida ? "3 4" : null, fillOpacity: vencida ? 0 : 0.12})
+        .bindTooltip(`${S.corridas.length > 1 ? `${MOTORES[c.motor]?.nombre || c.motor} · ` : ""}${textoDescargaPlano(p)}${vencida ? " · ya se secó" : ""}`, {sticky: true});
+    })).addTo(S.mapa);
+  }
+  dibujarLeyenda();
+}
+function textoDescargaPlano(d) {
+  return `${NOMBRE_MEDIO[d.medio] || d.medio} con ${NOMBRE_PRODUCTO[d.producto] || d.producto}: moja ${num(d.celdas_mojadas)} ${d.celdas_mojadas === 1 ? "celda" : "celdas"} sin quemar y frena ${num(d.celdas_frenadas)} con fuego` +
+    (d.celdas_intensas ? `; ${num(d.celdas_intensas)} del frente con demasiada intensidad` : "") + (d.vence_min != null ? ` · dura hasta la ${horaDe(d.vence_min)}` : " · no vence");
+}
+const textoDescarga = e => {
+  const t = textoDescargaPlano(e.datos || {});
+  return `<span class="marca-linea ${esc(e.datos?.producto || "")}"></span>Descarga de ${esc(t.charAt(0).toLowerCase() + t.slice(1))}`;
+};
+
 // ---- bitácora en la tarjeta
 function tomarBitacora(c, d) {
   if (!d || !Array.isArray(d.bitacora)) return;
@@ -1117,12 +1494,15 @@ function textoVientoManual(e) {
 function htmlBitacora(c) {
   const filas = [];
   for (const f of c.cortafuegos.filter(x => x.properties.origen === "inicial")) filas.push(["inicio", textoCortafuego(f.properties)]);
+  for (const d of c.pedido?.dotaciones || []) filas.push(["inicio", textoDespacho({datos: d, t_sim_min: 0})]);
   for (const e of c.bitacora) {
     const cuando = horaDe(e.t_sim_min);
     if (e.tipo === "cortafuego") {
       const f = c.cortafuegos.find(x => x.properties.origen === "intervencion" && x.properties.n === e.n);
       filas.push([cuando, textoCortafuego({...(e.datos || {}), ...(f ? f.properties : {})})]);
     } else if (e.tipo === "viento_manual") filas.push([cuando, textoVientoManual(e)]);
+    else if (e.tipo === "dotacion") filas.push([cuando, textoDespacho(e)]);
+    else if (e.tipo === "descarga") filas.push([cuando, textoDescarga(e)]);
     else if (e.tipo === "pausa") filas.push([cuando, "Pausa"]);
     else if (e.tipo === "detencion") filas.push([cuando, "Detenida"]);
   }

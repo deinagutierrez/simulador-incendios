@@ -11,6 +11,10 @@ El programa nuevo. Plan: `docs/etapa3/00_plan.md`.
 
 Los dos frentes se encuentran en `docs/etapa3/contrato_servidor_motor.md`. Las pruebas están en `test/app/`.
 
+**Combate del fuego (F8, rama `combate`)**: bomberos que construyen línea y descargas de avión o helicóptero, con un método
+común a los dos motores (`app/motores/combate.py` y un adaptador por motor). Diseño, parámetros, límites y cómo probarlo:
+`docs/etapa3/F8_combate.md`.
+
 ## Arrancar el simulador
 
 ```
