@@ -70,11 +70,12 @@ function seccion(id, abrir) {
   else el.classList.toggle("show", abrir);
   for (const b of document.querySelectorAll(`[data-bs-target="#${id}"]`)) { b.classList.toggle("collapsed", !abrir); b.setAttribute("aria-expanded", String(abrir)); }
 }
-const ABIERTAS_AL_INICIO = {"c-datos": true, "c-actuales": true, "c-manual": false, "c-escenario": false, "c-config": true, "c-capas": true,
+const ABIERTAS_AL_INICIO = {"c-datos": true, "c-config": true, "c-capas": true,
                             "c-anteriores": false, "c-historico": false};
 function seccionesIniciales() {
   for (const [id, abrir] of Object.entries(ABIERTAS_AL_INICIO)) seccion(id, abrir);
   $("avanzadas").open = false;
+  elegirOrigen("actuales");
 }
 function prepararPanel() {
   if (!window.bootstrap) {
@@ -1806,10 +1807,24 @@ function pintarPasos() {
   }
 }
 
+// «1. Datos» ofrece un camino por cada origen de los datos (actuales, desde archivos, escenario); cada camino termina en su
+// propio botón «Preparar datos para simular», que arma el evento de tiempo real y lo deja elegido en «2. Configurar».
+function elegirOrigen(o) {
+  $(`origen-${o}`).checked = true;
+  for (const c of document.querySelectorAll(".camino")) c.hidden = c.id !== `camino-${o}`;
+}
+
+// Camino «Desde archivos»: las tomas cargadas en esta visita. Lo que falte se completa con la toma más nueva guardada.
+const A = {meteo: null, indices: null};
+// Camino «Escenario»: al terminar la toma del escenario se arma el evento con los índices elegidos.
+const E = {pendiente: null};
+
 function prepararDatos() {
-  $("b-obtener").onclick = () => obtenerDatos(0);
+  for (const r of document.querySelectorAll('input[name="origen"]')) r.onchange = () => elegirOrigen(r.value);
+  $("b-obtener").onclick = () => { S.origenEvento = "actual"; obtenerDatos(0); };
   $("b-gee").onclick = () => lanzar(() => pedir("/api/datos/indices", {fuente: "gee"}));
   $("b-evento").onclick = armarEvento;
+  $("b-evento-archivos").onclick = armarEventoArchivos;
   $("b-csv").onclick = cargarCSV;
   $("b-tif").onclick = cargarTIF;
   $("b-escenario").onclick = armarEscenario;
@@ -1874,6 +1889,12 @@ function pintarDatos() {
     $(id).innerHTML = nuevo(lista, que) + lista.map(t => `<option value="${esc(t.id)}">${esc(etiquetaToma(t, que))}</option>`).join("");
     if (lista.some(t => t.id === antes)) $(id).value = antes;
   }
+  const tomasInd = d.indices || [], antesEsc = $("sel-indices-esc").value;
+  $("sel-indices-esc").innerHTML = tomasInd.length
+    ? tomasInd.map((t, i) => `<option value="${esc(t.id)}">${i ? "" : "La más nueva: "}${esc(etiquetaToma(t, "índices"))}</option>`).join("")
+    : '<option value="">No hay índices guardados</option>';
+  if (tomasInd.some(t => t.id === antesEsc)) $("sel-indices-esc").value = antesEsc;
+  pintarArchivos();
   pintarTrabajo();
 }
 
@@ -1905,11 +1926,18 @@ function pintarTrabajo() {
   if (!d.gee?.disponible) $("b-gee").disabled = true;
   if (!(d.meteo || []).length || !(d.indices || []).length) $("b-evento").disabled = true;
   $("b-evento").title = $("b-evento").disabled && !ocupado ? "Hace falta al menos una toma de meteorología y una de índices" : "";
+  const [mA, iA] = tomasArchivos();
+  if (!(A.meteo || A.indices) || !mA || !iA) $("b-evento-archivos").disabled = true;
+  $("b-evento-archivos").title = !(A.meteo || A.indices) ? "Primero cargá la meteorología, los índices o los dos"
+    : !mA || !iA ? "Falta la otra mitad y no hay nada guardado para completarla" : "";
+  if (!(d.indices || []).length) $("b-escenario").disabled = true;
+  $("b-escenario").title = !(d.indices || []).length ? "Hacen falta índices de vegetación: obtené los actuales o cargalos desde archivos" : "";
   $("b-obtener").textContent = C.activa ? "Obteniendo datos actuales…" : "Obtener datos actuales";
   $("trabajo").hidden = !t;
   if (!t) { pintarPasos(); return; }
   // la caja del trabajo va junto al botón que lo lanzó
-  const lugar = ["meteo_manual", "indices_manual"].includes(t.tarea) ? "lugar-trabajo-manual" : t.tarea === "escenario" ? "lugar-trabajo-escenario" : "lugar-trabajo-actual";
+  const lugar = {meteo_manual: "lugar-trabajo-csv", indices_manual: "lugar-trabajo-manual", escenario: "lugar-trabajo-escenario",
+                 evento: `lugar-trabajo-${S.origenEvento || "actual"}`}[t.tarea] || "lugar-trabajo-actual";
   if ($("trabajo").parentElement.id !== lugar) $(lugar).appendChild($("trabajo"));
   $("trabajo-nombre").textContent = TAREAS[t.tarea] || t.tarea;
   $("trabajo-estado").textContent = ESTADOS_TRABAJO[t.estado] || t.estado;
@@ -1932,9 +1960,9 @@ function pintarTrabajo() {
 
 function resumenResultado(t) {
   const r = t.resultado || {}, cuando = t.terminado_utc ? ` el ${aLocal(normalizarUTC(t.terminado_utc)).texto}` : "";
-  if (t.tarea === "evento") return `Evento ${r.id || ""} armado${cuando}. Quedó elegido en «2. Configurar simulación».`;
-  const usar = ["meteo_manual", "escenario", "indices_manual"].includes(t.tarea)
-    ? " Para usarla, armá el evento en «Datos actuales → Opciones avanzadas» (ya quedó elegida)." : "";
+  if (t.tarea === "evento") return `Datos listos${cuando}. Quedaron elegidos en «2. Configurar simulación»: seguí con el día, la hora y los focos.`;
+  if (t.tarea === "escenario") return `Escenario guardado${cuando}${r.horas ? `, ${num(r.horas)} horas` : ""}.`;
+  const usar = ["meteo_manual", "indices_manual"].includes(t.tarea) ? " Seguí con el paso siguiente." : "";
   if (t.tarea.startsWith("indices")) return `Toma ${r.id || ""} guardada${cuando}${r.n_escenas != null ? `, con ${num(r.n_escenas)} escenas` : ""}.${usar}`;
   return `Toma ${r.id || ""} guardada${cuando}${r.horas ? `, ${num(r.horas)} horas` : ""}.${usar}`;
 }
@@ -1948,7 +1976,7 @@ function pintarSinRed(t) {
   if (caja.hidden) return;
   caja.className = "alert alert-warning aviso sin-red";
   caja.innerHTML = `<b>No se pudo bajar ${t.tarea === "pronostico" ? "el pronóstico" : "los índices"} y no hay nada guardado.</b>` +
-    `Puede ser que la computadora no tenga internet. Podés ${t.tarea === "pronostico" ? "cargar un CSV de meteorología o armar un escenario" : "cargar los TIF de NDVI y NDMI"} (en «Carga manual» y «Modo escenario»), o simular con un evento de EJEMPLO, que no necesita red.` +
+    `Puede ser que la computadora no tenga internet. Podés ${t.tarea === "pronostico" ? "cargar un CSV de meteorología o armar un escenario" : "cargar los TIF de NDVI y NDMI"} (en «Desde archivos» y «Escenario»), o simular con un evento de EJEMPLO, que no necesita red.` +
     `<br><button class="btn btn-sm btn-outline-secondary mt-2" id="usar-ejemplo">Usar un ejemplo</button>`;
   $("usar-ejemplo").onclick = usarEjemplo;
 }
@@ -2012,10 +2040,19 @@ async function alTerminarTrabajo(t) {
   const id = t.resultado?.id;
   if (t.tarea === "evento") {
     try { await refrescarEventos(S.modo === "configurar" ? id : undefined); } catch (e) { $("error-datos").textContent = e.message; }
-  } else if (id && ["meteo_manual", "escenario", "indices_manual"].includes(t.tarea)) {   // lista para armar el evento
-    $(t.tarea === "indices_manual" ? "sel-indices" : "sel-meteo").value = id;
-    seccion("c-actuales", true); $("avanzadas").open = true;
+    if (S.modo === "configurar" && id) {          // el usuario sigue en «2. Configurar simulación»
+      seccion("c-config", true);
+      $("sec-config").scrollIntoView({behavior: "smooth", block: "start"});
+    }
+  } else if (id && t.tarea === "meteo_manual") { A.meteo = id; pintarArchivos(); pintarTrabajo(); }
+  else if (id && t.tarea === "indices_manual") { A.indices = id; pintarArchivos(); pintarTrabajo(); }
+  else if (id && t.tarea === "escenario" && E.pendiente) {
+    const cuerpo = {meteo: id, ...E.pendiente};
+    E.pendiente = null;
+    S.origenEvento = "escenario";
+    lanzar(() => pedir("/api/datos/evento", cuerpo), () => { $("nombre-esc").value = ""; });
   }
+  if (t.tarea === "escenario" && t.estado !== "terminado") E.pendiente = null;
   avanzarCadena(t);
 }
 
@@ -2024,7 +2061,34 @@ function armarEvento() {
   if ($("sel-meteo").value) cuerpo.meteo = $("sel-meteo").value;
   if ($("sel-indices").value) cuerpo.indices = $("sel-indices").value;
   if ($("nombre-rt").value.trim()) cuerpo.nombre = $("nombre-rt").value.trim();
+  S.origenEvento = "combinar";
   lanzar(() => pedir("/api/datos/evento", cuerpo), () => { $("nombre-rt").value = ""; });
+}
+
+// Qué tomas usaría «Preparar datos para simular» del camino «Desde archivos»: las cargadas, o si no las más nuevas guardadas.
+function tomasArchivos() {
+  const d = S.datos || {};
+  const de = (lista, id) => (lista || []).find(t => t.id === id) || (lista || [])[0] || null;
+  return [de(d.meteo, A.meteo), de(d.indices, A.indices)];
+}
+function pintarArchivos() {
+  const [m, i] = tomasArchivos();
+  for (const [id, cargada, n] of [["ok-meteo", A.meteo, "1"], ["ok-indices", A.indices, "2"]]) {
+    $(id).textContent = cargada ? "✓" : n;
+    $(id).className = `badge rounded-pill ${cargada ? "text-bg-success" : "text-bg-secondary"}`;
+    $(id).title = cargada ? "Cargado" : "";
+  }
+  const fila = (nombre, t, cargada, que) => `<dt>${nombre}</dt><dd>${!t ? '<span class="vacio">nada guardado</span>'
+    : cargada ? "la que cargaste" : `<span class="text-body-secondary">lo más nuevo guardado:</span> ${esc(etiquetaToma(t, que))}`}</dd>`;
+  $("resumen-archivos").innerHTML = fila("Meteorología", m, !!A.meteo, "meteorología") + fila("Índices", i, !!A.indices, "índices");
+}
+function armarEventoArchivos() {
+  const [m, i] = tomasArchivos();
+  if (!m || !i) return;
+  const cuerpo = {meteo: m.id, indices: i.id};
+  if ($("nombre-archivos").value.trim()) cuerpo.nombre = $("nombre-archivos").value.trim();
+  S.origenEvento = "archivos";
+  lanzar(() => pedir("/api/datos/evento", cuerpo), () => { $("nombre-archivos").value = ""; A.meteo = A.indices = null; pintarArchivos(); });
 }
 
 function cargarCSV() {
@@ -2059,7 +2123,11 @@ function armarEscenario() {
   }
   const cuerpo = {desde_utc: aUTC($("esc-fecha").value, $("esc-hora").value), horas: Math.round(v("esc-horas")), temp_c: v("esc-temp"),
                   hr_pct: v("esc-hr"), viento_kmh: v("esc-viento"), viento_dir_deg: v("esc-dir"), precip_mm: v("esc-lluvia")};
-  lanzar(() => pedir("/api/datos/meteo/escenario", cuerpo));
+  if (!$("sel-indices-esc").value) return void ($("error-datos").textContent = "Hacen falta índices de vegetación: obtené los actuales o cargalos desde archivos.");
+  const pendiente = {indices: $("sel-indices-esc").value};
+  if ($("nombre-esc").value.trim()) pendiente.nombre = $("nombre-esc").value.trim();
+  E.pendiente = pendiente;
+  lanzar(() => pedir("/api/datos/meteo/escenario", cuerpo)).then(ok => { if (!ok) E.pendiente = null; });
 }
 
 

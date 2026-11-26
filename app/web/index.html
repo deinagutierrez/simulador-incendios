@@ -91,121 +91,120 @@
           <div id="c-datos" class="accordion-collapse collapse show">
             <div class="accordion-body">
               <div id="datos-avisos"></div>
-              <div class="accordion" id="sub-datos">
+              <p class="small fw-semibold mb-1" id="origen-titulo">¿De dónde salen los datos?</p>
+              <div class="btn-group w-100 mb-2" role="group" aria-labelledby="origen-titulo" id="origen">
+                <input type="radio" class="btn-check" name="origen" id="origen-actuales" value="actuales" autocomplete="off" checked>
+                <label class="btn btn-sm btn-outline-primary" for="origen-actuales" title="Pronóstico e imágenes satelitales de hoy, bajados de internet">Actuales</label>
+                <input type="radio" class="btn-check" name="origen" id="origen-archivos" value="archivos" autocomplete="off">
+                <label class="btn btn-sm btn-outline-primary" for="origen-archivos" title="Archivos CSV y GeoTIFF de tu computadora">Desde archivos</label>
+                <input type="radio" class="btn-check" name="origen" id="origen-escenario" value="escenario" autocomplete="off">
+                <label class="btn btn-sm btn-outline-primary" for="origen-escenario" title="Tiempo inventado: viento, temperatura, humedad y lluvia fijos">Escenario</label>
+              </div>
 
-                <div class="accordion-item">
-                  <h3 class="accordion-header">
-                    <button class="accordion-button py-2" type="button" data-bs-toggle="collapse" data-bs-target="#c-actuales" aria-expanded="true" aria-controls="c-actuales">Datos actuales</button>
-                  </h3>
-                  <div id="c-actuales" class="accordion-collapse collapse show">
-                    <div class="accordion-body">
-                      <p class="form-text nota mt-0">Baja el pronóstico, los índices de vegetación y arma con ellos el evento de tiempo real, en ese orden.</p>
-                      <button class="btn btn-primary w-100 lanza" id="b-obtener">Obtener datos actuales</button>
-                      <ol id="pasos" class="list-group list-group-numbered small mt-2"></ol>
-                      <div id="lugar-trabajo-actual"></div>
-                      <div id="reintentar" class="alert alert-danger small py-2 px-3 mt-2 mb-0" role="alert" hidden>
-                        <div id="reintentar-texto"></div>
-                        <button class="btn btn-sm btn-danger mt-2" id="b-reintentar">Reintentar desde este paso</button>
-                      </div>
-                      <h4 class="h6 mt-3 mb-1">Datos vigentes</h4>
-                      <div class="small fw-semibold text-body-secondary">Pronóstico del tiempo</div>
-                      <dl id="datos-pronostico" class="ficha small"></dl>
-                      <div class="small fw-semibold text-body-secondary mt-2">Índices de vegetación</div>
-                      <dl id="datos-indices" class="ficha small"></dl>
-
-                      <details class="mt-3" id="avanzadas">
-                        <summary class="small fw-semibold">Opciones avanzadas</summary>
-                        <div class="pt-2">
-                          <h4 class="h6">Índices con Earth Engine</h4>
-                          <button class="btn btn-sm btn-outline-secondary lanza" id="b-gee">Bajar los índices (Earth Engine)</button>
-                          <p class="form-text nota" id="nota-gee" hidden></p>
-                          <h4 class="h6 mt-3">Armar un evento con tomas elegidas</h4>
-                          <p class="form-text nota mt-0">Para usar una toma cargada a mano, un escenario o una toma anterior.</p>
-                          <label class="form-label small mb-1" for="sel-meteo">Meteorología</label>
-                          <select class="form-select form-select-sm" id="sel-meteo"></select>
-                          <label class="form-label small mb-1 mt-2" for="sel-indices">Índices de vegetación</label>
-                          <select class="form-select form-select-sm" id="sel-indices"></select>
-                          <label class="form-label small mb-1 mt-2" for="nombre-rt">Nombre <span class="text-body-tertiary">(opcional)</span></label>
-                          <input class="form-control form-control-sm" id="nombre-rt" maxlength="200" placeholder="Se arma solo con la fecha y las fuentes">
-                          <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-evento">Armar evento en tiempo real</button>
-                        </div>
-                      </details>
-                    </div>
-                  </div>
+              <div class="camino" id="camino-actuales">
+                <p class="form-text nota mt-0">Baja el pronóstico del tiempo y los índices de vegetación de hoy y los deja listos para simular.</p>
+                <button class="btn btn-primary w-100 lanza" id="b-obtener">Obtener datos actuales</button>
+                <ol id="pasos" class="list-group list-group-numbered small mt-2"></ol>
+                <div id="lugar-trabajo-actual"></div>
+                <div id="reintentar" class="alert alert-danger small py-2 px-3 mt-2 mb-0" role="alert" hidden>
+                  <div id="reintentar-texto"></div>
+                  <button class="btn btn-sm btn-danger mt-2" id="b-reintentar">Reintentar desde este paso</button>
                 </div>
+                <h4 class="h6 mt-3 mb-1">Datos vigentes</h4>
+                <div class="small fw-semibold text-body-secondary">Pronóstico del tiempo</div>
+                <dl id="datos-pronostico" class="ficha small"></dl>
+                <div class="small fw-semibold text-body-secondary mt-2">Índices de vegetación</div>
+                <dl id="datos-indices" class="ficha small"></dl>
 
-                <div class="accordion-item">
-                  <h3 class="accordion-header">
-                    <button class="accordion-button py-2 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c-manual" aria-expanded="false" aria-controls="c-manual">Carga manual</button>
-                  </h3>
-                  <div id="c-manual" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                      <p class="form-text nota mt-0">Formatos completos y archivos de ejemplo: <a href="/formatos/formatos_de_carga.md" target="_blank" rel="noopener">formatos de carga</a>.</p>
-                      <h4 class="h6 mt-2">Meteorología (CSV)
-                        <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del CSV"
-                          title="Archivo .csv separado por comas, hasta 20 MB. Al menos 24 filas, una por hora en punto, en orden, sin horas repetidas ni celdas vacías (se rellenan huecos de hasta 2 h). Dos formatos: v4.0 → timestamp con huso horario (2026-11-13T09:00:00-03:00), temp_c (°C), hr_pct (%), viento_kmh (km/h), viento_dir_deg (grados de donde viene: 0 = norte), precip_mm (mm/h). v3.x → time_utc (UTC), temperature_2m (°C), relative_humidity_2m (%), wind_speed_10m (m/s), wind_direction_10m (grados), precipitation (mm/h).">ⓘ</button>
-                      </h4>
-                      <p class="form-text nota mt-0">Pasa por el mismo control de calidad que el pronóstico.</p>
-                      <input class="form-control form-control-sm" id="archivo-csv" type="file" accept=".csv,.txt,text/csv">
-                      <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-csv">Cargar meteorología</button>
-
-                      <h4 class="h6 mt-3">Índices (GeoTIFF)</h4>
-                      <label class="form-label small mb-1" for="archivo-ndvi">NDVI
-                        <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del TIF de NDVI"
-                          title="GeoTIFF (.tif) de una banda, en la grilla exacta del dominio: EPSG:5345, celdas de 30 m, 1672 columnas × 1671 filas, esquina noroeste en (3513060, 6417900). Tipo int16 con el índice × 10000 (−10000 a 10000). Nodata −32768. Hasta 60 MB.">ⓘ</button>
-                      </label>
-                      <input class="form-control form-control-sm" id="archivo-ndvi" type="file" accept=".tif,.tiff,image/tiff">
-                      <label class="form-label small mb-1 mt-2" for="archivo-ndmi">NDMI
-                        <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del TIF de NDMI"
-                          title="Igual que el NDVI: GeoTIFF de una banda, EPSG:5345, 30 m, 1672 × 1671 celdas, esquina noroeste en (3513060, 6417900), int16 × 10000, nodata −32768. NDMI = (NIR − B11) / (NIR + B11), con NIR = B08 o B8A (se elige abajo).">ⓘ</button>
-                      </label>
-                      <input class="form-control form-control-sm" id="archivo-ndmi" type="file" accept=".tif,.tiff,image/tiff">
-                      <div class="row g-2 mt-1">
-                        <div class="col"><label class="form-label small mb-1" for="ventana-desde">Ventana: desde</label><input class="form-control form-control-sm" id="ventana-desde" type="date"></div>
-                        <div class="col"><label class="form-label small mb-1" for="ventana-hasta">hasta</label><input class="form-control form-control-sm" id="ventana-hasta" type="date"></div>
-                      </div>
-                      <label class="form-label small mb-1 mt-2" for="ndmi-nir">Banda del infrarrojo cercano del NDMI</label>
-                      <select class="form-select form-select-sm" id="ndmi-nir">
-                        <option value="B08">B08 (10 m): (B08 − B11) / (B08 + B11)</option>
-                        <option value="B8A">B8A (20 m): (B8A − B11) / (B8A + B11)</option>
-                      </select>
-                      <label class="form-label small mb-1 mt-2" for="descripcion-tif">Descripción <span class="text-body-tertiary">(de dónde salen)</span></label>
-                      <input class="form-control form-control-sm" id="descripcion-tif" maxlength="2000">
-                      <div class="alert alert-warning aviso small py-2 px-3 mt-2 mb-0"><b>La ventana y la fórmula las declarás vos.</b>El programa revisa la grilla, la escala y el rango, pero no puede comprobar de qué fechas son las imágenes ni con qué banda se calculó el NDMI. La corrida queda rotulada «índices cargados a mano».</div>
-                      <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-tif">Cargar índices</button>
-                      <div id="lugar-trabajo-manual"></div>
-                    </div>
+                <details class="mt-3" id="avanzadas">
+                  <summary class="small fw-semibold">Opciones avanzadas</summary>
+                  <div class="pt-2">
+                    <h4 class="h6">Índices con Earth Engine</h4>
+                    <button class="btn btn-sm btn-outline-secondary lanza" id="b-gee">Bajar los índices (Earth Engine)</button>
+                    <p class="form-text nota" id="nota-gee" hidden></p>
+                    <h4 class="h6 mt-3">Combinar datos guardados</h4>
+                    <p class="form-text nota mt-0">Para volver a usar datos de días anteriores, o mezclar la meteorología de un origen con los índices de otro.</p>
+                    <label class="form-label small mb-1" for="sel-meteo">Meteorología</label>
+                    <select class="form-select form-select-sm" id="sel-meteo"></select>
+                    <label class="form-label small mb-1 mt-2" for="sel-indices">Índices de vegetación</label>
+                    <select class="form-select form-select-sm" id="sel-indices"></select>
+                    <label class="form-label small mb-1 mt-2" for="nombre-rt">Nombre <span class="text-body-tertiary">(opcional)</span></label>
+                    <input class="form-control form-control-sm" id="nombre-rt" maxlength="200" placeholder="Se arma solo con la fecha y las fuentes">
+                    <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-evento">Preparar datos para simular</button>
+                        <div id="lugar-trabajo-combinar"></div>
                   </div>
-                </div>
+                </details>
+              </div>
 
-                <div class="accordion-item">
-                  <h3 class="accordion-header">
-                    <button class="accordion-button py-2 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c-escenario" aria-expanded="false" aria-controls="c-escenario">Modo escenario</button>
-                  </h3>
-                  <div id="c-escenario" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                      <p class="form-text nota mt-0">Viento, temperatura, humedad y lluvia constantes durante todo el período. No es un pronóstico: la toma queda rotulada «escenario manual». Después armá el evento eligiéndola.</p>
-                      <div class="row g-2">
-                        <div class="col"><label class="form-label small mb-1" for="esc-fecha">Día de inicio</label><input class="form-control form-control-sm" id="esc-fecha" type="date"></div>
-                        <div class="col"><label class="form-label small mb-1" for="esc-hora">Hora <span class="text-body-tertiary">(Argentina)</span></label><select class="form-select form-select-sm" id="esc-hora"></select></div>
-                      </div>
-                      <div class="row g-2 mt-0">
-                        <div class="col"><label class="form-label small mb-1" for="esc-horas">Horas</label><input class="form-control form-control-sm" id="esc-horas" type="number" min="1" max="240" value="48"></div>
-                        <div class="col"><label class="form-label small mb-1" for="esc-temp">Temperatura (°C)</label><input class="form-control form-control-sm" id="esc-temp" type="number" min="-40" max="50" step="0.5" value="32"></div>
-                      </div>
-                      <div class="row g-2 mt-0">
-                        <div class="col"><label class="form-label small mb-1" for="esc-hr">Humedad relativa (%)</label><input class="form-control form-control-sm" id="esc-hr" type="number" min="0" max="100" value="15"></div>
-                        <div class="col"><label class="form-label small mb-1" for="esc-lluvia">Lluvia (mm/h)</label><input class="form-control form-control-sm" id="esc-lluvia" type="number" min="0" max="200" step="0.1" value="0"></div>
-                      </div>
-                      <div class="row g-2 mt-0">
-                        <div class="col"><label class="form-label small mb-1" for="esc-viento">Viento (km/h)</label><input class="form-control form-control-sm" id="esc-viento" type="number" min="0" max="216" value="40"></div>
-                        <div class="col"><label class="form-label small mb-1" for="esc-dir">Viene del (grados)</label><input class="form-control form-control-sm" id="esc-dir" type="number" min="0" max="360" value="330" title="0 = norte, 90 = este, 180 = sur, 270 = oeste"></div>
-                      </div>
-                      <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-escenario">Armar el escenario</button>
-                      <div id="lugar-trabajo-escenario"></div>
-                    </div>
-                  </div>
+              <div class="camino" id="camino-archivos" hidden>
+                <p class="form-text nota mt-0">Cargá uno o los dos. Lo que no cargues se completa con lo más nuevo que haya guardado.</p>
+                <p class="form-text nota mt-0">Formatos completos y archivos de ejemplo: <a href="/formatos/formatos_de_carga.md" target="_blank" rel="noopener">formatos de carga</a>.</p>
+                <h4 class="h6 mt-2 paso-titulo"><span class="badge rounded-pill text-bg-secondary" id="ok-meteo">1</span> Meteorología (CSV)
+                  <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del CSV"
+                    title="Archivo .csv separado por comas, hasta 20 MB. Al menos 24 filas, una por hora en punto, en orden, sin horas repetidas ni celdas vacías (se rellenan huecos de hasta 2 h). Dos formatos: v4.0 → timestamp con huso horario (2026-11-13T09:00:00-03:00), temp_c (°C), hr_pct (%), viento_kmh (km/h), viento_dir_deg (grados de donde viene: 0 = norte), precip_mm (mm/h). v3.x → time_utc (UTC), temperature_2m (°C), relative_humidity_2m (%), wind_speed_10m (m/s), wind_direction_10m (grados), precipitation (mm/h).">ⓘ</button>
+                </h4>
+                <p class="form-text nota mt-0">Pasa por el mismo control de calidad que el pronóstico.</p>
+                <input class="form-control form-control-sm" id="archivo-csv" type="file" accept=".csv,.txt,text/csv">
+                <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-csv">Cargar meteorología</button>
+                <div id="lugar-trabajo-csv"></div>
+
+                <h4 class="h6 mt-3 paso-titulo"><span class="badge rounded-pill text-bg-secondary" id="ok-indices">2</span> Índices de vegetación (GeoTIFF)</h4>
+                <label class="form-label small mb-1" for="archivo-ndvi">NDVI
+                  <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del TIF de NDVI"
+                    title="GeoTIFF (.tif) de una banda, en la grilla exacta del dominio: EPSG:5345, celdas de 30 m, 1672 columnas × 1671 filas, esquina noroeste en (3513060, 6417900). Tipo int16 con el índice × 10000 (−10000 a 10000). Nodata −32768. Hasta 60 MB.">ⓘ</button>
+                </label>
+                <input class="form-control form-control-sm" id="archivo-ndvi" type="file" accept=".tif,.tiff,image/tiff">
+                <label class="form-label small mb-1 mt-2" for="archivo-ndmi">NDMI
+                  <button type="button" class="btn btn-link p-0 info" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="right" aria-label="Formato del TIF de NDMI"
+                    title="Igual que el NDVI: GeoTIFF de una banda, EPSG:5345, 30 m, 1672 × 1671 celdas, esquina noroeste en (3513060, 6417900), int16 × 10000, nodata −32768. NDMI = (NIR − B11) / (NIR + B11), con NIR = B08 o B8A (se elige abajo).">ⓘ</button>
+                </label>
+                <input class="form-control form-control-sm" id="archivo-ndmi" type="file" accept=".tif,.tiff,image/tiff">
+                <div class="row g-2 mt-1">
+                  <div class="col"><label class="form-label small mb-1" for="ventana-desde">Ventana: desde</label><input class="form-control form-control-sm" id="ventana-desde" type="date"></div>
+                  <div class="col"><label class="form-label small mb-1" for="ventana-hasta">hasta</label><input class="form-control form-control-sm" id="ventana-hasta" type="date"></div>
                 </div>
+                <label class="form-label small mb-1 mt-2" for="ndmi-nir">Banda del infrarrojo cercano del NDMI</label>
+                <select class="form-select form-select-sm" id="ndmi-nir">
+                  <option value="B08">B08 (10 m): (B08 − B11) / (B08 + B11)</option>
+                  <option value="B8A">B8A (20 m): (B8A − B11) / (B8A + B11)</option>
+                </select>
+                <label class="form-label small mb-1 mt-2" for="descripcion-tif">Descripción <span class="text-body-tertiary">(de dónde salen)</span></label>
+                <input class="form-control form-control-sm" id="descripcion-tif" maxlength="2000">
+                <div class="alert alert-warning aviso small py-2 px-3 mt-2 mb-0"><b>La ventana y la fórmula las declarás vos.</b>El programa revisa la grilla, la escala y el rango, pero no puede comprobar de qué fechas son las imágenes ni con qué banda se calculó el NDMI. La corrida queda rotulada «índices cargados a mano».</div>
+                <button class="btn btn-sm btn-outline-primary mt-2 lanza" id="b-tif">Cargar índices</button>
+                <div id="lugar-trabajo-manual"></div>
+                <h4 class="h6 mt-3 paso-titulo"><span class="badge rounded-pill text-bg-secondary">3</span> Preparar los datos</h4>
+                <dl class="ficha small mb-1" id="resumen-archivos"></dl>
+                <label class="form-label small mb-1" for="nombre-archivos">Nombre <span class="text-body-tertiary">(opcional)</span></label>
+                <input class="form-control form-control-sm" id="nombre-archivos" maxlength="200" placeholder="Se arma solo con la fecha y las fuentes">
+                <button class="btn btn-primary w-100 mt-2 lanza" id="b-evento-archivos">Preparar datos para simular</button>
+                <div id="lugar-trabajo-archivos"></div>
+              </div>
+
+              <div class="camino" id="camino-escenario" hidden>
+                <p class="form-text nota mt-0">Viento, temperatura, humedad y lluvia constantes durante todo el período. No es un pronóstico: queda rotulado «escenario manual».</p>
+                <div class="row g-2">
+                  <div class="col"><label class="form-label small mb-1" for="esc-fecha">Día de inicio</label><input class="form-control form-control-sm" id="esc-fecha" type="date"></div>
+                  <div class="col"><label class="form-label small mb-1" for="esc-hora">Hora <span class="text-body-tertiary">(Argentina)</span></label><select class="form-select form-select-sm" id="esc-hora"></select></div>
+                </div>
+                <div class="row g-2 mt-0">
+                  <div class="col"><label class="form-label small mb-1" for="esc-horas">Horas</label><input class="form-control form-control-sm" id="esc-horas" type="number" min="1" max="240" value="48"></div>
+                  <div class="col"><label class="form-label small mb-1" for="esc-temp">Temperatura (°C)</label><input class="form-control form-control-sm" id="esc-temp" type="number" min="-40" max="50" step="0.5" value="32"></div>
+                </div>
+                <div class="row g-2 mt-0">
+                  <div class="col"><label class="form-label small mb-1" for="esc-hr">Humedad relativa (%)</label><input class="form-control form-control-sm" id="esc-hr" type="number" min="0" max="100" value="15"></div>
+                  <div class="col"><label class="form-label small mb-1" for="esc-lluvia">Lluvia (mm/h)</label><input class="form-control form-control-sm" id="esc-lluvia" type="number" min="0" max="200" step="0.1" value="0"></div>
+                </div>
+                <div class="row g-2 mt-0">
+                  <div class="col"><label class="form-label small mb-1" for="esc-viento">Viento (km/h)</label><input class="form-control form-control-sm" id="esc-viento" type="number" min="0" max="216" value="40"></div>
+                  <div class="col"><label class="form-label small mb-1" for="esc-dir">Viene del (grados)</label><input class="form-control form-control-sm" id="esc-dir" type="number" min="0" max="360" value="330" title="0 = norte, 90 = este, 180 = sur, 270 = oeste"></div>
+                </div>
+                <label class="form-label small mb-1 mt-2" for="sel-indices-esc">Índices de vegetación</label>
+                <select class="form-select form-select-sm" id="sel-indices-esc"></select>
+                <label class="form-label small mb-1 mt-2" for="nombre-esc">Nombre <span class="text-body-tertiary">(opcional)</span></label>
+                <input class="form-control form-control-sm" id="nombre-esc" maxlength="200" placeholder="Se arma solo con la fecha y las fuentes">
+                <button class="btn btn-primary w-100 mt-2 lanza" id="b-escenario">Preparar datos para simular</button>
+                <div id="lugar-trabajo-escenario"></div>
               </div>
 
               <div id="trabajo" class="card card-body p-2 mt-2 small" hidden>

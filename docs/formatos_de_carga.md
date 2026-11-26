@@ -1,6 +1,6 @@
 # Formatos de carga manual
 
-Qué archivos acepta la sección **1. Datos → Carga manual** del simulador y cómo tienen que estar armados. Los archivos de
+Qué archivos acepta la sección **1. Datos → Desde archivos** del simulador y cómo tienen que estar armados. Los archivos de
 ejemplo están en [`formatos_de_carga/`](formatos_de_carga/) y pasan los mismos controles que una carga real. Desde la
 pantalla se abren en `http://127.0.0.1:8000/formatos/…`.
 
@@ -56,7 +56,7 @@ Ejemplo: [`ejemplo_meteorologia_v3x.csv`](formatos_de_carga/ejemplo_meteorologia
 de v4.0).
 
 **Para tener en cuenta.** Es una serie de un solo punto: se aplica igual a todo el dominio. La toma queda rotulada
-«meteorología cargada a mano». Después de cargarla, el evento se arma en **Datos actuales → Opciones avanzadas**.
+«meteorología cargada a mano». Después de cargarla, el paso 3 del mismo camino, **Preparar datos para simular**, la deja lista; si no cargaste índices, usa los más nuevos guardados.
 
 ## 2. Índices de vegetación (GeoTIFF)
 
@@ -95,7 +95,7 @@ gdalwarp -t_srs EPSG:5345 -te 3513060 6367770 3563220 6417900 -tr 30 30 -r bilin
 
 (antes, multiplicar el índice por 10 000 si viene entre −1 y 1).
 
-## 3. Modo escenario
+## 3. Escenario
 
 No usa archivos: se cargan en la pantalla el día y la hora de inicio, la cantidad de horas (1 a 240), la temperatura
 (−40 a 50 °C), la humedad (0 a 100 %), la lluvia (0 a 200 mm/h), el viento (0 a 216 km/h) y de dónde viene (0 a 360°).

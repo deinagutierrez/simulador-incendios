@@ -1,4 +1,5 @@
-"""Panel rediseñado: Bootstrap con copia local, combustible SB40 de v4.0 en las capas y formatos de la carga manual.
+"""Panel rediseñado: Bootstrap con copia local, combustible SB40 de v4.0 en las capas, formatos de la carga manual y un camino
+por cada origen de los datos.
 
 Sin internet y sin motores. La parte visual (secciones, pie fijo, focos) se revisa en el navegador.
 """
@@ -92,3 +93,26 @@ def test_los_ejemplos_pasan_los_controles_de_la_carga():
     for nombre in ("ejemplo_ndvi.tif", "ejemplo_ndmi.tif"):
         banda = indices.leer_tif_manual(d / nombre, nombre)
         assert banda.dtype == "int16"
+
+
+def test_cada_origen_de_datos_tiene_su_camino_con_su_boton_final():
+    """«1. Datos»: actuales, desde archivos y escenario; cada camino termina en «Preparar datos para simular» sin pasar por
+    «Opciones avanzadas» (que solo guarda Earth Engine y la combinación de datos guardados)."""
+    html = (WEB / "index.html").read_text(encoding="utf-8")
+    caminos = {}
+    for origen in ("actuales", "archivos", "escenario"):
+        assert re.search(rf'<input type="radio"[^>]*name="origen"[^>]*value="{origen}"', html), origen
+        ini = html.index(f'id="camino-{origen}"')
+        fin = min([html.index(f'id="camino-{o}"') for o in ("archivos", "escenario") if html.index(f'id="camino-{o}"') > ini]
+                  + [html.index('id="trabajo"')])
+        caminos[origen] = html[ini:fin]
+    assert 'id="b-obtener"' in caminos["actuales"]
+    for origen, boton in (("archivos", "b-evento-archivos"), ("escenario", "b-escenario")):
+        assert re.search(rf'id="{boton}">Preparar datos para simular<', caminos[origen]), origen
+        assert "<details" not in caminos[origen], f"{origen}: el botón final no puede quedar escondido"
+    assert 'id="b-csv"' in caminos["archivos"] and 'id="b-tif"' in caminos["archivos"]
+    assert 'id="sel-indices-esc"' in caminos["escenario"]
+    avanzadas = caminos["actuales"][caminos["actuales"].index('id="avanzadas"'):]
+    assert 'id="b-gee"' in avanzadas and 'id="b-evento"' in avanzadas
+    for viejo in ("c-manual", "c-escenario", "sub-datos"):
+        assert viejo not in html, viejo
