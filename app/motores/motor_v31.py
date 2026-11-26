@@ -27,8 +27,10 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 import barreras_v31
+import exposicion
 import combate as cb
 import intervenciones as iv
 from control import Control, exigir_cortafuegos_iniciales, malla_viento
@@ -117,6 +119,7 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control, var
     trazos_iniciales = list(configuracion.get("cortafuegos") or [])
     c = cargar(base, configuracion, carpeta, variante_por_defecto)
     from incendios_sl.simulation.motor import MOTIVOS, Simulacion
+    from incendios_sl.simulation.automata import ACTIVA
     esc, pedido, ruta, nombre = c["esc"], c["pedido"], c["ruta"], c["nombre"]
     ent, cfg, g, meta = c["ent"], c["cfg"], c["g"], c["meta"]
 
@@ -154,11 +157,37 @@ def correr(base: dict, configuracion: dict, carpeta: Path, control: Control, var
         except Exception as e:                       # el mapa del viento no corta la corrida
             control.aviso("error", mensaje=f"viento para el mapa (hora {k}): {type(e).__name__}: {e}", fatal=False)
 
+    # Exposición y tiempo de la hora, como los informa v4.0 (v3.1 no los da): se calculan acá leyendo el estado del motor.
+    try:
+        expo = exposicion.Exposicion(grilla)
+    except Exception as e:                       # sin la capa de infraestructura la tarjeta queda sin esas cifras
+        expo = None
+        control.aviso("error", mensaje=f"exposición: {type(e).__name__}: {e}", fatal=False)
+    serie = ent.meteo.assign(time_utc=pd.to_datetime(ent.meteo.time_utc, utc=True)).sort_values("time_utc")
+
+    def extra_hora(sim) -> dict:
+        extra = {}
+        try:
+            ahora = (pd.Timestamp(ent.t_inicio_utc) + pd.Timedelta(seconds=float(sim.t))).floor("h")
+            if ahora.tzinfo is None:
+                ahora = ahora.tz_localize("UTC")
+            previas = serie[serie.time_utc <= ahora]
+            if len(previas):
+                extra["meteo"] = exposicion.meteo_v31(previas.iloc[-1])
+        except Exception as e:
+            control.aviso("error", mensaje=f"tiempo de la hora: {type(e).__name__}: {e}", fatal=False)
+        if expo is not None:
+            try:
+                extra["exposicion"] = expo.en(np.isfinite(sim.t_arr), sim.estado == ACTIVA)
+            except Exception as e:
+                control.aviso("error", mensaje=f"exposición (hora {estado['horas']}): {type(e).__name__}: {e}", fatal=False)
+        return extra
+
     def avisar_hora(sim) -> None:
         guardar_viento(sim)
         control.listo(ent.t_inicio_utc, grilla)
         ha = float(np.count_nonzero(np.isfinite(sim.t_arr))) * area_celda_ha
-        control.hora(estado["horas"], sim.t / 60.0, ha, int(sim.n_act[0]), huella_min(sim))
+        control.hora(estado["horas"], sim.t / 60.0, ha, int(sim.n_act[0]), huella_min(sim), **extra_hora(sim))
         estado["horas"] += 1
 
     class SimulacionControlada(Simulacion):
