@@ -1,5 +1,6 @@
 # entornos y cachés
 .venv/
+.instalador/
 __pycache__/
 *.pyc
 .pytest_cache/

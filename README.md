@@ -9,7 +9,7 @@ que se está construyendo sobre ellos: un programa que corre en la computadora y
 
 ## Empezar
 
-Hace falta **git** y **Python 3.12 o superior** (verificado con 3.14.7). Windows o Linux. Unos 2 GB de disco.
+Hace falta **git** y **cualquier Python 3**. El entorno usa siempre Python 3.14, la versión verificada: si no está en la computadora, `instalar` lo baja solo (con [uv](https://docs.astral.sh/uv/), sin permisos de administrador y sin tocar el Python del sistema). Windows o Linux. Unos 2 GB de disco.
 
 ```
 git clone https://github.com/deinagutierrez/simulador-incendios.git
