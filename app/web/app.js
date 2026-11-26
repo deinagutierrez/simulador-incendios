@@ -660,7 +660,7 @@ function pintarTarjetas() {
       h += `<dt>Viviendas afectadas · amenazadas</dt><dd>${num(x.viviendas_afectadas)} · ${num(x.viviendas_amenazadas)}</dd><dt>Red eléctrica quemada</dt><dd>${num(x.tendido_km_quemado, 1)} km</dd><dt>Caminos afectados</dt><dd>${num(x.caminos_km_afectados, 1)} km</dd>`;
     }
     h += "</dl>";
-    if (u && !u.exposicion && c.motor.startsWith("v3.1")) h += `<p class="linea">v3.1 no informa viviendas, red eléctrica ni caminos alcanzados.</p>`;
+    if (u && !u.exposicion && c.motor.startsWith("v3.1")) h += `<p class="linea">Esta corrida no informa viviendas, red eléctrica ni caminos alcanzados.</p>`;
     h += htmlCombate(c);
     h += htmlBitacora(c);
     if (FINALES.includes(c.estado)) {
@@ -1790,6 +1790,8 @@ function avanzarCadena(t) {
 }
 
 function pintarPasos() {
+  // acá y no en pintarTrabajo: la cadena termina (o falla) sin que cambie el trabajo, y el botón tiene que volver
+  $("b-obtener").textContent = C.activa ? "Obteniendo datos actuales…" : "Obtener datos actuales";
   $("pasos").hidden = C.paso < 0;
   $("pasos").innerHTML = PASOS.map((p, i) => {
     const [texto, clase] = ESTADO_PASO[C.estados[i]];
@@ -1932,7 +1934,6 @@ function pintarTrabajo() {
     : !mA || !iA ? "Falta la otra mitad y no hay nada guardado para completarla" : "";
   if (!(d.indices || []).length) $("b-escenario").disabled = true;
   $("b-escenario").title = !(d.indices || []).length ? "Hacen falta índices de vegetación: obtené los actuales o cargalos desde archivos" : "";
-  $("b-obtener").textContent = C.activa ? "Obteniendo datos actuales…" : "Obtener datos actuales";
   $("trabajo").hidden = !t;
   if (!t) { pintarPasos(); return; }
   // la caja del trabajo va junto al botón que lo lanzó
